@@ -43,6 +43,18 @@
 
 ---
 
+## 📸 Operations Room Visual Gallery
+
+| 1. Overview (Vibrant Basemap & 30s Understanding) | 2. Track & Timeline (Scrubber & NOAA Table) |
+| :---: | :---: |
+| ![Overview](docs/screenshots/01_overview_dashboard.png) | ![Track & Timeline](docs/screenshots/02_track_timeline_table.png) |
+| **3. Downscaling Lab (Swipe Slider & Spectral Proof)** | **4. Alert & Bulletin (Census 2011 & Official IMD Advisory)** |
+| ![Downscaling Lab](docs/screenshots/03_downscaling_lab_swipe.png) | ![Alert & Bulletin](docs/screenshots/04_alert_bulletin_census.png) |
+| **5. Methodology (PS Deliverables Matrix)** | **6. Interactive Explain-It-To-A-Judge Guided Tour** |
+| ![Methodology](docs/screenshots/05_methodology_compliance.png) | ![Guided Tour](docs/screenshots/06_guided_tour.png) |
+
+---
+
 ## 📌 Problem Context & Critical Industry Gaps
 
 Global Numerical Weather Prediction (NWP) outputs—such as the 12 km NCUM deterministic and NEPS-G global ensemble systems—are the backbone of national meteorological services. However, in the **medium-range window (3 to 10 days)**, forecasters face three critical operational bottlenecks:
@@ -167,6 +179,19 @@ Open your browser and navigate to:
 ```
 http://127.0.0.1:8000/
 ```
+
+### 4. Docker Deployment
+```bash
+# Build production container image
+docker build -t aero-track-4d .
+
+# Run container on port 8000
+docker run -p 8000:8000 aero-track-4d
+```
+
+### 5. 1-Click Cloud Deployment (Render / Hugging Face Spaces / Railway)
+- **Hugging Face Spaces**: Create a new Space &rarr; Select **Docker** &rarr; Push this repository. Automatically provides a permanent public HTTPS URL with 16 GB RAM.
+- **Render.com**: Connect your GitHub repository. Render automatically reads [`render.yaml`](file:///c:/weather/render.yaml) or [`Dockerfile`](file:///c:/weather/Dockerfile) to deploy a free web service.
 
 ---
 
