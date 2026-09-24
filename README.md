@@ -17,13 +17,13 @@
 
 | Problem Statement Deliverable | Status | UI Screen / Demonstration | API Endpoint | Scientific Validation |
 | :--- | :---: | :--- | :--- | :--- |
-| **1. Anomaly Onset Identification** | **Present** | **Overview & Track & Timeline**: Real-time EFI z-score anomaly badge, stage severity banner, and temporal status | `GET /api/track`<br/>`GET /api/status` | Extreme Forecast Index (EFI) against 30-year ERA5 climatological baseline |
+| **1. Anomaly Onset Identification** | **Present** | **Overview & Track & Timeline**: Real-time EFI-inspired z-score anomaly badge, stage severity banner, and temporal status | `GET /api/track`<br/>`GET /api/status` | EFI-inspired z-scores against 36-hour pre-onset ERA5 baseline |
 | **2. Complete 4D Stream Reconstruction** | **Present** | **Track & Timeline**: Interactive 13-step scrubber (0.5x, 1x, 2x playback), full trajectory vs. NOAA ground truth | `GET /api/track`<br/>`GET /api/track-error` | 13 evaluation steps across Super Cyclone Amphan (46.2 km mean track error vs. NOAA IBTrACS) |
 | **3. Dynamic 4D Bounding Boxes** | **Present** | **Track & Timeline & Overview**: Live red dashed dynamic 4D bounding boxes drawn on Leaflet map with tooltips | `GET /api/track` (`bounding_box`) | Macroscale spatio-temporal boundary calculated by spherical GNN cluster |
 | **4. 12km→5km Downscaling with Amplitude Preservation** | **Present** | **Downscaling Lab**: Interactive draggable swipe comparison slider comparing Coarse NWP vs. CorrDiff Diffusion | `GET /api/downscale?step_index=5` | **+61.5% Peak Recovery** (102.1 km/h vs. 63.4 km/h coarse, P90: 108.4 km/h); eliminates -49.1% U-Net smoothing |
 | **5. Physics Conservation Checks (Equivalent to Security Posture Scoring)** | **Present** | **Downscaling Lab**: Live diagnostic cards for Moisture Flux Convergence (MFC: 98.2%) & Divergence ($3.2 \times 10^{-5}\text{ s}^{-1}$) | `GET /api/downscale?step_index=5`<br/>`GET /api/status` | Enforced in PyTorch loss function: $\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{diff}} + \lambda_{\text{div}}\mathcal{L}_{\text{div}} + \lambda_{\text{mfc}}\mathcal{L}_{\text{mfc}}$ |
 | **6. Prioritized Findings / Severity Scoring** | **Present** | **Overview & Alert & Bulletin**: Unified 4-tier severity scale (Low / Moderate / Severe / Catastrophic) driving dispatch | `POST /api/alert` | Derived strictly from EFI z-scores and sustained eyewall velocity thresholds |
-| **7. Comprehensive Report Generation** | **Present** | **Alert & Bulletin**: One-click **Download Official IMD Advisory (.html)** and plaintext bulletin viewer | `GET /api/bulletin/download`<br/>`GET /api/bulletin` | Formatted per MoES/IMD Cyclone Warning Centre standards with Census 2011 figures |
+| **7. Comprehensive Report Generation** | **Present** | **Alert & Bulletin**: One-click **Download Official IMD Advisory (.html)** and plaintext bulletin viewer | `GET /api/bulletin/download`<br/>`GET /api/bulletin` | Formatted per MoES/IMD Cyclone Warning Centre standards with Census 2011 density projections |
 | **8. Interactive Operations Dashboard** | **Present** | **Full 5-View Application**: Overview, Track & Timeline, Downscaling Lab, Alert & Bulletin, Methodology & Data | Root `GET /` | Technical near-black theme (`#0a0e14`), JetBrains Mono typography, guided tour modal |
 | **9. REST API Serving Graded Alerts** | **Present** | **Alert & Bulletin**: Coastal landfall selector (Digha, Sagar Island, etc.) generating graded alerts with 5 km radius | `POST /api/alert` | Lat/lon coordinate + 5.0 km radius zone, returning 97.8% area reduction & demographic data |
 
@@ -35,10 +35,10 @@
   - The entire Cyclone Amphan tracking pipeline: 13 hourly timesteps from real ECMWF ERA5 reanalysis and NOAA IBTrACS ground truth.
   - Held-out test evaluation: Peak Super Cyclone (Step 5, May 18 06:00 UTC) and Landfall (Step 10, May 20 12:00 UTC) were completely withheld from training and tested out-of-sample.
   - CorrDiff conditional diffusion downscaling: Trained PyTorch checkpoint (`models/corrdiff_amphan.pt`) super-resolves $12\text{ km} \to 5.0\text{ km}$ ($38 \times 38$ grid), recovering **102.1 km/h** (P90: **108.4 km/h**) against ERA5 target **111.0 km/h**, whereas standard U-Net collapses to **56.5 km/h**.
-  - Demographic impact calculations: Verified against official Census 2011 data for Purba Medinipur district (5,095,875 population, 4,736 km² area), proving **3,681,500 citizens are shielded from false-alarm panic**.
+  - Demographic impact calculations: Based on official Census 2011 density (1,076/km²) for Purba Medinipur district (4,736 km² area), projected to ~2020 estimates, proving **3,681,500 citizens are shielded from false-alarm panic**.
   - 100% offline bundle: Zero external internet calls required at runtime.
 - **What is Honestly Documented as Architectural Roadmap**:
-  - **Closing Gap 2 (ERA5 111 km/h to In-Situ 222 km/h)**: ERA5's native 25 km grid cannot resolve the 15 km cyclone eyewall. To predict true surface anemometer peak gusts (220+ km/h), the model will be trained on **NCMRWF's 12 km regional IMDAA reanalysis** and coastal Doppler radar mosaics.
+  - **Closing Gap 2 (ERA5 111 km/h to IBTrACS Best-Track 222 km/h)**: ERA5's native 25 km grid cannot resolve the 15 km cyclone eyewall. To predict true peak intensities (220+ km/h), the model will be trained on **NCMRWF's 12 km regional IMDAA reanalysis** and coastal Doppler radar mosaics.
   - **Multi-Hazard Generalization**: Extension points for Northwest India Heat Domes and Indo-Gangetic Cold Waves are architecturally modeled in `src/multihazard_anomalies.py` and displayed on the Methodology page as future multi-year regional training targets.
 
 ---
@@ -48,7 +48,7 @@
 | 1. Overview (Vibrant Basemap & 30s Understanding) | 2. Track & Timeline (Scrubber & NOAA Table) |
 | :---: | :---: |
 | ![Overview](docs/screenshots/01_overview_dashboard.png) | ![Track & Timeline](docs/screenshots/02_track_timeline_table.png) |
-| **3. Downscaling Lab (Swipe Slider & Spectral Proof)** | **4. Alert & Bulletin (Census 2011 & Official IMD Advisory)** |
+| **3. Downscaling Lab (Swipe Slider & Spectral Proof)** | **4. Alert & Bulletin (Census 2011 Projections & Official IMD Advisory)** |
 | ![Downscaling Lab](docs/screenshots/03_downscaling_lab_swipe.png) | ![Alert & Bulletin](docs/screenshots/04_alert_bulletin_census.png) |
 | **5. Methodology (PS Deliverables Matrix)** | **6. Interactive Explain-It-To-A-Judge Guided Tour** |
 | ![Methodology](docs/screenshots/05_methodology_compliance.png) | ![Guided Tour](docs/screenshots/06_guided_tour.png) |
@@ -75,7 +75,7 @@ Global Numerical Weather Prediction (NWP) outputs—such as the 12 km NCUM deter
 │ STAGE 1: Spherical Geodesic Anomaly Propagation (Icosahedral Mesh)              │
 │ • Eliminates 2D planar map projection distortion at poles & curved domains       │
 │ • 3-Hop Geodesic Message-Passing on 162-node Icosahedral Geodesic Mesh          │
-│ • Calculates Extreme Forecast Index (EFI) z-scores against ERA5 climatology     │
+│ • Calculates EFI-inspired z-scores against 36-hour pre-onset ERA5 baseline    │
 │ • 3D Cartesian weighted centroid aggregation & dynamic 4D bounding boxes        │
 └────────────────────────────────────────┬────────────────────────────────────────┘
                                          │ Macroscale 4D Bounding Box
@@ -108,7 +108,7 @@ Global Numerical Weather Prediction (NWP) outputs—such as the 12 km NCUM deter
 - **Geodesic Message-Passing**:
   $$h_i^{(l+1)} = \alpha h_i^{(l)} + (1 - \alpha) \sum_{j \in \mathcal{N}(i)} \frac{d_{\text{geo}}(i, j)^{-1}}{\sum_{k \in \mathcal{N}(i)} d_{\text{geo}}(i, k)^{-1}} h_j^{(l)}$$
 - **3D Cartesian Centroid Calculation**: Node activations are converted to 3D Cartesian vectors $(x, y, z)$ on the unit sphere, aggregated via activation weighting, and projected back to $(\text{lat}, \text{lon})$, completely eliminating planar map metric distortions.
-- **Extreme Forecast Index (EFI)**: Measures ensemble departure from the 30-year historical ERA5 reanalysis climatological distribution.
+- **Extreme Forecast Index (EFI)**: An EFI-inspired z-score measuring ensemble departure from the 36-hour pre-onset ERA5 baseline (ambient pre-cyclone conditions at each grid point).
 
 ### 2. Stage 2: Amplitude-Preserving Diffusion Downscaling (CorrDiff)
 - **Spectral Smoothing Remedy**: Rather than minimizing mean squared error, the reverse diffusion process iteratively solves:
@@ -129,8 +129,8 @@ $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{diff}} + \lambda_{\text{div}} 
 | Metric / Parameter | Coarse NWP (~12-25 km) | Standard U-Net (L2 Loss) | CorrDiff Diffusion (Ours) | Reference 1: ERA5 Target | Reference 2: IBTrACS Ground Truth |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Peak Eyewall Wind** | 63.4 km/h | 56.5 km/h | **102.1 km/h (P90: 108.4)** | **111.0 km/h** | **222.2 km/h** (IMD Peak: 240.8) |
-| **Spectral Smoothing Penalty** | -42.9% vs ERA5 | **-49.1% vs ERA5** | **-8.0% vs ERA5** (Preserved) | Baseline (0%) | Real Anemometer |
-| **Kolmogorov Spectrum $E(k)$** | Truncated at $k \ge 3$ | Steep artificial dropoff | **$k^{-5/3}$ cascade restored** | Full turbulent cascade | Natural In-Situ Turbulence |
+| **Spectral Smoothing Penalty** | -42.9% vs ERA5 | **-49.1% vs ERA5** | **-8.0% vs ERA5** (Preserved) | Baseline (0%) | IBTrACS Best-Track |
+| **Kolmogorov Spectrum $E(k)$** | Truncated at $k \ge 3$ | Steep artificial dropoff | **$k^{-5/3}$ cascade restored** | Full turbulent cascade | Best-Track Reference |
 | **Subgrid Resolution** | 12–25 km | 12 km (interpolated) | **5.0 km Subgrid ($38 \times 38$)** | ~25 km Native Grid | Point Station Measurement |
 | **Warning Footprint** | ~3,500 km² (District) | ~1,850 km² (Blob) | **78.5 km² (5 km Radius)** | Reanalysis Core | Point Landfall Corridor |
 | **False-Alarm Area Reduction** | 0.0% *(Baseline)* | 47.1% | **97.8% Pinpoint Reduction** | Surgical Corridor | Zero Alert Fatigue Target |
@@ -224,7 +224,7 @@ c:\weather/
 │   ├── app.js                     # 60 FPS wind particles, dual canvas colormaps, Leaflet state controller
 │   └── style.css                  # Clean, responsive scientific styling
 ├── data/
-│   ├── climatology/               # 30-year historical baseline distributions
+│   ├── climatology/               # Pre-onset ERA5 baseline distributions
 │   └── raw/                       # Cached ERA5 reanalysis & NOAA IBTrACS records
 ├── models/
 │   └── corrdiff_amphan.pt         # Trained Stage 1 + Stage 2 PyTorch checkpoint

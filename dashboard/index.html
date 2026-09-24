@@ -210,14 +210,14 @@
             </div>
           </div>
 
-          <!-- Demographic Precision (Census of India 2011) -->
+          <!-- Demographic Precision (Census of India 2011 Projected Estimates) -->
           <div class="intel-card demographic-card">
             <div class="demographic-title">
               <span>👥 Demographic Precision Gain</span>
-              <span class="census-tag">Census 2011 Data</span>
+              <span class="census-tag">Census 2011 Projected Est.</span>
             </div>
             <p class="demographic-desc">
-              Grounded in Census 2011 for East Midnapore (5.09M population, 4,736 km² &bull; 1,076/km² density):
+              Based on Census 2011 density (1,076/km²) for East Midnapore, projected to ~2020 district population estimates:
             </p>
             <div class="demographic-calc-box font-mono">
               <div class="calc-row">
@@ -429,7 +429,7 @@
               </div>
               <div class="gap-tier tier-groundtruth">
                 <div class="tier-label">NOAA IBTrACS Ground Truth</div>
-                <div class="tier-bar" style="width: 100%;">222.2 km/h (In-Situ Coastal Anemometer)</div>
+                <div class="tier-bar" style="width: 100%;">222.2 km/h (IBTrACS Best-Track Estimate)</div>
               </div>
             </div>
           </div>
@@ -454,7 +454,7 @@
               <div class="phys-metric">
                 <span class="p-label">Diagnostic Conformity:</span>
                 <span class="p-val text-cyan" id="val-phys-score">98.2 / 100</span>
-                <span class="p-sub">Penalizes unphysical states</span>
+                <span class="p-sub">Weighted 60% MFC alignment + 40% divergence norm; >90 = physically consistent</span>
               </div>
             </div>
           </div>
@@ -589,7 +589,7 @@
             <tbody>
               <tr>
                 <td>Automatic Anomaly Onset</td>
-                <td>Extreme Forecast Index (EFI) z-scores computed against 30-year ERA5 climatology</td>
+                <td>EFI-inspired z-scores computed against 36-hour pre-onset ERA5 baseline (May 15 ambient hours)</td>
                 <td>Track &amp; Timeline / <code>/api/track</code></td>
                 <td><span class="status-pass">✓ VERIFIED</span></td>
               </tr>
@@ -653,7 +653,7 @@
           <div class="glossary-items">
             <div class="glossary-item">
               <strong>Extreme Forecast Index (EFI):</strong>
-              <p>A statistical metric measuring how anomalous a forecast is compared to 30 years of historical reanalysis at the exact same location and calendar week. An EFI z-score &gt; +2.0&sigma; signals an extreme outlier event.</p>
+              <p>An EFI-inspired z-score measuring how anomalous a forecast timestep is compared to the pre-onset ERA5 baseline (first 36 hours of the event window, representing ambient pre-cyclone conditions). A z-score &gt; +2.0&sigma; signals an extreme outlier departure from that baseline.</p>
             </div>
             <div class="glossary-item">
               <strong>Spectral Smoothing Problem:</strong>
@@ -678,8 +678,8 @@
           <div class="roadmap-content">
             <div class="dataset-box font-mono">
               <div><strong>Reanalysis Target:</strong> ECMWF ERA5 Hourly Spatial Grids (May 15–21, 2020)</div>
-              <div><strong>In-Situ Ground Truth:</strong> NOAA IBTrACS v04r01 (Agency: IMD New Delhi, 51 records)</div>
-              <div><strong>Climatology:</strong> 30-year May Pre-Monsoon Baseline (Bay of Bengal)</div>
+              <div><strong>Best-Track Ground Truth:</strong> NOAA IBTrACS v04r01 (Agency: IMD New Delhi, 51 records)</div>
+              <div><strong>Climatology Baseline:</strong> 36-hour pre-onset ERA5 ambient conditions (May 15 00Z–May 16 12Z)</div>
               <div><strong>Dataset License:</strong> CC-BY-NC-SA-4.0 &bull; Contains Copernicus C3S information</div>
             </div>
             <h4 class="roadmap-subhead">Phase 2 Architectural Extension Roadmap:</h4>

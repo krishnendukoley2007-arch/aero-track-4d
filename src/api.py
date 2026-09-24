@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, PlainTextResponse, HTMLResponse, Response
+from fastapi.responses import FileResponse, PlainTextResponse, HTMLResponse, Response, JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
 import numpy as np
@@ -85,7 +85,7 @@ def get_status():
         "data_sources": {
             "reanalysis_grid": "ECMWF ERA5 Hourly Spatial Grid (May 15-21, 2020, 256 coordinates)",
             "observation_records": "NOAA IBTrACS v04r01 (Agency: IMD New Delhi, 51 records)",
-            "climatology_baseline": "ECMWF ERA5 May Pre-Monsoon Climatology (Bay of Bengal)",
+            "climatology_baseline": "36-hour pre-onset ERA5 baseline (May 15 00Z–May 16 12Z, ambient conditions)",
             "license": "CC-BY-NC-SA-4.0",
         },
         "modules": {
@@ -283,7 +283,7 @@ def get_imd_bulletin_html(step_index: int = Query(5), lat: float = Query(21.62),
 
 @app.get("/api/bulletin/download")
 def download_imd_bulletin(step_index: int = Query(5), lat: float = Query(21.62), lon: float = Query(87.51), loc_name: str = Query("Digha Coast")):
-    """Generates downloadable HTML bulletin file with Census 2011 demographic precision calculations."""
+    """Generates downloadable HTML bulletin file with Census 2011 density-based demographic projections."""
     step_data = tracker.detect_and_track_step(step_index)
     req = AlertRequest(lat=lat, lon=lon, location_name=loc_name, step_index=step_index)
     alert_data = calculate_ndrf_alert(req)
@@ -310,20 +310,36 @@ def get_hazard_detail(hazard_id: str):
 
 @app.get("/api/hazards/{hazard_id}/timesteps")
 def get_hazard_timesteps(hazard_id: str):
-    """Returns temporal progression and spectral smoothing analysis for hazard."""
-    res = MultiHazardRegistry.generate_hazard_timesteps(hazard_id)
-    if res is None:
-        # If Amphan, redirect to standard track
+    """Returns temporal progression and spectral smoothing analysis for hazard.
+    Note: Cyclone Amphan (amphan_2020) is fully operational and computed from real ERA5/IBTrACS data.
+    Heat Dome and Cold Wave are documented architectural roadmap extensions."""
+    if hazard_id == "amphan_2020":
         return get_track()
-    return res
+    return JSONResponse(
+        status_code=501,
+        content={
+            "status": "roadmap",
+            "hazard_id": hazard_id,
+            "message": "Heat Dome / Cold Wave tracking uses the same spherical GNN + CorrDiff architecture as the Amphan pipeline but requires regional IMDAA temperature reanalysis not yet integrated. See roadmap in README.md."
+        }
+    )
 
 
 @app.get("/api/hazards/{hazard_id}/downscale")
 def get_hazard_downscale(hazard_id: str, step_index: int = Query(2, description="Timestep index")):
-    """Returns 2D spatial downscaled fields for Heat Dome or Cold Wave."""
+    """Returns 2D spatial downscaled fields for hazard.
+    Note: Cyclone Amphan (amphan_2020) is fully operational with trained PyTorch CorrDiff weights.
+    Heat Dome and Cold Wave are documented architectural roadmap extensions."""
     if hazard_id == "amphan_2020":
         return get_downscale(step_index)
-    return MultiHazardRegistry.generate_hazard_downscale(hazard_id, step_index)
+    return JSONResponse(
+        status_code=501,
+        content={
+            "status": "roadmap",
+            "hazard_id": hazard_id,
+            "message": "Heat Dome / Cold Wave spatial downscaling uses the same conditional diffusion architecture as the Amphan pipeline but requires regional IMDAA temperature reanalysis not yet integrated. See roadmap in README.md."
+        }
+    )
 
 
 @app.get("/api/coastal-districts")

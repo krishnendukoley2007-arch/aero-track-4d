@@ -35,6 +35,8 @@ class MultiHazardRegistry:
             "standard_warning_area_km2": 3500.0,  # Average coastal district area
             "pinpoint_warning_area_km2": 78.5,    # 5 km radius footprint
             "area_reduction_pct": 97.8,
+            "status": "operational",
+            "data_source": "ECMWF ERA5 (Copernicus/Open-Meteo) + NOAA IBTrACS v04r01 (Genuinely Computed)",
             "description": "Super Cyclonic Storm with central pressure 920 hPa and sustained eyewall winds of 220+ km/h. Traditional NWP smoothed the intense eyewall gradient."
         },
         "heat_dome_2020": {
@@ -54,6 +56,8 @@ class MultiHazardRegistry:
             "standard_warning_area_km2": 6200.0,  # Broad divisional heat warning
             "pinpoint_warning_area_km2": 78.5,    # 5 km hyper-local microclimate zone
             "area_reduction_pct": 98.7,
+            "status": "architectural_roadmap",
+            "data_source": "Roadmap (Requires regional IMDAA high-resolution temperature reanalysis)",
             "description": "Intense anticyclonic subsidence causing multi-day Tmax > 47°C across Churu, Palam, and Vidarbha. Standard models smoothed out urban asphalt heating and hyper-localized heat mortality risk zones."
         },
         "cold_wave_2021": {
@@ -73,6 +77,8 @@ class MultiHazardRegistry:
             "standard_warning_area_km2": 4500.0,  # District-wide agricultural frost alert
             "pinpoint_warning_area_km2": 78.5,    # 5 km topographically sheltered frost zone
             "area_reduction_pct": 98.3,
+            "status": "architectural_roadmap",
+            "data_source": "Roadmap (Requires regional IMDAA high-resolution temperature reanalysis)",
             "description": "Post-Western Disturbance cold advection combined with nocturnal radiational cooling. Standard coarse NWP (12-25 km) failed to resolve low-lying agrarian frost depressions and highway fog pockets."
         }
     }

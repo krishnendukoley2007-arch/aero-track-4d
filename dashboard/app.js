@@ -770,7 +770,7 @@ function initChart() {
   state.chartInstance = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["Coarse NWP", "Standard U-Net (L2)", "CorrDiff Mean", "CorrDiff P90", "Native ERA5 Target", "IBTrACS In-Situ"],
+      labels: ["Coarse NWP", "Standard U-Net (L2)", "CorrDiff Mean", "CorrDiff P90", "Native ERA5 Target", "IBTrACS Best-Track"],
       datasets: [{
         label: "Peak Wind Speed (km/h)",
         data: [63.4, 56.5, 102.1, 108.4, 111.0, 222.2],
@@ -825,7 +825,7 @@ function updateChart(data) {
       "CorrDiff Mean",
       "CorrDiff P90",
       "Native ERA5 Target",
-      "IBTrACS In-Situ"
+      "IBTrACS Best-Track"
     ];
     state.chartInstance.data.datasets = [{
       label: "Peak Wind Speed (km/h)",
@@ -1017,7 +1017,7 @@ const TOUR_SLIDES = [
   },
   {
     title: "3. Stage 1: Spherical Geodesic Anomaly Tracking",
-    text: "To eliminate geographic distortions caused by processing the spherical Earth on flat 2D pixel grids, the system maps ensemble fields directly onto an icosahedral geodesic mesh (162 vertices, 480 edges). It calculates the Extreme Forecast Index (EFI) against a 30-year ERA5 climatology and aggregates 3D Cartesian weighted centroids."
+    text: "To eliminate geographic distortions caused by processing the spherical Earth on flat 2D pixel grids, the system maps ensemble fields directly onto an icosahedral geodesic mesh (162 vertices, 480 edges). It calculates an EFI-inspired z-score anomaly index against a 36-hour pre-onset ERA5 baseline and aggregates 3D Cartesian weighted centroids."
   },
   {
     title: "4. Stage 2: CorrDiff Physics-Constrained Diffusion",

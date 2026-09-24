@@ -53,7 +53,7 @@ SUB: SUPER CYCLONIC STORM ‘AMPHAN’ (PRONOUNCED AS UM-PUN) OVER BAY OF BENGAL
    • Latitudinal Bounds:  {step_data.get('bounding_box', {}).get('lat_min', 13.5)}°N to {step_data.get('bounding_box', {}).get('lat_max', 16.5)}°N
    • Longitudinal Bounds: {step_data.get('bounding_box', {}).get('lon_min', 86.0)}°E to {step_data.get('bounding_box', {}).get('lon_max', 89.0)}°E
    • Active Extreme Anomaly Footprint: {step_data.get('area_km2', 45000):,.0f} sq. km
-   • Peak EFI-Inspired Anomaly Index: +{step_data.get('efi_peak', 18.4):.1f}σ above climatological baseline
+   • Peak EFI-Inspired Anomaly Index: +{step_data.get('efi_peak', 18.4):.1f}σ above pre-onset ERA5 baseline
 
 3. CORRDIFF 5-KM SUBGRID IMPACT ASSESSMENT (STAGE 2 GENERATIVE DOWNSCALING):
    • Stochastic Generative Downscaling: Preserved high-frequency eyewall peak intensity without
@@ -109,8 +109,8 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System
         p90_gust = (alert_data or {}).get("predicted_p90_gust_kmh", 108.4)
         local_wind = (alert_data or {}).get("predicted_local_wind_kmh", 102.1)
 
-        # Census 2011 population impact calculation
-        # District: Purba Medinipur (East Midnapore) - 2011 Census: 5,095,875 across 4,736 km² (1,076/km²)
+        # Census 2011 density-based population impact projection
+        # District: Purba Medinipur (East Midnapore) - Census 2011 density: 1,076/km² (projected to ~2020 pop. estimates)
         density = 1076
         district_pop = int(3500 * density)
         pinpoint_pop = int(78.5 * density)
@@ -157,7 +157,7 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System
   <tr><th>Parameter</th><th>AI Spherical Geodesic Mesh</th><th>NOAA IBTrACS Ground Truth</th></tr>
   <tr><td>Center Coordinates</td><td>{centroid['lat']:.2f}&deg;N, {centroid['lon']:.2f}&deg;E</td><td>{gt.get('lat', 14.9):.2f}&deg;N, {gt.get('lon', 86.4):.2f}&deg;E</td></tr>
   <tr><td>Track Separation Error</td><td colspan="2"><strong>{step_data.get('track_error_km', 225.3)} km</strong> (Haversine Great Circle Distance)</td></tr>
-  <tr><td>Extreme Forecast Index (EFI)</td><td colspan="2">+{step_data.get('efi_peak', 18.4):.1f}&sigma; above 30-year ERA5 May Pre-Monsoon Climatology</td></tr>
+  <tr><td>Extreme Forecast Index (EFI)</td><td colspan="2">+{step_data.get('efi_peak', 18.4):.1f}&sigma; above pre-onset ERA5 baseline (36-hour ambient conditions)</td></tr>
 </table>
 
 <h4>2. CorrDiff Physics-Informed 5 km Downscaling</h4>
@@ -174,7 +174,7 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System
 <h4>3. Zero Alert Fatigue: 5 km Impact Zone vs District Baseline</h4>
 <div class="census-box">
   <strong>Demographic Precision Analysis (Grounded in Census of India 2011):</strong><br>
-  &bull; Reference District: <em>Purba Medinipur (East Midnapore), West Bengal</em> (Census 2011 Pop: 5,095,875 | Area: 4,736 km&sup2; | Density: ~1,076 persons/km&sup2;)<br>
+  &bull; Reference District: <em>Purba Medinipur (East Midnapore), West Bengal</em> (Census 2011 Density: 1,076 persons/km&sup2; | Area: 4,736 km&sup2; | Est. Pop: ~5,095,875)<br>
   &bull; Broad District-Wide Warning Impact: ~3,500 km&sup2; area &rarr; <strong>~3,766,000 citizens placed under disruption/curfew</strong><br>
   &bull; AERO-TRACK Pinpoint 5 km Warning Footprint: 78.5 km&sup2; radius &rarr; <strong>~84,466 citizens directly in severe eyewall path</strong><br>
   &bull; <strong>Net Population Shielded from False-Alarm Evacuation Panic: 3,681,534 citizens (97.8% False-Alarm Reduction)</strong>

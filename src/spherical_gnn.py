@@ -120,7 +120,7 @@ class SphericalGNNTracker:
     "To eliminate geographic distortions caused by processing the spherical Earth on flat
     2D pixel grids, the system maps the 12 km NCMRWF Global Ensemble (NEPS-G) grids directly
     onto an icosahedral mesh. The message-passing network calculates the Extreme Forecast Index (EFI)
-    against a 30-year historical baseline distribution to isolate standard deviations and draw
+    against a pre-onset ERA5 baseline distribution to isolate standard deviations and draw
     a macro-scale temporal bounding box around the anomaly's trajectory."
     
     Uses fixed geodesic great-circle distance weighting for spatial propagation across spherical edges,

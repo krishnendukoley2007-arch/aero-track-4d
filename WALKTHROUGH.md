@@ -62,7 +62,7 @@ AERO-TRACK 4D delivers an automated, physics-informed hybrid AI pipeline structu
   $$h_i^{(l+1)} = \alpha h_i^{(l)} + (1 - \alpha) \sum_{j \in \mathcal{N}(i)} \frac{d_{\text{geo}}(i, j)^{-1}}{\sum_{k \in \mathcal{N}(i)} d_{\text{geo}}(i, k)^{-1}} h_j^{(l)}$$
   This spatial message-passing diffuses localized anomalies across spherical neighbors without planar pole distortion.
 - **3D Cartesian Centroid Calculation**: Node activations are projected to 3D unit sphere Cartesian coordinates $(x, y, z)$, aggregated via activation weighting, and converted back to spherical coordinates $(\text{lat}, \text{lon})$, eliminating planar projection singularities.
-- **Extreme Forecast Index (EFI)**: Measures ensemble departure from the 30-year historical ERA5 reanalysis baseline distribution.
+- **Extreme Forecast Index (EFI)**: An EFI-inspired z-score measuring ensemble departure from the 36-hour pre-onset ERA5 baseline (ambient pre-cyclone conditions at each grid cell).
 
 ### 2. Stage 2: Amplitude-Preserving Diffusion Downscaling (CorrDiff)
 - **Spectral Smoothing Remedy**: Rather than optimizing for mean errors (which blurs peaks), the conditional diffusion model iteratively learns the score function $\nabla_{\mathbf{x}} \log p_t(\mathbf{x} | \mathbf{y})$, stochastically reconstructing realistic eyewall turbulence.
@@ -84,13 +84,13 @@ $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{diff}} + \lambda_{\text{div}} 
 To evaluate downscaling scientifically, results must be grounded against **two separate references**:
 
 1. **Reconstruction Target (Native ERA5 Reanalysis — 111.0 km/h)**: The gridded atmospheric field that the model was trained to reconstruct from coarsened NWP inputs.
-2. **Real-World Storm Truth (NOAA IBTrACS In-Situ — 222.2 km/h, IMD Peak 240.8 km/h)**: Ground-level observation from coastal anemometers and satellite Dvorak estimates during Super Cyclone Amphan's peak eyewall passage.
+2. **Real-World Storm Truth (NOAA IBTrACS Best-Track — 222.2 km/h, IMD Peak 240.8 km/h)**: Satellite-derived Dvorak intensity estimates and best-track synthesis during Super Cyclone Amphan's peak eyewall passage.
 
 | Metric / Parameter | Coarse NWP (~12-25 km) | Standard U-Net (L2 Loss) | CorrDiff Diffusion (Ours) | Reference 1: ERA5 Target | Reference 2: IBTrACS Ground Truth |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Peak Eyewall Wind** | 63.4 km/h | 56.5 km/h | **102.1 km/h (P90: 108.4)** | **111.0 km/h** | **222.2 km/h** (IMD Peak: 240.8) |
-| **Spectral Smoothing Penalty** | -42.9% vs ERA5 | **-49.1% vs ERA5** | **-8.0% vs ERA5** (Preserved) | Baseline (0%) | Real Anemometer |
-| **Kolmogorov Spectrum $E(k)$** | Truncated at $k \ge 3$ | Steep artificial dropoff | **$k^{-5/3}$ cascade restored** | Full turbulent cascade | Natural In-Situ Turbulence |
+| **Spectral Smoothing Penalty** | -42.9% vs ERA5 | **-49.1% vs ERA5** | **-8.0% vs ERA5** (Preserved) | Baseline (0%) | IBTrACS Best-Track |
+| **Kolmogorov Spectrum $E(k)$** | Truncated at $k \ge 3$ | Steep artificial dropoff | **$k^{-5/3}$ cascade restored** | Full turbulent cascade | Best-Track Reference |
 | **Subgrid Resolution** | 12–25 km | 12 km (interpolated) | **5.0 km Subgrid ($38 \times 38$)** | ~25 km Native Grid | Point Station Measurement |
 | **Warning Footprint** | ~3,500 km² (District) | ~1,850 km² (Blob) | **78.5 km² (5 km Radius)** | Reanalysis Core | Point Landfall Corridor |
 | **False-Alarm Area Reduction** | 0.0% *(Baseline)* | 47.1% | **97.8% Pinpoint Reduction** | Surgical Corridor | Zero Alert Fatigue Target |
@@ -122,7 +122,7 @@ A technically rigorous evaluation reveals **two distinct gaps**, each with a dis
 
 #### Gap 2: The Global Reanalysis Resolution Ceiling (Native ERA5 → IBTrACS Ground Truth) — **Known Physical Ceiling**
 - **The Reality**: Why does native ERA5 only report 111.0 km/h when IBTrACS recorded 222.2 km/h? This is a widely documented, fundamental resolution limitation of global reanalysis products. At ~25–31 km native horizontal spacing, ERA5's grid box averages out the extreme pressure gradients confined within a cyclone's 15–25 km Radius of Maximum Wind (RMW). The model was trained to reconstruct ERA5, and thus inherits ERA5's physical intensity ceiling.
-- **The Concrete Operational Next Step**: To close Gap 2 and reach true surface anemometer intensities, the pipeline must be trained against high-resolution **regional** reanalysis products—specifically **NCMRWF's 12 km IMDAA (Indian Monsoon Data Assimilation and Analysis)** or high-resolution coastal Doppler weather radar mosaics. Because the CorrDiff architecture is resolution-agnostic, substituting IMDAA as the training target directly enables prediction of true 200+ km/h eyewall intensities without architectural changes.
+- **The Concrete Operational Next Step**: To close Gap 2 and reach true peak intensities, the pipeline must be trained against high-resolution **regional** reanalysis products—specifically **NCMRWF's 12 km IMDAA (Indian Monsoon Data Assimilation and Analysis)** or high-resolution coastal Doppler weather radar mosaics. Because the CorrDiff architecture is resolution-agnostic, substituting IMDAA as the training target directly enables prediction of true 200+ km/h eyewall intensities without architectural changes.
 
 ---
 
@@ -159,7 +159,7 @@ This script is structured around the 5 persistent views. Follow this exact flow 
 ### ⏱️ Minute 0:45 – 1:45 // View 2: Track & Timeline (4D Stream Reconstruction)
 - **What to show**: Click **"Track & Timeline"** in the top navigation.
 - **The Talking Point**:
-  > *"Here is the complete 13-timestep 4D trajectory of Super Cyclone Amphan across 6 days over the Bay of Bengal, evaluated against official NOAA IBTrACS in-situ records. Notice the red dashed box moving dynamically with the storm—that is our Stage 1 dynamic 4D bounding box computed on a spherical icosahedral mesh."*
+  > *"Here is the complete 13-timestep 4D trajectory of Super Cyclone Amphan across 6 days over the Bay of Bengal, evaluated against official NOAA IBTrACS best-track records. Notice the red dashed box moving dynamically with the storm—that is our Stage 1 dynamic 4D bounding box computed on a spherical icosahedral mesh."*
 - **Action**:
   - Drag the **13-step timeline scrubber** or click **Play** with **1x / 2x speed controls**.
   - Show the live updates: the eye marker, the dynamic 4D bounding box, the geodesic mesh activations, and telemetry readouts update smoothly in real time.
@@ -179,7 +179,7 @@ This script is structured around the 5 persistent views. Follow this exact flow 
     - Moisture Flux Convergence (MFC): **98.2% diagnostic conformity**.
     - Wind Field Divergence: **$3.2 \times 10^{-5}\text{ s}^{-1}$**, enforcing mass continuity.
   - Present the **Two-Gap Honesty Diagram**:
-    > *"We are completely honest about our numbers: CorrDiff closes Gap 1 (+61.5% peak recovery, matching native ERA5 target 111 km/h). Gap 2 (between 111 km/h ERA5 and 222 km/h in-situ IBTrACS) is a known physical limitation of global 25 km reanalyses. Our concrete Phase 2 step is retraining directly on NCMRWF's 12 km regional IMDAA dataset."*
+    > *"We are completely honest about our numbers: CorrDiff closes Gap 1 (+61.5% peak recovery, matching native ERA5 target 111 km/h). Gap 2 (between 111 km/h ERA5 and 222 km/h IBTrACS best-track) is a known physical limitation of global 25 km reanalyses. Our concrete Phase 2 step is retraining directly on NCMRWF's 12 km regional IMDAA dataset."*
 
 ### ⏱️ Minute 3:00 – 4:00 // View 4: Alert & Bulletin (Societal Impact & Real Census Demographics)
 - **What to show**: Click **"Alert & Bulletin"** in the top navigation.
@@ -187,13 +187,13 @@ This script is structured around the 5 persistent views. Follow this exact flow 
   > *"Why does high-resolution downscaling matter to the nation? Because today, coarse weather models force NDRF and State Disaster Management Authorities to issue 3,500 km² district-wide red alerts. People experience alert fatigue and ignore warnings. We reduce the threat zone to a surgical 5 km radius."*
 - **Action**:
   - Click the **"Digha Coast (West Bengal)"** coastal preset.
-  - Show the **Real Census 2011 Demographic Impact Card**:
+  - Show the **Census 2011 Projected Demographic Impact Card**:
     - District baseline (Purba Medinipur): **4,736 km² area, 5,095,875 citizens**.
     - A standard district alert disrupts **3,766,000 citizens**.
     - Our 5 km pinpoint alert zone (78.5 km²) covers only **84,500 citizens**.
     - Result: **3,681,500 citizens are shielded from panic and unnecessary curfew**—a **97.8% reduction in false-alarm footprint**.
   - Click **"Download Official IMD Advisory (.html)"**:
-    - Downloads an authentic, MoES/IMD Cyclone Warning Centre formatted advisory with official crest, metadata box, Census 2011 metrics, and operational directives.
+    - Downloads an authentic, MoES/IMD Cyclone Warning Centre formatted advisory with official crest, metadata box, Census 2011 density metrics, and operational directives.
 
 ### ⏱️ Minute 4:00 – 5:00 // View 5: Methodology & PS Compliance Checklist (Technical Defense)
 - **What to show**: Click **"Methodology & Data"** in the top navigation.
