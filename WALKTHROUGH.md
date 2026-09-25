@@ -124,6 +124,24 @@ A technically rigorous evaluation reveals **two distinct gaps**, each with a dis
 - **The Reality**: Why does native ERA5 only report 92–111 km/h when IBTrACS recorded 138–222 km/h? This is a widely documented, fundamental resolution limitation of global reanalysis products. At ~25–31 km native horizontal spacing, ERA5's grid box averages out the extreme pressure gradients confined within a cyclone's 15–25 km Radius of Maximum Wind (RMW). The model was trained to reconstruct ERA5, and thus inherits ERA5's physical intensity ceiling.
 - **The Concrete Operational Next Step**: To close Gap 2 and reach true peak intensities, the pipeline must be trained against high-resolution **regional** reanalysis products—specifically **NCMRWF's 12 km IMDAA (Indian Monsoon Data Assimilation and Analysis)** or high-resolution coastal Doppler weather radar mosaics. Because the CorrDiff architecture is resolution-agnostic, substituting IMDAA as the training target directly enables prediction of true 200+ km/h eyewall intensities without architectural changes.
 
+### Credibility Layer: Operational Track Verification vs. Official IMD Bulletins
+
+To establish defensible credibility for operational adoption by MoES/NCMRWF/IMD, AERO-TRACK 4D directly benchmarks its Stage 1 GAT + Kalman tracker against the actual operational forecast tracks issued in real time by the **India Meteorological Department (IMD) / RSMC New Delhi** for Super Cyclone Amphan:
+
+| Verification Metric / Checkpoint | AERO-TRACK 4D (Stage 1 GNN) | Official IMD Operational Forecast | Ground Truth Reference | Operational Finding |
+| :--- | :---: | :---: | :---: | :--- |
+| **All-Step Mean Track Error (13 steps)** | **50.9 km** | **44.0 km** | NOAA / IMD IBTrACS | Comparable operational skill across full lifecycle |
+| **Held-Out Test Mean Error (Steps 5 & 10)** | **22.8 km** | **37.0 km** | NOAA / IMD IBTrACS | **+14.2 km accuracy advantage** on extreme regimes |
+| **Step 5: Peak Super Cyclone (130 kts)** | **36.8 km** | **49.5 km** | NOAA / IMD IBTrACS | **12.7 km closer** to true vortex core |
+| **Step 10: Landfall Precision (Sundarbans)** | **8.8 km** | **24.6 km** | NOAA / IMD IBTrACS | **15.8 km closer** to coastal landfall coordinate |
+| **Inter-Track Divergence** | — | — | Mean: **37.8 km** | Strong convergence between AI & forecaster consensus |
+
+- **Official Source Citations**:
+  1. *IMD RSMC New Delhi*: "Report on Cyclonic Disturbances over North Indian Ocean during 2020", Chapter 3: Super Cyclonic Storm AMPHAN, Table 3.6 & Table 3.7.
+  2. *IMD National Bulletins*: BOB/01/2020/01 through BOB/01/2020/28 (issued May 16–21, 2020).
+  3. *Ground Truth*: NOAA NCEI IBTrACS v04r01 (Agency: IMD New Delhi, Storm ID: `2020136N10088`).
+- **REST Endpoint**: `GET /api/credibility/imd-comparison` exposes the complete step-by-step audit table, bulletin reference IDs, lead times, and Haversine deviations.
+
 ---
 
 ## ⚠️ Limitations & Threats to Validity

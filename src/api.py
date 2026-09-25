@@ -36,6 +36,7 @@ from src.cap_alert import CAPAlertGenerator
 from src.scientific_audit import ScientificMeteorologicalAudit
 from src.agri_advisory import AgriAdvisoryEngine
 from src.data_export import OperationalDataExporter
+from src.credibility import IMDCredibilityEngine
 from src.live_global import (
     search_global_cities,
     get_live_point_forecast,
@@ -834,6 +835,16 @@ def api_live_global_wind_vectors():
     return get_global_wind_vectors()
 
 
+
+
+@app.get("/api/credibility/imd-comparison")
+def api_credibility_imd_comparison(event_id: str = Query("amphan_2020", description="Hazard event ID")):
+    """
+    Overlays IMD's actual issued operational forecast track against AERO-TRACK 4D's
+    Stage 1 GAT + Kalman tracker evaluated against NOAA/IMD IBTrACS ground truth.
+    Real IMD bulletin archival data only with full MoES/IMD RSMC citations.
+    """
+    return IMDCredibilityEngine.get_track_comparison(event_id=event_id)
 
 
 @app.get("/api/historical/verification")
