@@ -52,24 +52,27 @@ def run_tests():
     print("AERO-TRACK 4D SMOKE TEST SUITE")
     print("=" * 60)
 
-    # Pre-flight check: ensure server is ready
-    import time
-    for _ in range(10):
-        try:
-            with urllib.request.urlopen(f"{BASE_URL}/api/status", timeout=2) as resp:
-                if resp.status == 200:
-                    break
-        except Exception:
-            time.sleep(0.5)
+    # Pre-flight check: check if live server is listening
+    use_live_server = False
+    try:
+        with urllib.request.urlopen(f"{BASE_URL}/api/status", timeout=1.5) as resp:
+            if resp.status == 200:
+                use_live_server = True
+                print("Testing against LIVE server at http://127.0.0.1:8000")
+    except Exception:
+        pass
+
+    if not use_live_server:
+        print("Testing via in-process FastAPI TestClient...")
+        from fastapi.testclient import TestClient
+        from src.api import app
+        client = TestClient(app)
 
     passed = 0
     failed = 0
 
     for method, path, required_keys in ENDPOINTS:
-        url = f"{BASE_URL}{path}"
-        req_data = None
-        headers = {}
-
+        payload = None
         if method == "POST":
             payload = {
                 "lat": 21.626,
@@ -77,30 +80,40 @@ def run_tests():
                 "location_name": "Digha Coast (West Bengal)",
                 "step_index": 5
             }
-            req_data = json.dumps(payload).encode("utf-8")
-            headers["Content-Type"] = "application/json"
 
         try:
-            req = urllib.request.Request(url, data=req_data, headers=headers, method=method)
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                status = resp.status
-                raw = resp.read()
-
-                if status == 200:
+            if use_live_server:
+                url = f"{BASE_URL}{path}"
+                req_data = json.dumps(payload).encode("utf-8") if payload else None
+                headers = {"Content-Type": "application/json"} if payload else {}
+                req = urllib.request.Request(url, data=req_data, headers=headers, method=method)
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    status = resp.status
+                    raw = resp.read()
+                    data = None
                     if required_keys:
-                        body = raw.decode("utf-8", errors="ignore")
-                        data = json.loads(body)
-                        missing = [k for k in required_keys if k not in data]
-                        if missing:
-                            print(f"[FAIL] {method} {path} - Missing keys: {missing}")
-                            failed += 1
-                            continue
+                        data = json.loads(raw.decode("utf-8", errors="ignore"))
+            else:
+                if method == "GET":
+                    resp = client.get(path)
+                elif method == "POST":
+                    resp = client.post(path, json=payload)
+                status = resp.status_code
+                data = resp.json() if required_keys and resp.status_code == 200 else None
 
-                    print(f"[PASS] {method} {path} (HTTP {status})")
-                    passed += 1
-                else:
-                    print(f"[FAIL] {method} {path} - Unexpected status: {status}")
-                    failed += 1
+            if status == 200:
+                if required_keys and data:
+                    missing = [k for k in required_keys if k not in data]
+                    if missing:
+                        print(f"[FAIL] {method} {path} - Missing keys: {missing}")
+                        failed += 1
+                        continue
+
+                print(f"[PASS] {method} {path} (HTTP {status})")
+                passed += 1
+            else:
+                print(f"[FAIL] {method} {path} - Unexpected status: {status}")
+                failed += 1
         except Exception as e:
             print(f"[FAIL] {method} {path} - Exception: {e}")
             failed += 1
