@@ -1065,7 +1065,10 @@ body {
 .swipe-container {
   position: relative;
   width: 100%;
-  height: 380px;
+  max-width: 480px;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  margin: 0 auto;
   background: #000;
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -2302,7 +2305,7 @@ body {
   right: 10px;
   bottom: 10px;
   z-index: 750;
-  width: 380px;
+  width: 420px;
   max-width: calc(100% - 20px);
   background: rgba(8, 14, 24, 0.95);
   backdrop-filter: blur(16px);
@@ -2320,7 +2323,7 @@ body {
 }
 
 .globe-live-inspector-card.is-expanded {
-  width: 480px;
+  width: 560px;
   max-width: calc(100% - 20px);
 }
 
@@ -2330,12 +2333,15 @@ body {
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 8px;
+  gap: 8px;
 }
 
 .inspector-title-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .inspector-title {
@@ -2343,10 +2349,11 @@ body {
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.03em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 260px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.25;
+  flex: 1;
+  min-width: 0;
 }
 
 .inspector-header-actions {
@@ -2529,11 +2536,17 @@ body {
   box-shadow: 0 0 8px rgba(0, 212, 229, 0.4);
 }
 
-/* Forecast Strips */
+/* Utility Hidden & Forecast Strips */
+.hidden,
+.forecast-strip-container.hidden {
+  display: none !important;
+}
+
 .forecast-strip-container {
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: thin;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
 }
 
 .daily-forecast-strip,
@@ -3286,6 +3299,98 @@ body {
   transform: translateY(-1px);
 }
 
+/* ---------------- Live Active Storms Header Bar ---------------- */
+.live-storms-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  background: rgba(10, 16, 26, 0.88);
+  border-bottom: 1px solid rgba(0, 212, 229, 0.2);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  z-index: 10;
+}
 
+.live-storms-bar.hidden {
+  display: none !important;
+}
 
+.storms-bar-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #00d4e5;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
 
+/* Live Storm 2D Leaflet Markers */
+.live-storm-2d-divicon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.live-storm-2d-eye {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.9);
+  border: 2px solid #00d4e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px rgba(0, 212, 229, 0.7);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.live-storm-2d-eye:hover {
+  transform: scale(1.22);
+}
+
+.live-storm-pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #00d4e5;
+  opacity: 0.7;
+  animation: botPulse 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  pointer-events: none;
+}
+
+.live-storm-symbol {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.live-waypoint-divicon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.live-waypoint-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #0f172a;
+  border: 2px solid #00d4e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(0, 212, 229, 0.5);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.live-waypoint-dot:hover,
+.live-waypoint-dot.active {
+  transform: scale(1.4);
+  background: #00d4e5;
+  border-color: #fff;
+}

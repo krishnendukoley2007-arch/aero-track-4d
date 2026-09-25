@@ -1319,34 +1319,34 @@ const COLORMAPS = {
     let r, g, b;
     if (t < 0.15) {
       const f = t / 0.15;
-      r = Math.floor(8 + 12 * f);
-      g = Math.floor(25 + 75 * f);
-      b = Math.floor(80 + 130 * f);
+      r = Math.floor(10 + 10 * f);
+      g = Math.floor(35 + 85 * f);
+      b = Math.floor(95 + 130 * f);
     } else if (t < 0.35) {
       const f = (t - 0.15) / 0.20;
       r = Math.floor(20 - 20 * f);
-      g = Math.floor(100 + 120 * f);
-      b = Math.floor(210 + 35 * f);
+      g = Math.floor(120 + 92 * f);
+      b = Math.floor(225 + 4 * f);
     } else if (t < 0.55) {
       const f = (t - 0.35) / 0.20;
-      r = Math.floor(0 + 140 * f);
-      g = Math.floor(220 + 20 * f);
-      b = Math.floor(245 - 195 * f);
+      r = Math.floor(0 + 16 * f);
+      g = Math.floor(212 - 27 * f);
+      b = Math.floor(229 - 100 * f);
     } else if (t < 0.75) {
       const f = (t - 0.55) / 0.20;
-      r = Math.floor(140 + 115 * f);
-      g = Math.floor(240 - 75 * f);
-      b = Math.floor(50 - 40 * f);
+      r = Math.floor(16 + 229 * f);
+      g = Math.floor(185 + 19 * f);
+      b = Math.floor(129 - 108 * f);
     } else if (t < 0.90) {
       const f = (t - 0.75) / 0.15;
-      r = Math.floor(255);
-      g = Math.floor(165 - 120 * f);
-      b = Math.floor(10 + 25 * f);
+      r = Math.floor(245 + 4 * f);
+      g = Math.floor(204 - 89 * f);
+      b = Math.floor(21 + 1 * f);
     } else {
       const f = (t - 0.90) / 0.10;
-      r = Math.floor(255);
-      g = Math.floor(45 - 45 * f);
-      b = Math.floor(35 + 145 * f);
+      r = Math.floor(249 - 24 * f);
+      g = Math.floor(115 - 86 * f);
+      b = Math.floor(22 + 50 * f);
     }
     return [r, g, b, 255];
   },
@@ -1364,7 +1364,7 @@ const COLORMAPS = {
     let r, g, b;
     if (t < 0.33) {
       const f = t / 0.33;
-      r = Math.floor(255 * f + (1 - f) * 240);
+      r = Math.floor(245 + 10 * f);
       g = Math.floor(220 * (1 - f) + 140 * f);
       b = Math.floor(40 * (1 - f));
     } else if (t < 0.66) {
@@ -1374,9 +1374,9 @@ const COLORMAPS = {
       b = Math.floor(20 * (1 - f));
     } else {
       const f = (t - 0.66) / 0.34;
-      r = Math.floor(255 * (1 - f) + 160 * f);
-      g = Math.floor(30 * (1 - f));
-      b = Math.floor(140 * f);
+      r = Math.floor(255 * (1 - f) + 225 * f);
+      g = Math.floor(30 * (1 - f) + 29 * f);
+      b = Math.floor(140 * f + 72 * (1 - f));
     }
     return [r, g, b, 255];
   },
@@ -1384,16 +1384,31 @@ const COLORMAPS = {
   cold: (val, min = 0, max = 12) => {
     const t = Math.max(0, Math.min(1, (val - min) / (max - min)));
     let r, g, b;
-    if (t < 0.5) {
-      const f = t / 0.5;
-      r = Math.floor(220 * (1 - f) + 40 * f);
-      g = Math.floor(240 * (1 - f) + 120 * f);
-      b = Math.floor(255);
+    if (t < 0.25) {
+      const f = t / 0.25;
+      r = Math.floor(15 + 15 * f);
+      g = Math.floor(40 + 70 * f);
+      b = Math.floor(130 + 110 * f);
+    } else if (t < 0.50) {
+      const f = (t - 0.25) / 0.25;
+      r = Math.floor(30 - 30 * f);
+      g = Math.floor(110 + 102 * f);
+      b = Math.floor(240 - 11 * f);
+    } else if (t < 0.75) {
+      const f = (t - 0.50) / 0.25;
+      r = Math.floor(0 + 34 * f);
+      g = Math.floor(212 - 15 * f);
+      b = Math.floor(229 - 135 * f);
+    } else if (t < 0.90) {
+      const f = (t - 0.75) / 0.15;
+      r = Math.floor(34 + 211 * f);
+      g = Math.floor(197 - 39 * f);
+      b = Math.floor(94 - 83 * f);
     } else {
-      const f = (t - 0.5) / 0.5;
-      r = Math.floor(40 * (1 - f) + 16 * f);
-      g = Math.floor(120 * (1 - f) + 185 * f);
-      b = Math.floor(255 * (1 - f) + 129 * f);
+      const f = (t - 0.90) / 0.10;
+      r = Math.floor(245 + 10 * f);
+      g = Math.floor(158 - 114 * f);
+      b = Math.floor(11 + 33 * f);
     }
     return [r, g, b, 255];
   }
@@ -1443,7 +1458,7 @@ const BASEMAP_PRESETS = {
   }
 };
 
-let activeBasemapKey = "streets";
+let activeBasemapKey = "satellite";
 let activeBasemapLayers = [];
 
 function switchBasemap(key) {
@@ -1494,6 +1509,9 @@ const LiveGlobal = {
       btnBench.classList.remove("active");
       this.showLiveBanner();
 
+      const stormsBar = document.getElementById("live-storms-bar");
+      if (stormsBar) stormsBar.classList.remove("hidden");
+
       // Hide Amphan benchmark layers from 2D map and 3D globe
       setBenchmarkMapLayersVisible(false);
       if (ThreeGlobeViewer.initialized) {
@@ -1501,6 +1519,8 @@ const LiveGlobal = {
         if (ThreeGlobeViewer.activeStorms3DGroup) ThreeGlobeViewer.activeStorms3DGroup.visible = true;
         if (ThreeGlobeViewer.forecastTrackGroup) ThreeGlobeViewer.forecastTrackGroup.visible = true;
       }
+
+      this.renderTimelineCheckpoints(true, this.selectedStorm);
 
       // Load active global storms & anomalies
       this.loadGlobalAnomalies();
@@ -1516,14 +1536,28 @@ const LiveGlobal = {
       btnLive.classList.remove("active");
       this.showBenchmarkBanner();
 
+      const stormsBar = document.getElementById("live-storms-bar");
+      if (stormsBar) stormsBar.classList.add("hidden");
+
       // Remove live anomaly markers from 2D and 3D
       this.removeGlobalAnomalyMarkers();
+      this.removeLiveStorm2DLayers();
       if (ThreeGlobeViewer.anomalies3DGroup) ThreeGlobeViewer.anomalies3DGroup.clear();
       if (ThreeGlobeViewer.liveBeaconGroup) ThreeGlobeViewer.liveBeaconGroup.clear();
       if (ThreeGlobeViewer.activeStorms3DGroup) ThreeGlobeViewer.activeStorms3DGroup.visible = false;
       if (ThreeGlobeViewer.forecastTrackGroup) ThreeGlobeViewer.forecastTrackGroup.visible = false;
       const inspectorCard = document.getElementById("globe-live-inspector");
       if (inspectorCard) inspectorCard.style.display = "none";
+
+      // Reset slider to benchmark range
+      const slider = document.getElementById("timeline-slider");
+      if (slider) {
+        slider.min = "0";
+        slider.max = "12";
+        slider.value = (state.currentStep || 5).toString();
+      }
+
+      this.renderTimelineCheckpoints(false);
 
       // Restore Amphan benchmark layers
       setBenchmarkMapLayersVisible(true);
@@ -2172,14 +2206,18 @@ const LiveGlobal = {
 
   // ---- Active Global Storms & 5-Day Outlook Controller --------
   async loadActiveStorms() {
-    const pillsContainer = document.getElementById("globe-storms-pills");
+    const containers = [
+      document.getElementById("live-storms-pills"),
+      document.getElementById("globe-storms-pills")
+    ].filter(Boolean);
+
     try {
       const res = await fetch("/api/live/active-storms");
       if (!res.ok) throw new Error("Active storms API failed");
       const data = await res.json();
       this.activeStormsList = data.active_storms || [];
 
-      if (pillsContainer) {
+      containers.forEach(pillsContainer => {
         pillsContainer.innerHTML = "";
         this.activeStormsList.forEach((storm, idx) => {
           const pill = document.createElement("button");
@@ -2191,7 +2229,7 @@ const LiveGlobal = {
           });
           pillsContainer.appendChild(pill);
         });
-      }
+      });
 
       if (ThreeGlobeViewer.initialized) {
         ThreeGlobeViewer.renderActiveStorms(this.activeStormsList);
@@ -2202,9 +2240,9 @@ const LiveGlobal = {
       }
     } catch (err) {
       console.warn("Failed to load active storms:", err);
-      if (pillsContainer) {
+      containers.forEach(pillsContainer => {
         pillsContainer.innerHTML = '<span class="storm-pill">⚠️ Offline storm fallback active</span>';
-      }
+      });
     }
   },
 
@@ -2214,20 +2252,13 @@ const LiveGlobal = {
     this.selectedStorm = storm;
     this.currentForecastStep = 0;
 
-    // Highlight active pill
+    // Highlight active pill across all pill containers
     document.querySelectorAll(".storm-pill").forEach(p => {
       p.classList.toggle("active", p.textContent.includes(storm.name));
     });
 
-    // Focus 3D Globe camera smoothly
-    if (ThreeGlobeViewer.initialized) {
-      ThreeGlobeViewer.setTargetCentroid(storm.current_lat, storm.current_lon);
-      ThreeGlobeViewer.renderStormForecastTrack(storm, 0);
-    }
-
-    // Update Overview & Top Cards
-    this.updateOverviewFromStorm(storm, 0);
-    this.updateInspectorFromStorm(storm, 0);
+    // Render timeline checkpoints for live mode
+    this.renderTimelineCheckpoints(true, storm);
 
     // Sync timeline slider for 5-day / 120-hour forecast scrubbing
     const slider = document.getElementById("timeline-slider");
@@ -2236,6 +2267,9 @@ const LiveGlobal = {
       slider.max = (storm.forecast_steps.length - 1).toString();
       slider.value = "0";
     }
+
+    // Scrub step 0 (updates 2D map, 3D globe, overview, and inspector)
+    this.scrubStormStep(0);
   },
 
   scrubStormStep(stepIdx) {
@@ -2243,12 +2277,166 @@ const LiveGlobal = {
     const step = this.selectedStorm.forecast_steps[stepIdx];
     if (!step) return;
     this.currentForecastStep = stepIdx;
+    state.currentStep = stepIdx;
 
+    const slider = document.getElementById("timeline-slider");
+    if (slider) slider.value = stepIdx.toString();
+
+    // Highlight corresponding timeline checkpoint
+    const checkpointsEl = document.getElementById("timeline-checkpoints");
+    if (checkpointsEl) {
+      checkpointsEl.querySelectorAll(".checkpoint-item").forEach(cp => {
+        const cpStep = parseInt(cp.dataset.step);
+        cp.classList.toggle("active", Math.abs(cpStep - stepIdx) <= 1);
+      });
+    }
+
+    // Update 3D Globe
     if (ThreeGlobeViewer.initialized) {
       ThreeGlobeViewer.renderStormForecastTrack(this.selectedStorm, stepIdx);
+      ThreeGlobeViewer.setTargetCentroid(step.centroid.lat, step.centroid.lon);
     }
+
+    // Update 2D Leaflet Map
+    this.renderStormOn2DMap(this.selectedStorm, stepIdx);
+
+    // Update Overview and Inspector HUD
     this.updateOverviewFromStorm(this.selectedStorm, stepIdx);
     this.updateInspectorFromStorm(this.selectedStorm, stepIdx);
+  },
+
+  renderTimelineCheckpoints(isLive, storm) {
+    const checkpointsEl = document.getElementById("timeline-checkpoints");
+    if (!checkpointsEl) return;
+    if (isLive) {
+      checkpointsEl.innerHTML = `
+        <span class="checkpoint-item active" data-step="0">NOW (0h)<br><small>Genesis / Active</small></span>
+        <span class="checkpoint-item" data-step="2">+12h<br><small>Intensification</small></span>
+        <span class="checkpoint-item tag-peak" data-step="4">+24h<br><small>Peak Intensity ★</small></span>
+        <span class="checkpoint-item" data-step="6">+48h<br><small>Trajectory</small></span>
+        <span class="checkpoint-item tag-landfall" data-step="7">+72h<br><small>Peak Approach ★</small></span>
+        <span class="checkpoint-item" data-step="9">+120h<br><small>Dissipation</small></span>
+      `;
+      checkpointsEl.querySelectorAll(".checkpoint-item").forEach(item => {
+        item.style.cursor = "pointer";
+        item.addEventListener("click", () => {
+          const st = parseInt(item.dataset.step);
+          this.scrubStormStep(st);
+        });
+      });
+    } else {
+      checkpointsEl.innerHTML = `
+        <span class="checkpoint-item" data-step="0">May 16<br><small>Genesis</small></span>
+        <span class="checkpoint-item" data-step="2">May 17<br><small>Rapid Intensification</small></span>
+        <span class="checkpoint-item tag-peak" data-step="5">May 18<br><small>Peak Super Cyclone ★ (Held-Out)</small></span>
+        <span class="checkpoint-item" data-step="7">May 19<br><small>Recurvature</small></span>
+        <span class="checkpoint-item tag-landfall" data-step="10">May 20<br><small>Landfall ★ (Held-Out)</small></span>
+        <span class="checkpoint-item" data-step="12">May 21<br><small>Dissipation</small></span>
+      `;
+      checkpointsEl.querySelectorAll(".checkpoint-item").forEach(item => {
+        item.style.cursor = "pointer";
+        item.addEventListener("click", () => {
+          const st = parseInt(item.dataset.step);
+          updateStep(st);
+        });
+      });
+    }
+  },
+
+  renderStormOn2DMap(storm, activeStepIdx = 0) {
+    if (!state.map) return;
+    if (!state.liveStorm2DLayerGroup) {
+      state.liveStorm2DLayerGroup = L.layerGroup().addTo(state.map);
+    }
+    state.liveStorm2DLayerGroup.clearLayers();
+
+    if (!storm || !storm.forecast_steps || !storm.forecast_steps.length) return;
+    const step = storm.forecast_steps[activeStepIdx] || storm.forecast_steps[0];
+    const stormColor = storm.badge_color || (storm.color || "#00d4e5");
+
+    // Center map view smoothly on active step position
+    state.map.setView([step.centroid.lat, step.centroid.lon], Math.max(state.map.getZoom(), 5));
+
+    // 1. Draw glowing 5-day projected forecast track polyline
+    const latlngs = storm.forecast_steps.map(s => [s.centroid.lat, s.centroid.lon]);
+    L.polyline(latlngs, {
+      color: stormColor,
+      weight: 6,
+      opacity: 0.35
+    }).addTo(state.liveStorm2DLayerGroup);
+
+    L.polyline(latlngs, {
+      color: stormColor,
+      weight: 2.5,
+      dashArray: "6, 6",
+      opacity: 0.95
+    }).addTo(state.liveStorm2DLayerGroup);
+
+    // 2. Draw interactive waypoint circles along forecast steps
+    storm.forecast_steps.forEach((s, idx) => {
+      const isCurrent = idx === activeStepIdx;
+      const wpIcon = L.divIcon({
+        className: "live-waypoint-divicon",
+        html: `<div class="live-waypoint-dot ${isCurrent ? 'active' : ''}" style="border-color: ${isCurrent ? '#fff' : stormColor}; background: ${isCurrent ? stormColor : '#0f172a'};" title="${s.lead_time_label}: ${s.corrdiff_resolved_wind_kmh} km/h"></div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7]
+      });
+      const wpMarker = L.marker([s.centroid.lat, s.centroid.lon], { icon: wpIcon }).addTo(state.liveStorm2DLayerGroup);
+      wpMarker.bindTooltip(`<strong>${storm.name} [${s.lead_time_label}]</strong><br>Stage: ${s.stage}<br>Resolved Wind: ${s.corrdiff_resolved_wind_kmh} km/h<br>Coords: ${s.centroid.lat}°N, ${s.centroid.lon}°E`, {
+        direction: "top"
+      });
+      wpMarker.on("click", () => {
+        this.scrubStormStep(idx);
+      });
+    });
+
+    // 3. Draw expanding uncertainty cone around active step
+    const uncertaintyRadiusMeters = (step.uncertainty_radius_km || 35) * 1000;
+    L.circle([step.centroid.lat, step.centroid.lon], {
+      radius: uncertaintyRadiusMeters,
+      color: stormColor,
+      weight: 1.5,
+      dashArray: "4, 4",
+      fillColor: stormColor,
+      fillOpacity: 0.14
+    }).addTo(state.liveStorm2DLayerGroup);
+
+    // 4. Draw active storm eye marker
+    const eyeIcon = L.divIcon({
+      className: "live-storm-2d-divicon",
+      html: `
+        <div class="live-storm-2d-eye" style="border-color: ${stormColor};">
+          <div class="live-storm-pulse-ring" style="border-color: ${stormColor};"></div>
+          <span class="live-storm-symbol">🌀</span>
+        </div>
+      `,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+
+    const eyeMarker = L.marker([step.centroid.lat, step.centroid.lon], { icon: eyeIcon }).addTo(state.liveStorm2DLayerGroup);
+    eyeMarker.bindPopup(`
+      <div style="font-family: monospace; font-size: 12px; color: #fff; line-height: 1.4;">
+        <strong style="color: ${stormColor}; font-size: 13px;">🌀 ${storm.name}</strong><br>
+        <strong>Lead Time:</strong> ${step.lead_time_label} (${step.stage})<br>
+        <strong>CorrDiff Wind:</strong> <span style="color: #00d4e5;">${step.corrdiff_resolved_wind_kmh} km/h</span><br>
+        <strong>Coarse NWP:</strong> ${step.coarse_nwp_wind_kmh} km/h (+61.5% recovered)<br>
+        <strong>Surface Pressure:</strong> ${step.surface_pressure_hpa} hPa<br>
+        <strong>Position:</strong> ${step.centroid.lat}°N, ${step.centroid.lon}°E
+      </div>
+    `);
+
+    state.selectedLocation = {
+      lat: step.centroid.lat,
+      lon: step.centroid.lon,
+      name: `${storm.name} [${step.lead_time_label}]`
+    };
+  },
+
+  removeLiveStorm2DLayers() {
+    if (state.liveStorm2DLayerGroup) {
+      state.liveStorm2DLayerGroup.clearLayers();
+    }
   },
 
   updateOverviewFromStorm(storm, stepIdx) {
@@ -2352,6 +2540,8 @@ const LiveGlobal = {
         tabHourly.classList.remove("active");
         contDaily.classList.remove("hidden");
         contHourly.classList.add("hidden");
+        contDaily.style.display = "";
+        contHourly.style.display = "none";
       });
 
       tabHourly.addEventListener("click", () => {
@@ -2359,6 +2549,8 @@ const LiveGlobal = {
         tabDaily.classList.remove("active");
         contHourly.classList.remove("hidden");
         contDaily.classList.add("hidden");
+        contHourly.style.display = "";
+        contDaily.style.display = "none";
       });
     }
 
@@ -2380,6 +2572,7 @@ const LiveGlobal = {
     this.initRegionalFocusButtons();
 
     // Auto-start in live mode: load active storms and anomalies
+    this.renderTimelineCheckpoints(true);
     this.loadGlobalAnomalies();
     this.loadActiveStorms();
 
@@ -3219,6 +3412,16 @@ function renderSwipeCanvases(data) {
   const coarseCanvas = document.getElementById("canvas-coarse");
   const corrdiffCanvas = document.getElementById("canvas-corrdiff");
   if (!coarseCanvas || !corrdiffCanvas || !data.fields) return;
+
+  coarseCanvas.width = 480;
+  coarseCanvas.height = 480;
+  corrdiffCanvas.width = 480;
+  corrdiffCanvas.height = 480;
+  const overlay = document.getElementById("canvas-transect-overlay");
+  if (overlay) {
+    overlay.width = 480;
+    overlay.height = 480;
+  }
 
   const isTemp = !!data.fields.coarse_nwp.temperature_c;
   let coarseGrid, corrdiffGrid, colormapName, minV, maxV;
@@ -4394,7 +4597,12 @@ function initEventListeners() {
   const slider = document.getElementById("timeline-slider");
   if (slider) {
     slider.addEventListener("input", (e) => {
-      updateStep(parseInt(e.target.value));
+      const val = parseInt(e.target.value);
+      if (state.opMode === "live" && LiveGlobal.selectedStorm) {
+        LiveGlobal.scrubStormStep(val);
+      } else {
+        updateStep(val);
+      }
     });
   }
 
@@ -4406,9 +4614,16 @@ function initEventListeners() {
       if (state.isPlaying) {
         btnPlay.textContent = "⏸ PAUSE";
         btnPlay.classList.add("btn-playing");
+        const maxSteps = (state.opMode === "live" && LiveGlobal.selectedStorm)
+          ? LiveGlobal.selectedStorm.forecast_steps.length
+          : 13;
         state.playTimer = setInterval(() => {
-          let nextStep = (state.currentStep + 1) % 13;
-          updateStep(nextStep);
+          let nextStep = (state.currentStep + 1) % maxSteps;
+          if (state.opMode === "live" && LiveGlobal.selectedStorm) {
+            LiveGlobal.scrubStormStep(nextStep);
+          } else {
+            updateStep(nextStep);
+          }
         }, state.playSpeed);
       } else {
         btnPlay.textContent = "▶ PLAY";
@@ -4427,9 +4642,16 @@ function initEventListeners() {
 
       if (state.isPlaying) {
         clearInterval(state.playTimer);
+        const maxSteps = (state.opMode === "live" && LiveGlobal.selectedStorm)
+          ? LiveGlobal.selectedStorm.forecast_steps.length
+          : 13;
         state.playTimer = setInterval(() => {
-          let nextStep = (state.currentStep + 1) % 13;
-          updateStep(nextStep);
+          let nextStep = (state.currentStep + 1) % maxSteps;
+          if (state.opMode === "live" && LiveGlobal.selectedStorm) {
+            LiveGlobal.scrubStormStep(nextStep);
+          } else {
+            updateStep(nextStep);
+          }
         }, state.playSpeed);
       }
     });
@@ -4437,12 +4659,23 @@ function initEventListeners() {
 
   document.getElementById("btn-step-prev").addEventListener("click", () => {
     let prev = Math.max(0, state.currentStep - 1);
-    updateStep(prev);
+    if (state.opMode === "live" && LiveGlobal.selectedStorm) {
+      LiveGlobal.scrubStormStep(prev);
+    } else {
+      updateStep(prev);
+    }
   });
 
   document.getElementById("btn-step-next").addEventListener("click", () => {
-    let next = Math.min(12, state.currentStep + 1);
-    updateStep(next);
+    const maxSteps = (state.opMode === "live" && LiveGlobal.selectedStorm)
+      ? LiveGlobal.selectedStorm.forecast_steps.length - 1
+      : 12;
+    let next = Math.min(maxSteps, state.currentStep + 1);
+    if (state.opMode === "live" && LiveGlobal.selectedStorm) {
+      LiveGlobal.scrubStormStep(next);
+    } else {
+      updateStep(next);
+    }
   });
 
   // Layer Toggles

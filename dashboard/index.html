@@ -169,8 +169,8 @@
             <!-- Basemap Selector -->
             <div class="basemap-selector-wrap" id="basemap-selector-wrap">
               <select id="select-basemap-ov" class="select-basemap font-mono" title="Select Leaflet basemap layer">
-                <option value="streets" selected>🗺️ Streets (Google Style)</option>
-                <option value="satellite">🛰️ Photorealistic Satellite</option>
+                <option value="satellite" selected>🛰️ Photorealistic Satellite</option>
+                <option value="streets">🗺️ Streets (Google Style)</option>
                 <option value="topo">⛰️ Topographic Terrain</option>
                 <option value="dark">🌑 Tactical Dark</option>
               </select>
@@ -195,6 +195,12 @@
               ⛶ Fullscreen
             </button>
           </div>
+        </div>
+
+        <!-- ACTIVE GLOBAL STORMS BAR (Visible in Live Mode across 2D Map & 3D Earth) -->
+        <div class="live-storms-bar font-mono" id="live-storms-bar">
+          <span class="storms-bar-label">🌀 ACTIVE STORMS:</span>
+          <div class="storms-pill-list" id="live-storms-pills"></div>
         </div>
 
         <!-- The Visual Viewport Wrapper -->
@@ -255,7 +261,7 @@
                 <span class="inspector-title" id="inspector-loc-title">📍 Live Point Inspection</span>
               </div>
               <div class="inspector-header-actions">
-                <button class="btn-toggle-forecast-expand font-mono" id="btn-toggle-forecast-expand" title="Expand / Compact" style="display:none;">⛶</button>
+                <button class="btn-toggle-forecast-expand font-mono" id="btn-toggle-forecast-expand" title="Expand / Compact Drawer Width">⛶</button>
                 <button class="btn-close-inspector" id="btn-close-inspector" title="Close inspector">&times;</button>
               </div>
             </div>
@@ -312,7 +318,7 @@
               </div>
             </div>
 
-            <div class="forecast-strip-container hidden" id="container-insp-hourly">
+            <div class="forecast-strip-container hidden" id="container-insp-hourly" style="display: none;">
               <div class="hourly-forecast-strip" id="insp-hourly-strip"></div>
             </div>
 
@@ -359,7 +365,7 @@
 
           <div class="timeline-slider-container">
             <input type="range" id="timeline-slider" min="0" max="12" value="5" step="1" class="custom-timeline-slider">
-            <div class="timeline-checkpoints font-mono">
+            <div class="timeline-checkpoints font-mono" id="timeline-checkpoints">
               <span>May 16<br><small>Genesis</small></span>
               <span>May 17<br><small>Rapid Intensification</small></span>
               <span class="tag-peak">May 18<br><small>Peak Super Cyclone ★ (Held-Out)</small></span>
@@ -525,15 +531,15 @@
 
           <div class="swipe-container" id="swipe-container">
             <div class="swipe-layer-under">
-              <canvas id="canvas-corrdiff" class="downscale-canvas" width="380" height="380"></canvas>
+              <canvas id="canvas-corrdiff" class="downscale-canvas" width="480" height="480"></canvas>
             </div>
             <div class="swipe-layer-over" id="swipe-overlay-box">
-              <canvas id="canvas-coarse" class="downscale-canvas" width="380" height="380"></canvas>
+              <canvas id="canvas-coarse" class="downscale-canvas" width="480" height="480"></canvas>
             </div>
             <div class="swipe-divider-handle" id="swipe-handle">
               <div class="handle-pill"><span>◀</span><span>▶</span></div>
             </div>
-            <canvas id="canvas-transect-overlay" width="380" height="380" title="Click &amp; Drag to slice arbitrary cross-section across anomaly"></canvas>
+            <canvas id="canvas-transect-overlay" width="480" height="480" title="Click &amp; Drag to slice arbitrary cross-section across anomaly"></canvas>
           </div>
 
           <!-- Colorbar and Live Canvas Inspection Readout (Cleanly Stacked to avoid overlap) -->
