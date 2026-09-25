@@ -1,8 +1,17 @@
 """
-Training & Out-of-Sample Evaluation for CorrDiff on Genuine ERA5 Reanalysis (SIH 26078).
+Training & Multi-Storm Out-of-Sample Evaluation for CorrDiff (SIH 26078).
 Trains the Stage 1 UNet Mean Predictor and Stage 2 Conditional Score-Based Diffusion Corrector
-on multi-timestep real ERA5 coarse-to-fine pairs, with out-of-sample held-out evaluation
-on May 18 Peak Super Cyclone and May 20 Landfall.
+on multi-timestep real ERA5 coarse-to-fine pairs, with out-of-sample evaluation on:
+1. Held-out May 18 Peak Super Cyclone and May 20 Landfall (Cyclone Amphan)
+2. Completely unseen Cyclone Fani (April-May 2019)
+3. Completely unseen Cyclone Yaas (May 2021)
+
+Calculates Continuous Ranked Probability Score (CRPS) for 5-member ensemble
+and precipitation Fractions Skill Score (FSS).
+
+ROADMAP NOTE: Full IndiaWeatherBench (2000-2019, ~40-80 GB) and NCMRWF IMDAA regional
+reanalysis retargeting requires NCMRWF portal registration credentials and multi-GPU
+cluster for 20-year decadal training. Currently evaluated against genuine ERA5 reanalysis splits.
 """
 
 import os
@@ -24,7 +33,7 @@ def train_corrdiff(epochs: int = 15, lr: float = 1e-3, save_ckpt: bool = True):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"=== Initializing CorrDiff Training on {device} ===")
 
-    dl = WeatherDataLoader()
+    dl = WeatherDataLoader(event_id="amphan_2020")
     X_train, Y_train, X_test, Y_test = dl.build_training_dataset()
     print(f"Dataset split: {len(X_train)} training timesteps | {len(X_test)} held-out test timesteps (Peak & Landfall)")
 
@@ -50,7 +59,6 @@ def train_corrdiff(epochs: int = 15, lr: float = 1e-3, save_ckpt: bool = True):
         perm = torch.randperm(len(x_train_t))
         ep_loss_mean = 0.0
         ep_loss_diff = 0.0
-        ep_loss_phys = 0.0
 
         for b in range(n_batches):
             idx = perm[b * batch_size:(b + 1) * batch_size]
@@ -65,7 +73,6 @@ def train_corrdiff(epochs: int = 15, lr: float = 1e-3, save_ckpt: bool = True):
             loss_mean.backward()
             opt_mean.step()
             ep_loss_mean += loss_mean.item()
-            ep_loss_phys += phys_loss_dict["loss_divergence"].item() + phys_loss_dict["loss_moisture_convergence"].item()
 
             # 2. Optimize Stage 2 Diffusion Corrector
             opt_diff.zero_grad()
@@ -94,17 +101,15 @@ def train_corrdiff(epochs: int = 15, lr: float = 1e-3, save_ckpt: bool = True):
     with torch.no_grad():
         test_mean = model.mean_predictor(x_test_t)
         test_mse_mean = crit_mse(test_mean, y_test_t).item()
-        
-        # Test ensemble sampling
         ens_res = model.sample_ensemble(x_test_t[:5], n_members=5)
         test_corrdiff_mse = crit_mse(ens_res["ensemble_mean"], y_test_t[:5]).item()
 
     print(f"\n--- Held-out Test Split Results (May 18 & 20) ---")
-    print(f"Standard U-Net Held-Out MSE:   {test_mse_mean:.4f}")
+    print(f"Standard U-Net Held-Out MSE:    {test_mse_mean:.4f}")
     print(f"CorrDiff Ensemble Held-Out MSE: {test_corrdiff_mse:.4f}")
 
+    ckpt_path = os.path.join(MODELS_DIR, "corrdiff_amphan.pt")
     if save_ckpt:
-        ckpt_path = os.path.join(MODELS_DIR, "corrdiff_amphan.pt")
         torch.save({
             "model_state": model.state_dict(),
             "epochs": epochs,
@@ -112,6 +117,19 @@ def train_corrdiff(epochs: int = 15, lr: float = 1e-3, save_ckpt: bool = True):
             "test_corrdiff_mse": test_corrdiff_mse,
         }, ckpt_path)
         print(f"Model saved to: {ckpt_path}\n")
+
+    # Multi-Storm Out-of-Sample Generalization Evaluation (Fani 2019 & Yaas 2021)
+    from src.downscale.inference import CorrDiffInferenceEngine
+    inf_engine = CorrDiffInferenceEngine(weights_path=ckpt_path)
+
+    fani_res = inf_engine.run_downscale(step_idx=7, event_id="fani_2019")
+    yaas_res = inf_engine.run_downscale(step_idx=5, event_id="yaas_2021")
+    amphan_res = inf_engine.run_downscale(step_idx=5, event_id="amphan_2020")
+
+    print("=== MULTI-STORM OUT-OF-SAMPLE EVALUATION (REAL OUTPUTS ONLY) ===")
+    print(f"Cyclone Amphan (2020 Peak Held-out): Recovery = {amphan_res['amplitude_evaluation']['measured_recovery_percent']['corrdiff_mean']}% | CRPS = {amphan_res['calibration_metrics']['crps_wind_kmh']} km/h | FSS = {amphan_res['calibration_metrics']['fss_precipitation_score']}")
+    print(f"Cyclone Fani (2019 Category 5 Unseen): Recovery = {fani_res['amplitude_evaluation']['measured_recovery_percent']['corrdiff_mean']}% | CRPS = {fani_res['calibration_metrics']['crps_wind_kmh']} km/h | FSS = {fani_res['calibration_metrics']['fss_precipitation_score']}")
+    print(f"Cyclone Yaas (2021 Very Severe Unseen): Recovery = {yaas_res['amplitude_evaluation']['measured_recovery_percent']['corrdiff_mean']}% | CRPS = {yaas_res['calibration_metrics']['crps_wind_kmh']} km/h | FSS = {yaas_res['calibration_metrics']['fss_precipitation_score']}")
 
     return model
 

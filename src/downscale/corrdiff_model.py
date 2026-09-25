@@ -323,3 +323,37 @@ class PhysicsNeMoCorrDiff(nn.Module):
             "diagnostic_conformity_score": diagnostic_score,
             "audit_type": "Post-Hoc Diagnostic Check (Fluid Dynamics Consistency)",
         }
+
+    @staticmethod
+    def compute_crps(ensemble_predictions: np.ndarray, observation: np.ndarray) -> float:
+        """
+        Computes Continuous Ranked Probability Score (CRPS) for an M-member ensemble against observation:
+        CRPS(F, y) = (1/M) sum_{m=1}^M |x_m - y| - (1 / (2*M^2)) sum_{m=1}^M sum_{m'=1}^M |x_m - x_m'|
+        """
+        M = ensemble_predictions.shape[0]
+        term1 = np.mean(np.abs(ensemble_predictions - observation[None, ...]), axis=0)
+        term2 = np.zeros_like(observation)
+        for m in range(M):
+            for mp in range(M):
+                term2 += np.abs(ensemble_predictions[m] - ensemble_predictions[mp])
+        term2 /= (2.0 * M * M)
+        crps_grid = term1 - term2
+        return float(np.mean(crps_grid))
+
+    @staticmethod
+    def compute_fractions_skill_score(pred: np.ndarray, target: np.ndarray,
+                                      threshold: float = 2.0, window_size: int = 5) -> float:
+        """
+        Computes precipitation Fractions Skill Score (FSS) at given exceedance threshold over spatial window:
+        FSS = 1 - MSE / MSE_ref
+        """
+        from scipy.ndimage import uniform_filter
+        b_pred = (pred >= threshold).astype(np.float32)
+        b_targ = (target >= threshold).astype(np.float32)
+        f_pred = uniform_filter(b_pred, size=window_size, mode='constant', cval=0.0)
+        f_targ = uniform_filter(b_targ, size=window_size, mode='constant', cval=0.0)
+        mse = np.mean((f_pred - f_targ) ** 2)
+        mse_ref = np.mean(f_pred ** 2) + np.mean(f_targ ** 2)
+        if mse_ref < 1e-8:
+            return 1.0
+        return float(np.clip(1.0 - mse / mse_ref, 0.0, 1.0))

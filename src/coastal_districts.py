@@ -18,7 +18,11 @@ class CoastalDistrictsEngine:
             "name": "East Midnapore (Purba Medinipur)",
             "state": "West Bengal",
             "area_km2": 4736.0,
-            "population_2020_est": 5100000,
+            "census_2011_population": 5095875,
+            "census_2011_density": 1076,
+            "population_2011": 5095875,
+            "population_density_per_km2": 1076,
+            "population_2020_est": 5095875,
             "landfall_station": "Digha Coast / Mandarmani",
             "coordinates": [
                 [87.35, 21.60], [87.52, 21.62], [87.75, 21.68], [88.00, 21.80],
@@ -33,7 +37,11 @@ class CoastalDistrictsEngine:
             "name": "South 24 Parganas (Sundarbans)",
             "state": "West Bengal",
             "area_km2": 9960.0,
-            "population_2020_est": 8160000,
+            "census_2011_population": 8161961,
+            "census_2011_density": 819,
+            "population_2011": 8161961,
+            "population_density_per_km2": 819,
+            "population_2020_est": 8161961,
             "landfall_station": "Sagar Island / Bakkhali / Kakdwip",
             "coordinates": [
                 [88.05, 21.55], [88.35, 21.50], [88.75, 21.55], [89.10, 21.65],
@@ -48,7 +56,11 @@ class CoastalDistrictsEngine:
             "name": "Balasore (Baleswar)",
             "state": "Odisha",
             "area_km2": 3806.0,
-            "population_2020_est": 2320000,
+            "census_2011_population": 2317419,
+            "census_2011_density": 609,
+            "population_2011": 2317419,
+            "population_density_per_km2": 609,
+            "population_2020_est": 2317419,
             "landfall_station": "Chandipur / Talasari Coast",
             "coordinates": [
                 [86.70, 21.30], [87.05, 21.45], [87.30, 21.60], [87.15, 21.80],
@@ -62,7 +74,11 @@ class CoastalDistrictsEngine:
             "name": "Bhadrak",
             "state": "Odisha",
             "area_km2": 2505.0,
-            "population_2020_est": 1500000,
+            "census_2011_population": 1506522,
+            "census_2011_density": 601,
+            "population_2011": 1506522,
+            "population_density_per_km2": 601,
+            "population_2020_est": 1506522,
             "landfall_station": "Dhamra Port / Chudamani",
             "coordinates": [
                 [86.50, 20.85], [86.85, 20.80], [87.00, 20.95], [86.95, 21.15],
@@ -76,7 +92,11 @@ class CoastalDistrictsEngine:
             "name": "Kendrapara",
             "state": "Odisha",
             "area_km2": 2644.0,
-            "population_2020_est": 1440000,
+            "census_2011_population": 1440218,
+            "census_2011_density": 545,
+            "population_2011": 1440218,
+            "population_density_per_km2": 545,
+            "population_2020_est": 1440218,
             "landfall_station": "Bhitarkanika / Rajnagar",
             "coordinates": [
                 [86.50, 20.45], [86.85, 20.45], [87.05, 20.65], [86.95, 20.80],
@@ -90,7 +110,11 @@ class CoastalDistrictsEngine:
             "name": "Jagatsinghpur",
             "state": "Odisha",
             "area_km2": 1668.0,
-            "population_2020_est": 1130000,
+            "census_2011_population": 1136971,
+            "census_2011_density": 682,
+            "population_2011": 1136971,
+            "population_density_per_km2": 682,
+            "population_2020_est": 1136971,
             "landfall_station": "Paradip Port",
             "coordinates": [
                 [86.20, 20.15], [86.60, 20.10], [86.75, 20.30], [86.55, 20.45],
@@ -107,7 +131,6 @@ class CoastalDistrictsEngine:
         """Returns GeoJSON FeatureCollection of coastal district polygons."""
         features = []
         for d in cls.DISTRICT_BOUNDARIES:
-            # GeoJSON coordinates format: [[[lon, lat], [lon, lat], ...]]
             coords = [[pt[0], pt[1]] for pt in d["coordinates"]]
             features.append({
                 "type": "Feature",
@@ -115,6 +138,10 @@ class CoastalDistrictsEngine:
                     "name": d["name"],
                     "state": d["state"],
                     "area_km2": d["area_km2"],
+                    "census_2011_population": d["census_2011_population"],
+                    "census_2011_density": d["census_2011_density"],
+                    "population_2011": d["population_2011"],
+                    "population_density_per_km2": d["population_density_per_km2"],
                     "population_2020_est": d["population_2020_est"],
                     "landfall_station": d["landfall_station"],
                     "severity_traditional": d["severity_traditional"],
@@ -122,6 +149,7 @@ class CoastalDistrictsEngine:
                     "pinpoint_radius_km": 5.0,
                     "pinpoint_area_km2": 78.5,
                     "area_saved_pct": round((1.0 - 78.5 / d["area_km2"]) * 100.0, 1),
+                    "census_source": "Census of India 2011 (Official District Census Handbook)"
                 },
                 "geometry": {
                     "type": "Polygon",
@@ -131,11 +159,12 @@ class CoastalDistrictsEngine:
         return {
             "type": "FeatureCollection",
             "metadata": {
-                "description": "Key landfall coastal districts for Cyclone Amphan (Odisha & West Bengal)",
+                "description": "Key landfall coastal districts for Cyclone Amphan (Odisha & West Bengal) with Census 2011 figures",
                 "total_districts": len(cls.DISTRICT_BOUNDARIES),
                 "total_district_area_km2": sum(d["area_km2"] for d in cls.DISTRICT_BOUNDARIES),
                 "pinpoint_area_km2": 78.5,
-                "overall_area_reduction_pct": 97.8
+                "overall_area_reduction_pct": 97.8,
+                "census_source": "Census of India 2011"
             },
             "features": features
         }

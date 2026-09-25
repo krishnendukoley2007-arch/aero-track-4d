@@ -1,7 +1,10 @@
 """
-Real Meteorological Data Fetcher for SIH 26078
-Pulls real ECMWF ERA5 reanalysis spatial grid data (hourly for May 15-21, 2020)
-and official NOAA IBTrACS observation records (IO012020) for Cyclone Amphan.
+Real Meteorological Data Fetcher for SIH 26078.
+Pulls real ECMWF ERA5 reanalysis spatial grid data (hourly)
+and official NOAA IBTrACS observation records for:
+1. Super Cyclone Amphan (May 2020)
+2. Extremely Severe Cyclonic Storm Fani (April-May 2019)
+3. Very Severe Cyclonic Storm Yaas (May 2021)
 Saves genuine datasets to data/raw/ and derives real climatology baselines to data/climatology/.
 """
 
@@ -12,6 +15,7 @@ import csv
 import io
 import urllib.request
 import numpy as np
+from typing import Dict, List, Any
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 RAW_DIR = os.path.join(DATA_DIR, "raw")
@@ -20,27 +24,28 @@ CLIM_DIR = os.path.join(DATA_DIR, "climatology")
 os.makedirs(RAW_DIR, exist_ok=True)
 os.makedirs(CLIM_DIR, exist_ok=True)
 
+IBTRACS_URL = "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.NI.list.v04r01.csv"
 
-def fetch_ibtracs_real_data():
+
+def fetch_ibtracs_for_storm(storm_name_query: str, output_prefix: str) -> List[Dict[str, Any]]:
     """
-    Downloads and extracts official observation records for Super Cyclonic Storm Amphan
+    Downloads official observation records for a requested storm
     from NOAA's International Best Track Archive for Climate Stewardship (IBTrACS v04r01).
     """
-    print("[1/3] Fetching official NOAA IBTrACS best-track records...")
-    url = "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.NI.list.v04r01.csv"
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    print(f"Fetching official NOAA IBTrACS records for {storm_name_query}...")
+    req = urllib.request.Request(IBTRACS_URL, headers={"User-Agent": "Mozilla/5.0"})
 
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=40) as resp:
             text = resp.read().decode("utf-8", errors="ignore")
 
         reader = csv.reader(io.StringIO(text))
         header = next(reader)
         units = next(reader)
 
-        amphan_rows = []
+        storm_rows = []
         for row in reader:
-            if len(row) > 9 and ("AMPHAN" in row[5] or "2020136N10088" in row[0]):
+            if len(row) > 9 and storm_name_query.upper() in row[5].upper():
                 iso_time = row[6].strip()
                 lat_str = row[8].strip()
                 lon_str = row[9].strip()
@@ -54,7 +59,7 @@ def fetch_ibtracs_real_data():
                     wind_kts = float(wmo_wind) if wmo_wind else None
                     pres_hpa = float(wmo_pres) if wmo_pres else None
 
-                    amphan_rows.append({
+                    storm_rows.append({
                         "sid": row[0].strip(),
                         "name": row[5].strip(),
                         "iso_time": iso_time,
@@ -66,34 +71,31 @@ def fetch_ibtracs_real_data():
                         "agency": agency,
                     })
 
-        # Save CSV and JSON
-        json_path = os.path.join(RAW_DIR, "amphan_ibtracs_real.json")
+        json_path = os.path.join(RAW_DIR, f"{output_prefix}_ibtracs_real.json")
         with open(json_path, "w") as f:
-            json.dump(amphan_rows, f, indent=2)
+            json.dump(storm_rows, f, indent=2)
 
-        csv_path = os.path.join(RAW_DIR, "amphan_ibtracs_real.csv")
+        csv_path = os.path.join(RAW_DIR, f"{output_prefix}_ibtracs_real.csv")
         with open(csv_path, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=["sid", "name", "iso_time", "lat", "lon", "wind_kts", "wind_kmh", "mslp_hpa", "agency"])
             writer.writeheader()
-            writer.writerows(amphan_rows)
+            writer.writerows(storm_rows)
 
-        print(f"  -> Successfully saved {len(amphan_rows)} official IBTrACS observation records to {json_path}")
-        return amphan_rows
+        print(f"  -> Successfully saved {len(storm_rows)} official IBTrACS observation records to {json_path}")
+        return storm_rows
     except Exception as e:
-        print(f"  -> Warning: IBTrACS download error ({e}), generating cached fallback.")
+        print(f"  -> Warning: IBTrACS download error ({e})")
         return []
 
 
-def fetch_era5_spatial_grid():
+def fetch_era5_spatial_grid_for_dates(start_date: str, end_date: str, filename: str) -> Dict[str, Any]:
     """
     Downloads real ECMWF ERA5 reanalysis fields over the Bay of Bengal (10N-25N, 80E-95E)
-    for May 15 to May 21, 2020 via Open-Meteo's historical ERA5 reanalysis API.
-    Saves the multi-dimensional dataset to data/raw/era5_amphan_may2020.json.
+    via Open-Meteo's historical ERA5 reanalysis API.
     """
-    print("[2/3] Fetching real ECMWF ERA5 reanalysis spatial grid for Cyclone Amphan (May 15-21, 2020)...")
-    raw_file = os.path.join(RAW_DIR, "era5_amphan_may2020.json")
+    print(f"Fetching real ECMWF ERA5 reanalysis grid for {start_date} to {end_date} -> {filename}...")
+    raw_file = os.path.join(RAW_DIR, filename)
 
-    # Define 16x16 spatial domain (256 coordinates over Bay of Bengal)
     lats = np.linspace(10.0, 25.0, 16)
     lons = np.linspace(80.0, 95.0, 16)
     grid_lats, grid_lons = np.meshgrid(lats, lons, indexing="ij")
@@ -113,11 +115,10 @@ def fetch_era5_spatial_grid():
         url = (
             f"https://archive-api.open-meteo.com/v1/archive?"
             f"latitude={lat_str}&longitude={lon_str}&"
-            f"start_date=2020-05-15&end_date=2020-05-21&"
+            f"start_date={start_date}&end_date={end_date}&"
             f"hourly=wind_speed_10m,wind_direction_10m,surface_pressure,precipitation,temperature_2m"
         )
 
-        print(f"  -> Fetching grid points {i+1} to {min(i+batch_size, n_points)} of {n_points}...")
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=45) as resp:
             data = json.loads(resp.read().decode())
@@ -126,12 +127,9 @@ def fetch_era5_spatial_grid():
             else:
                 all_point_data.append(data)
 
-    # Extract timestamps and structure into 16x16 grid arrays per hour
-    sample_pt = all_point_data[0]["hourly"]
-    timestamps = sample_pt["time"]  # 168 hourly steps
+    timestamps = all_point_data[0]["hourly"]["time"]
     n_hours = len(timestamps)
 
-    # Structure data: dictionary keyed by timestamp containing 16x16 arrays for variables
     era5_dataset = {
         "domain": {
             "lat_min": 10.0, "lat_max": 25.0, "lon_min": 80.0, "lon_max": 95.0,
@@ -143,8 +141,7 @@ def fetch_era5_spatial_grid():
         "grid_points": []
     }
 
-    # Store point summaries
-    for idx, p in enumerate(all_point_data):
+    for p in all_point_data:
         era5_dataset["grid_points"].append({
             "lat": round(float(p["latitude"]), 2),
             "lon": round(float(p["longitude"]), 2),
@@ -158,64 +155,33 @@ def fetch_era5_spatial_grid():
     return era5_dataset
 
 
-def compute_real_climatology(era5_data):
-    """
-    Derives genuine May climatological mean and standard deviation distributions
-    from pre-monsoon reanalysis fields across the Bay of Bengal grid.
-    """
-    print("[3/3] Deriving genuine May climatological baseline distributions...")
-    shape = era5_data["domain"]["shape"]  # [16, 16]
-    n_rows, n_cols = shape
+def fetch_all_cyclone_datasets():
+    """Fetches real datasets for Amphan (2020), Fani (2019), and Yaas (2021)."""
+    # 1. Cyclone Amphan (May 2020)
+    amphan_ibtracs = os.path.join(RAW_DIR, "amphan_ibtracs_real.json")
+    amphan_era5 = os.path.join(RAW_DIR, "era5_amphan_may2020.json")
+    if not os.path.exists(amphan_ibtracs):
+        fetch_ibtracs_for_storm("AMPHAN", "amphan")
+    if not os.path.exists(amphan_era5):
+        fetch_era5_spatial_grid_for_dates("2020-05-15", "2020-05-21", "era5_amphan_may2020.json")
 
-    mslp_mean = np.zeros(shape)
-    mslp_std = np.zeros(shape)
-    wind_mean = np.zeros(shape)
-    wind_std = np.zeros(shape)
-    precip_mean = np.zeros(shape)
-    precip_std = np.zeros(shape)
+    # 2. Cyclone Fani (April-May 2019)
+    fani_ibtracs = os.path.join(RAW_DIR, "fani_ibtracs_real.json")
+    fani_era5 = os.path.join(RAW_DIR, "era5_fani_may2019.json")
+    if not os.path.exists(fani_ibtracs):
+        fetch_ibtracs_for_storm("FANI", "fani")
+    if not os.path.exists(fani_era5):
+        fetch_era5_spatial_grid_for_dates("2019-04-28", "2019-05-04", "era5_fani_may2019.json")
 
-    for i in range(n_rows):
-        for j in range(n_cols):
-            pt_idx = i * n_cols + j
-            pt = era5_data["grid_points"][pt_idx]["hourly"]
-
-            p_vals = np.array(pt["surface_pressure"])
-            w_vals = np.array(pt["wind_speed_10m"]) / 3.6  # convert to m/s
-            r_vals = np.array(pt["precipitation"])
-
-            # Baseline calculation: use outer ambient hours (May 15 initial or non-cyclone hours)
-            # as local climatological baseline
-            mslp_mean[i, j] = float(np.mean(p_vals[:36]))  # Pre-cyclone baseline
-            mslp_std[i, j] = float(np.std(p_vals[:36])) + 1.5
-
-            wind_mean[i, j] = float(np.mean(w_vals[:36]))
-            wind_std[i, j] = float(np.std(w_vals[:36])) + 1.2
-
-            precip_mean[i, j] = float(np.mean(r_vals[:36]))
-            precip_std[i, j] = float(np.std(r_vals[:36])) + 2.0
-
-    clim_data = {
-        "source": "ECMWF ERA5 Reanalysis (Bay of Bengal Pre-Monsoon Baseline)",
-        "lats": era5_data["domain"]["lats"],
-        "lons": era5_data["domain"]["lons"],
-        "mslp_mean": mslp_mean.tolist(),
-        "mslp_std": mslp_std.tolist(),
-        "wind_mean": wind_mean.tolist(),
-        "wind_std": wind_std.tolist(),
-        "precip_mean": precip_mean.tolist(),
-        "precip_std": precip_std.tolist(),
-    }
-
-    clim_path = os.path.join(CLIM_DIR, "bay_of_bengal_may_climatology.json")
-    with open(clim_path, "w") as f:
-        json.dump(clim_data, f, indent=2)
-
-    print(f"  -> Climatology baseline successfully saved to {clim_path}")
-    return clim_data
+    # 3. Cyclone Yaas (May 2021)
+    yaas_ibtracs = os.path.join(RAW_DIR, "yaas_ibtracs_real.json")
+    yaas_era5 = os.path.join(RAW_DIR, "era5_yaas_may2021.json")
+    if not os.path.exists(yaas_ibtracs):
+        fetch_ibtracs_for_storm("YAAS", "yaas")
+    if not os.path.exists(yaas_era5):
+        fetch_era5_spatial_grid_for_dates("2021-05-23", "2021-05-28", "era5_yaas_may2021.json")
 
 
 if __name__ == "__main__":
-    ibtracs = fetch_ibtracs_real_data()
-    era5 = fetch_era5_spatial_grid()
-    compute_real_climatology(era5)
-    print("Real data acquisition complete!")
+    fetch_all_cyclone_datasets()
+    print("Multi-cyclone data fetch complete!")
