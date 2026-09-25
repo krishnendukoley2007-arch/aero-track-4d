@@ -24,9 +24,61 @@ class OperationalDataExporter:
         hazard = MultiHazardRegistry.get_event(hazard_id)
         if not hazard:
             hazard = MultiHazardRegistry.get_event("amphan_2020") or {}
-        
-        downscale_res = MultiHazardRegistry.generate_hazard_downscale(hazard_id, step_idx)
-        return hazard, downscale_res
+
+        if hazard_id in ["amphan_2020", "fani_2019", "yaas_2021"]:
+            engine = CorrDiffInferenceEngine()
+            raw_downscale = engine.run_downscale(step_idx=step_idx, event_id=hazard_id)
+        else:
+            raw_downscale = MultiHazardRegistry.generate_hazard_downscale(hazard_id, step_idx)
+
+        if not raw_downscale:
+            raw_downscale = {}
+
+        fields = raw_downscale.get("fields", {})
+        coords = raw_downscale.get("coordinates", {})
+        lats = coords.get("lats", [20.0, 22.0])
+        lons = coords.get("lons", [86.0, 88.0])
+
+        bbox = raw_downscale.get("bounding_box")
+        if not bbox:
+            bbox = {
+                "lat_min": float(min(lats)),
+                "lat_max": float(max(lats)),
+                "lon_min": float(min(lons)),
+                "lon_max": float(max(lons)),
+            }
+
+        # Extract matrices according to hazard type
+        if "wind_speed_kmh" in fields.get("corrdiff_ensemble_mean", {}):
+            cd_patch = np.array(fields["corrdiff_ensemble_mean"]["wind_speed_kmh"], dtype=np.float32)
+            coarse_patch = np.array(fields.get("coarse_nwp", {}).get("wind_speed_kmh", cd_patch * 0.65), dtype=np.float32)
+            spread_field = fields.get("corrdiff_spread_uncertainty", {}).get("wind_spread_kmh")
+            if spread_field is not None:
+                spread_patch = np.array(spread_field, dtype=np.float32)
+            else:
+                p90 = np.array(fields.get("corrdiff_high_impact_p90", {}).get("wind_speed_kmh", cd_patch * 1.15), dtype=np.float32)
+                spread_patch = np.abs(p90 - cd_patch)
+        elif "temperature_c" in fields.get("corrdiff_ensemble_mean", {}):
+            cd_patch = np.array(fields["corrdiff_ensemble_mean"]["temperature_c"], dtype=np.float32)
+            coarse_patch = np.array(fields.get("coarse_nwp", {}).get("temperature_c", cd_patch), dtype=np.float32)
+            p90 = np.array(fields.get("corrdiff_high_impact_p90", {}).get("temperature_c", cd_patch + 0.6), dtype=np.float32)
+            spread_patch = np.abs(p90 - cd_patch)
+        else:
+            cd_patch = np.zeros((38, 38), dtype=np.float32)
+            coarse_patch = np.zeros((38, 38), dtype=np.float32)
+            spread_patch = np.zeros((38, 38), dtype=np.float32)
+
+        downscale = {
+            "corrdiff_patch": cd_patch,
+            "coarse_patch": coarse_patch,
+            "ensemble_spread": spread_patch,
+            "bounding_box": bbox,
+            "lats": lats,
+            "lons": lons,
+            "raw": raw_downscale
+        }
+
+        return hazard, downscale
 
     @classmethod
     def export_netcdf(cls, hazard_id: str = "amphan_2020", step_idx: int = 5) -> bytes:
@@ -36,9 +88,19 @@ class OperationalDataExporter:
         """
         hazard, downscale = cls._get_hazard_and_downscale(hazard_id, step_idx)
         
-        coarse_arr = np.array(downscale.get("coarse_patch", np.zeros((64, 64))), dtype=np.float32)
-        corrdiff_arr = np.array(downscale.get("corrdiff_patch", np.zeros((64, 64))), dtype=np.float32)
-        spread_arr = np.array(downscale.get("ensemble_spread", np.zeros((64, 64))), dtype=np.float32)
+        coarse_arr = np.array(downscale.get("coarse_patch", np.zeros((38, 38))), dtype=np.float32)
+        corrdiff_arr = np.array(downscale.get("corrdiff_patch", np.zeros((38, 38))), dtype=np.float32)
+        spread_arr = np.array(downscale.get("ensemble_spread", np.zeros((38, 38))), dtype=np.float32)
+
+        if coarse_arr.shape != corrdiff_arr.shape:
+            from scipy.ndimage import zoom
+            factors = (corrdiff_arr.shape[0] / max(1, coarse_arr.shape[0]), corrdiff_arr.shape[1] / max(1, coarse_arr.shape[1]))
+            coarse_arr = zoom(coarse_arr, factors, order=1).astype(np.float32)
+
+        if spread_arr.shape != corrdiff_arr.shape:
+            from scipy.ndimage import zoom
+            factors = (corrdiff_arr.shape[0] / max(1, spread_arr.shape[0]), corrdiff_arr.shape[1] / max(1, spread_arr.shape[1]))
+            spread_arr = zoom(spread_arr, factors, order=1).astype(np.float32)
         
         h_type = hazard.get("hazard_type", "cyclone")
         if h_type == "cyclone":
@@ -58,8 +120,9 @@ class OperationalDataExporter:
             long_desc = "CorrDiff 5km Super-Resolved Minimum Air Temperature (2m)"
 
         bbox = downscale.get("bounding_box", {"lat_min": 19.5, "lat_max": 22.5, "lon_min": 86.0, "lon_max": 89.0})
-        lats = np.linspace(bbox["lat_min"], bbox["lat_max"], 64, dtype=np.float32)
-        lons = np.linspace(bbox["lon_min"], bbox["lon_max"], 64, dtype=np.float32)
+        nrows, ncols = corrdiff_arr.shape
+        lats = np.linspace(bbox["lat_min"], bbox["lat_max"], nrows, dtype=np.float32)
+        lons = np.linspace(bbox["lon_min"], bbox["lon_max"], ncols, dtype=np.float32)
         
         # Build xarray dataset
         ds = xr.Dataset(

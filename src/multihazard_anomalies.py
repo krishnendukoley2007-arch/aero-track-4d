@@ -446,7 +446,7 @@ class MultiHazardRegistry:
                 }
             }
 
-        else:
+        elif hazard_id == "cold_wave_2021":
             # Cold Wave & Dense Fog: North India Domain 26°N to 33°N, 74°E to 84°E
             lats = [round(float(v), 2) for v in np.linspace(26.0, 33.0, n_rows)]
             lons = [round(float(v), 2) for v in np.linspace(74.0, 84.0, n_cols)]
@@ -522,3 +522,6 @@ class MultiHazardRegistry:
                     "corrdiff_recovery_error": f"{round(abs(float(cd_grid.min()) - peak_val), 1)}°C"
                 }
             }
+
+        return None
+
