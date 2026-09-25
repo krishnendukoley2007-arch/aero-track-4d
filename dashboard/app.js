@@ -1919,6 +1919,8 @@ const LiveGlobal = {
       btnClose.addEventListener("click", () => {
         const card = document.getElementById("globe-live-inspector");
         if (card) card.style.display = "none";
+        const btnToggleInsp = document.getElementById("btn-toggle-inspector");
+        if (btnToggleInsp) btnToggleInsp.classList.remove("active");
       });
     }
 
@@ -1990,13 +1992,9 @@ const LiveGlobal = {
 
     if (card) {
       card.style.display = "flex";
-      card.style.position = "absolute";
-      card.style.bottom = "16px";
-      card.style.right = "16px";
-      card.style.left = "auto";
-      card.style.top = "auto";
-      card.style.zIndex = "750";
     }
+    const btnToggle = document.getElementById("btn-toggle-inspector");
+    if (btnToggle) btnToggle.classList.add("active");
     if (title) title.textContent = `📍 ${name}`;
     if (coarseWind) coarseWind.textContent = "Loading...";
     if (resolvedWind) resolvedWind.textContent = "Loading...";
@@ -2329,13 +2327,9 @@ const LiveGlobal = {
 
     if (card) {
       card.style.display = "flex";
-      card.style.position = "absolute";
-      card.style.bottom = "16px";
-      card.style.right = "16px";
-      card.style.left = "auto";
-      card.style.top = "auto";
-      card.style.zIndex = "750";
     }
+    const btnToggle = document.getElementById("btn-toggle-inspector");
+    if (btnToggle) btnToggle.classList.add("active");
     if (title) title.textContent = `🌀 ${storm.name} [${step.lead_time_label}]`;
     if (coarseWind) coarseWind.textContent = `${step.coarse_nwp_wind_kmh} km/h`;
     if (resolvedWind) resolvedWind.textContent = `${step.corrdiff_resolved_wind_kmh} km/h`;
@@ -2504,6 +2498,14 @@ function initMap() {
     const customName = `Probed Point (${lat}°N, ${lon}°E)`;
     triggerNDRFAlert(lat, lon, customName);
   });
+
+  const mapEl = document.getElementById("leaflet-map");
+  if (mapEl && window.ResizeObserver) {
+    const ro = new ResizeObserver(() => {
+      if (state.map) state.map.invalidateSize();
+    });
+    ro.observe(mapEl);
+  }
 }
 
 // ---------------- View Tab Controller ----------------
@@ -2528,11 +2530,16 @@ function switchView(viewName) {
     p.classList.toggle("active", p.id === `view-${viewName}`);
   });
 
-  // If entering Overview or Timeline, invalidate map size to prevent gray gaps
-  if (viewName === "overview" || viewName === "timeline") {
+  // If entering Overview, Timeline, or Ensemble, invalidate map size to prevent gray gaps
+  if (viewName === "overview" || viewName === "timeline" || viewName === "ensemble") {
     setTimeout(() => {
       if (state.map) state.map.invalidateSize();
-    }, 60);
+      if (state.ensembleMap) state.ensembleMap.invalidateSize();
+    }, 50);
+    setTimeout(() => {
+      if (state.map) state.map.invalidateSize();
+      if (state.ensembleMap) state.ensembleMap.invalidateSize();
+    }, 200);
   }
 
   // If entering Downscaling Lab, refresh canvases, chart, transect and export links
@@ -2739,6 +2746,14 @@ function initEnsembleMap() {
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(state.ensembleMap);
+
+  const ensEl = document.getElementById("ensemble-leaflet-map");
+  if (ensEl && window.ResizeObserver) {
+    const roEns = new ResizeObserver(() => {
+      if (state.ensembleMap) state.ensembleMap.invalidateSize();
+    });
+    roEns.observe(ensEl);
+  }
 }
 
 function renderEnsembleView() {
@@ -4466,6 +4481,23 @@ function initEventListeners() {
       btnWind.classList.toggle("active", state.showWindLayer);
       const canvas = document.getElementById("canvas-wind-streamlines");
       if (canvas) canvas.style.display = state.showWindLayer ? "block" : "none";
+    });
+  }
+
+  // Weather Inspector Drawer Toggle
+  const btnToggleInsp = document.getElementById("btn-toggle-inspector");
+  if (btnToggleInsp) {
+    btnToggleInsp.addEventListener("click", () => {
+      const card = document.getElementById("globe-live-inspector");
+      if (!card) return;
+      const isVisible = card.style.display !== "none" && getComputedStyle(card).display !== "none";
+      if (isVisible) {
+        card.style.display = "none";
+        btnToggleInsp.classList.remove("active");
+      } else {
+        card.style.display = "flex";
+        btnToggleInsp.classList.add("active");
+      }
     });
   }
 
