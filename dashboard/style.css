@@ -34,6 +34,16 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 
+  /* 8-Step Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -1110,21 +1120,21 @@ body {
 .quick-intel-column {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--space-4);
 }
 
 .intel-card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 14px;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .alert-intel-card {
-  border-left: 4px solid var(--sev-sev);
+  border-left: var(--space-1) solid var(--sev-sev);
 }
 
 .intel-card-header {
@@ -1139,7 +1149,7 @@ body {
   font-weight: 700;
   background: var(--sev-sev);
   color: #fff;
-  padding: 3px 8px;
+  padding: 3px var(--space-2);
   border-radius: var(--radius-sm);
 }
 
@@ -1158,7 +1168,7 @@ body {
   font-size: 0.8rem;
   color: #cbd5e1;
   background: #0a111a;
-  padding: 10px;
+  padding: var(--space-3);
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--sev-sev);
   line-height: 1.45;
@@ -1169,7 +1179,7 @@ body {
   justify-content: space-between;
   font-size: 0.74rem;
   border-top: 1px solid #1a283c;
-  padding-top: 8px;
+  padding-top: var(--space-2);
   color: var(--text-muted);
 }
 .intel-footer-stats strong { color: #fff; }
@@ -1800,7 +1810,7 @@ body {
 }
 
 .alert-full-card {
-  border-left: 4px solid var(--sev-sev);
+  border-left: var(--space-1) solid var(--sev-sev);
 }
 
 .alert-card-header {
@@ -1815,7 +1825,7 @@ body {
   font-weight: 800;
   background: var(--sev-sev);
   color: #fff;
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-sm);
 }
 
@@ -1828,10 +1838,10 @@ body {
 .alert-metrics-banner {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--space-2);
   background: #090e17;
   border: 1px solid var(--border-subtle);
-  padding: 10px;
+  padding: var(--space-3);
   border-radius: var(--radius-sm);
 }
 
@@ -1847,7 +1857,7 @@ body {
 .action-directive-box {
   background: #080d14;
   border-left: 3px solid var(--sev-sev);
-  padding: 12px;
+  padding: var(--space-3);
   border-radius: var(--radius-sm);
   font-size: 0.84rem;
   line-height: 1.5;
@@ -1857,7 +1867,7 @@ body {
 .fatigue-banner {
   background: rgba(0, 212, 229, 0.08);
   border: 1px solid rgba(0, 212, 229, 0.25);
-  padding: 10px 14px;
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
   font-size: 0.78rem;
   color: #e2e8f0;
@@ -2020,13 +2030,13 @@ body {
   background: #0e1622;
   border: 1px solid var(--accent-cyan);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: var(--space-6);
   max-width: 520px;
   width: 90%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .tour-header {
@@ -3182,7 +3192,7 @@ body {
   border: none;
   font-size: 0.72rem;
   font-weight: 700;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   outline: none;
   cursor: pointer;
 }
@@ -3195,8 +3205,8 @@ body {
 /* Bulletin / CAP / Agri-Shield Tabs */
 .bulletin-tabs-bar {
   display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 
 .btn-b-tab {
@@ -3205,11 +3215,11 @@ body {
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 6px 12px;
+  padding: 6px var(--space-3);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
 }
 
 .btn-b-tab:hover {
@@ -3228,11 +3238,11 @@ body {
 .cap-xml-view {
   background: #060b13;
   border: 1px solid rgba(0, 212, 229, 0.2);
-  border-radius: 8px;
-  padding: 14px;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
   max-height: 480px;
   overflow-y: auto;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 0.73rem;
   line-height: 1.5;
   color: #a5f3fc;
@@ -3382,7 +3392,7 @@ body {
   font-size: 0.95rem;
   font-weight: 800;
   color: #fff;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
 }
 
 .metpy-stat-sub {
@@ -3906,7 +3916,7 @@ body {
   -webkit-backdrop-filter: blur(4px);
   border: 1.5px solid rgba(255, 255, 255, 0.90);
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   color: #ffffff;
   pointer-events: none;
   transform: translate(-50%, -50%);
@@ -3950,7 +3960,7 @@ body {
 }
 
 .zoom-city-name {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 600;
   color: #ffffff;
@@ -3965,7 +3975,7 @@ body {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   color: #0f172a;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 700;
   padding: 1px 6px;
