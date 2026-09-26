@@ -2750,6 +2750,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   initFullscreenController();
   initChart();
 
+  // Initialize Lucide iconography
+  refreshIcons();
+
   // Initialize Live Global Earth module
   LiveGlobal.init();
 
@@ -2823,6 +2826,17 @@ function initMap() {
   }
 }
 
+// ---------------- Lucide Icon Controller ----------------
+function refreshIcons() {
+  if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) {
+    try {
+      lucide.createIcons();
+    } catch (e) {
+      console.warn("Lucide createIcons error:", e);
+    }
+  }
+}
+
 // ---------------- View Tab Controller ----------------
 function initViewTabs() {
   const tabs = document.querySelectorAll(".nav-tab");
@@ -2844,6 +2858,9 @@ function switchView(viewName) {
   document.querySelectorAll(".view-panel").forEach(p => {
     p.classList.toggle("active", p.id === `view-${viewName}`);
   });
+
+  // Ensure Lucide icons render in newly exposed tab views
+  refreshIcons();
 
   // If entering Overview, Timeline, or Ensemble, invalidate map size to prevent gray gaps
   if (viewName === "overview" || viewName === "timeline" || viewName === "ensemble") {
@@ -6358,7 +6375,7 @@ async function loadAgriAdvisory() {
 
     zoneEl.textContent = `${data.agro_climatic_zone} • ${data.threat_metric}`;
     badgeEl.textContent = data.urgency_level;
-    econEl.textContent = `💰 ${data.economic_shield_estimate}`;
+    econEl.innerHTML = `<i data-lucide="shield-check"></i> ${data.economic_shield_estimate}`;
 
     if (cropsListEl && data.target_crops) {
       cropsListEl.innerHTML = data.target_crops.map(c => `<span class="agri-crop-tag">${c}</span>`).join("");
@@ -6367,11 +6384,12 @@ async function loadAgriAdvisory() {
     if (data.actionable_protocols) {
       listEl.innerHTML = data.actionable_protocols.map(p => `
         <div class="agri-protocol-item">
-          <span>⚡</span>
+          <span><i data-lucide="zap"></i></span>
           <span>${p}</span>
         </div>
       `).join("");
     }
+    refreshIcons();
   } catch (err) {
     console.error("Agri advisory error:", err);
   }
