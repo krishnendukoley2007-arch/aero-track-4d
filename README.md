@@ -2,14 +2,16 @@
 
 > **SIH Problem Statement 26078 | Ministry of Earth Sciences (MoES) & NCMRWF | Theme: Smart Automation**
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-aero--track--4d.onrender.com-success?style=for-the-badge&logo=render)](https://aero-track-4d.onrender.com)
+[![Live Operations Room](https://img.shields.io/badge/Live_Operations_Room-GitHub_Pages-brightgreen?style=for-the-badge&logo=github)](https://krishnendukoley2007-arch.github.io/aero-track-4d/)
+[![Render API](https://img.shields.io/badge/Backend_API-aero--track--4d.onrender.com-success?style=for-the-badge&logo=render)](https://aero-track-4d.onrender.com)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![PyTorch 2.1+](https://img.shields.io/badge/PyTorch-2.1+-orange.svg)](https://pytorch.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
 [![Tests](https://img.shields.io/badge/tests-55%20passed-brightgreen.svg)](#-test-suite--reproducibility)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
-🌐 **Public URL**: **[https://aero-track-4d.onrender.com](https://aero-track-4d.onrender.com)**
+🌐 **Live Operations Room (Instant Zero-Delay Web App)**: **[https://krishnendukoley2007-arch.github.io/aero-track-4d/](https://krishnendukoley2007-arch.github.io/aero-track-4d/)**
+🚀 **Live FastAPI Backend**: **[https://aero-track-4d.onrender.com](https://aero-track-4d.onrender.com)**
 
 ---
 

@@ -1043,6 +1043,24 @@ def api_export_agri_csv(hazard_id: str = "amphan_2020"):
 DASHBOARD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard")
 if os.path.exists(DASHBOARD_DIR):
     app.mount("/static", StaticFiles(directory=DASHBOARD_DIR), name="static")
+    vendor_dir = os.path.join(DASHBOARD_DIR, "vendor")
+    if os.path.exists(vendor_dir):
+        app.mount("/vendor", StaticFiles(directory=vendor_dir), name="vendor")
+
+@app.get("/style.css")
+def serve_css():
+    css_file = os.path.join(DASHBOARD_DIR, "style.css")
+    if os.path.exists(css_file):
+        return FileResponse(css_file, media_type="text/css")
+    raise HTTPException(status_code=404, detail="style.css not found")
+
+@app.get("/app.js")
+def serve_js():
+    js_file = os.path.join(DASHBOARD_DIR, "app.js")
+    if os.path.exists(js_file):
+        return FileResponse(js_file, media_type="application/javascript")
+    raise HTTPException(status_code=404, detail="app.js not found")
+
 
 @app.get("/")
 def serve_dashboard():

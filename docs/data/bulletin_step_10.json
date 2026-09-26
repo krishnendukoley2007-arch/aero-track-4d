@@ -1,0 +1,52 @@
+========================================================================================
+                      GOVERNMENT OF INDIA - MINISTRY OF EARTH SCIENCES
+                         INDIA METEOROLOGICAL DEPARTMENT (IMD)
+                          CYCLONE WARNING DIVISION, NEW DELHI
+========================================================================================
+NATIONAL CYCLONE BULLETIN NO.: 11
+TIME OF ISSUE: 2020-05-20 06:00
+SUB: SUPER CYCLONIC STORM ‘AMPHAN’ (PRONOUNCED AS UM-PUN) OVER BAY OF BENGAL
+========================================================================================
+
+1. CURRENT SYNOPTIC SITUATION & INTENSITY:
+   The Super Cyclonic Storm ‘AMPHAN’ over the west-central and adjoining central Bay of
+   Bengal moved nearly north-northeastwards and lay centered at 2020-05-20 06:00 near:
+   • Latitude:  20.53°N
+   • Longitude: 87.96°E
+   • Estimated Central Pressure: 956.0 hPa
+   • Maximum Sustained Surface Wind: 166.7 km/h (90.0 knots), gusting to 191.7 km/h
+   • Current System Status: EXTREMELY SEVERE CYCLONIC STORM
+   • Forward Translation Speed: 18.0 km/h towards NNE
+
+2. AI 4D SPATIO-TEMPORAL BOUNDING BOX (STAGE 1 GNN TRACKER):
+   • Latitudinal Bounds:  18.03°N to 23.03°N
+   • Longitudinal Bounds: 85.46°E to 90.46°E
+   • Active Extreme Anomaly Footprint: 1,886,268 sq. km
+   • Peak EFI Anomaly Index: +0.8σ above pre-onset climatological baseline
+
+3. CORRDIFF 5-KM SUBGRID IMPACT ASSESSMENT (STAGE 2 GENERATIVE DOWNSCALING):
+   • Stochastic Generative Downscaling: Preserved high-frequency eyewall peak intensity without
+     spectral smoothing.
+   • Modeled Peak Subgrid Eyewall Wind: 166.7 km/h
+   • Physical Conservation Verification: Moisture flux convergence alignment verified at 98.2%.
+
+4. HYPER-LOCALIZED 5-KM RADIUS DIRECTIVE (ZERO ALERT FATIGUE FOR NDRF):
+   • Target Location: Digha Coast (West Bengal) (21.626°N, 87.508°E)
+   • Distance to Core Circulation: 130.6 km
+   • Predicted Local Wind at Site: 54.1 km/h (P90 Gusts: 59.4 km/h)
+   • Alert Classification: HIGH WARNING (LIFE THREATENING) [Ensemble Spread: ±4.6 km/h | Conf: HIGH (Narrow Ensemble Spread)]
+   • Action Directive: RED WARNING: Violent squalls (54.1 km/h, rain 2.4 mm/h). Uprooting of trees and power loss expected within 5 km impact zone. NDRF response teams on high alert.
+   • Spatial Footprint Refinement: Pinpoint 5 km radius (78.5 km²) replaces
+     broad district warning (3500.0 km²), reducing false-alarm warning
+     area by 97.8%.
+
+5. ACTIONABLE DIRECTIVES FOR FIRST RESPONDERS & DISTRICT MAGISTRATES:
+   • Fishermen Warning: Total suspension of fishing operations over deep sea and coastal waters.
+   • Coastal Evacuation: Immediate mobilization of population living in kutcha houses within 5 km of coast.
+   • NDRF Deployment: NDRF 2nd Battalion (Haringhata) / 9th Battalion (Cuttack)
+   • Port Warning: Keep Great Danger Signal No. 10 hoisted at Kolkata, Haldia, Paradip, and Dhamra ports.
+
+========================================================================================
+Issued by: National Centre for Medium Range Weather Forecasting (NCMRWF) & IMD
+Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language: English)
+========================================================================================
