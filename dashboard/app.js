@@ -31,7 +31,7 @@ const state = {
   showPressureLayer: false,
   showRadarLayer: false,
   activeWindUnit: "kmh",
-  windSpeedScale: 0.95, // Calibrated flow pace (calm: 0.65, realistic: 0.95, fast: 1.35)
+  windSpeedScale: 0.50, // Calibrated smooth flow pace (calm: 0.32, normal: 0.50, fast: 0.85)
   particles: [],
   particleAnimId: null,
   selectedLocation: { lat: 21.626, lon: 87.508, name: "Digha Coast (West Bengal)" },
@@ -944,7 +944,7 @@ const ThreeGlobeViewer = {
 
     const positions = this.windGeo.attributes.position.array;
     const colors = this.windGeo.attributes.color.array;
-    const dt = 0.055;
+    const dt = 0.026;
 
     for (let i = 0; i < this.windParticlesData.length; i++) {
       const p = this.windParticlesData[i];
@@ -1422,12 +1422,13 @@ const COLORMAPS = {
 
 // ---------------- Multi-Style Basemaps ----------------
 const BASEMAP_PRESETS = {
-  streets: {
+  dark: {
     layers: [
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
         maxNativeZoom: 19,
-        maxZoom: 19,
+        maxZoom: 20,
       })
     ]
   },
@@ -1445,6 +1446,15 @@ const BASEMAP_PRESETS = {
       })
     ]
   },
+  streets: {
+    layers: [
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxNativeZoom: 19,
+        maxZoom: 19,
+      })
+    ]
+  },
   topo: {
     layers: [
       L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
@@ -1453,24 +1463,10 @@ const BASEMAP_PRESETS = {
         maxZoom: 18,
       })
     ]
-  },
-  dark: {
-    layers: [
-      L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
-        attribution: '&copy; Esri, DeLorme, NAVTEQ, &copy; OpenStreetMap',
-        maxNativeZoom: 16,
-        maxZoom: 18,
-      }),
-      L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
-        maxNativeZoom: 16,
-        maxZoom: 18,
-        opacity: 0.65,
-      })
-    ]
   }
 };
 
-let activeBasemapKey = "satellite";
+let activeBasemapKey = "dark";
 let activeBasemapLayers = [];
 
 function switchBasemap(key) {
@@ -2980,8 +2976,11 @@ function initEnsembleMap() {
     zoomControl: true,
   });
 
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: '&copy; OpenStreetMap contributors'
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: "abcd",
+    maxNativeZoom: 19,
+    maxZoom: 20,
   }).addTo(state.ensembleMap);
 
   const ensEl = document.getElementById("ensemble-leaflet-map");
@@ -3555,12 +3554,12 @@ function animateWindParticles() {
     // Calm wind (< 15 km/h): small, compact tails (step 0.35-0.70px, maxAge 10-18 frames -> ~5-10px tail)
     // High wind / cyclone (> 75 km/h): long, sweeping tails (step 3.0-4.5px, maxAge 75-110 frames -> ~200-300px tail)
     const normSpeed = Math.max(1.0, speed);
-    const speedRatio = Math.pow(normSpeed / 22.0, 1.30);
-    const targetMaxAge = Math.round(10 + Math.min(95, speedRatio * 22));
-    p.maxAge = Math.round(p.maxAge * 0.88 + targetMaxAge * 0.12);
+    const speedRatio = Math.pow(normSpeed / 22.0, 1.15);
+    const targetMaxAge = Math.round(18 + Math.min(130, speedRatio * 32));
+    p.maxAge = Math.round(p.maxAge * 0.90 + targetMaxAge * 0.10);
 
-    const speedScale = (state.windSpeedScale !== undefined) ? state.windSpeedScale : 1.0;
-    const baseSpeed = Math.max(0.35, Math.min(4.5, Math.pow(normSpeed / 25.0, 1.15) * 1.55));
+    const speedScale = (state.windSpeedScale !== undefined) ? state.windSpeedScale : 0.50;
+    const baseSpeed = Math.max(0.20, Math.min(2.1, Math.pow(normSpeed / 25.0, 0.92) * 0.85));
     const targetPixels = baseSpeed * (p.speedMult || 1.0) * speedScale;
 
     const cosLat = Math.cos((p.lat * Math.PI) / 180);
@@ -4212,9 +4211,9 @@ function initZoomEarthOverlays() {
       paceBtns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       const pace = btn.dataset.pace || "normal";
-      if (pace === "calm") state.windSpeedScale = 0.65;
-      else if (pace === "fast") state.windSpeedScale = 1.35;
-      else state.windSpeedScale = 0.95;
+      if (pace === "calm") state.windSpeedScale = 0.32;
+      else if (pace === "fast") state.windSpeedScale = 0.85;
+      else state.windSpeedScale = 0.50;
     });
   });
 }
