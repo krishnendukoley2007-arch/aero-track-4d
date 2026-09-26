@@ -113,7 +113,13 @@ class AnomalyTracker:
                 f_samples = wind_ms[r0:r1, c0:c1].flatten()
                 f_cdf = np.array([np.mean(f_samples <= q) for q in qc])
                 integrand = (p_grid - f_cdf) / denom
-                efi_grid[i, j] = float((2.0 / np.pi) * np.trapz(integrand, p_grid))
+                if hasattr(np, "trapezoid"):
+                    efi_integral = np.trapezoid(integrand, p_grid)
+                elif hasattr(np, "trapz"):
+                    efi_integral = np.trapz(integrand, p_grid)
+                else:
+                    efi_integral = np.sum((integrand[:-1] + integrand[1:]) / 2.0 * np.diff(p_grid))
+                efi_grid[i, j] = float((2.0 / np.pi) * efi_integral)
 
         # Shift of Tails (SOT)
         q99_c = clim_w_mean + 2.326 * clim_w_std
