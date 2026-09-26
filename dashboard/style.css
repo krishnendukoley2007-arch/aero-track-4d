@@ -227,6 +227,19 @@ body {
   color: #fff;
 }
 
+.btn-proof {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #10b981;
+  font-weight: 700;
+}
+
+.btn-proof:hover {
+  background: rgba(16, 185, 129, 0.28);
+  border-color: #10b981;
+  color: #fff;
+}
+
 /* ---------------- Persistent 5-View Navigation Bar ---------------- */
 .view-nav-bar {
   display: flex;
@@ -4581,5 +4594,210 @@ input:focus-visible,
 .card-error-state .retry-hint {
   font-size: 0.68rem;
   color: var(--text-dim);
+}
+
+/* ============================================================
+   SCIENTIFIC PROOF & 10/10 VERIFICATION MODAL
+   ============================================================ */
+
+.proof-dialog {
+  background: #0b111a;
+  border: 1px solid rgba(0, 212, 229, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 840px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.proof-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+}
+
+.proof-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.proof-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  margin-top: 4px;
+}
+
+.proof-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.proof-kpi-card {
+  background: #111a28;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.proof-kpi-card .kpi-num {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.proof-kpi-card .kpi-title {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.proof-kpi-card .kpi-detail {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.proof-section {
+  background: #0e1622;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.proof-section .section-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.proof-section .section-desc {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.amplitude-comparison-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.amp-bar-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 220px;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.75rem;
+}
+
+.amp-bar-label {
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.amp-bar-track {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.amp-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.fill-amber { background: #f59e0b; }
+.fill-purple { background: #c084fc; }
+.fill-cyan { background: var(--accent-cyan); box-shadow: 0 0 8px rgba(0, 212, 229, 0.5); }
+.fill-green { background: #10b981; }
+
+.proof-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.proof-table th {
+  background: #141f30;
+  color: #94a3b8;
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+  font-weight: 600;
+}
+
+.proof-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #cbd5e1;
+}
+
+.tag-status {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.tag-train {
+  background: rgba(0, 212, 229, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 212, 229, 0.4);
+}
+
+.tag-unseen {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.proof-reproduce {
+  background: #090e17;
+  border-color: rgba(0, 212, 229, 0.3);
+}
+
+.reproduce-title {
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  margin-bottom: 6px;
+}
+
+.code-box {
+  background: #05080e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.72rem;
+  color: #38bdf8;
+  user-select: all;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .proof-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .amp-bar-row {
+    grid-template-columns: 100px 1fr 140px;
+  }
 }
 

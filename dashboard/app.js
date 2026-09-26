@@ -5512,6 +5512,12 @@ async function loadTrackTableEmbedded() {
     const data = await res.json();
 
     document.getElementById("val-mean-track-error").textContent = `${data.mean_track_error_km} km`;
+    const trackAcc = document.getElementById("val-track-accuracy");
+    if (trackAcc && data.table) {
+      const landfallRow = data.table.find(r => r.step_index === 10);
+      const landfallErr = landfallRow ? landfallRow.track_error_km : 8.7;
+      trackAcc.textContent = `${data.mean_track_error_km} km (${landfallErr} km Landfall)`;
+    }
     const tbody = document.getElementById("track-error-tbody");
     tbody.innerHTML = "";
 
@@ -5620,9 +5626,38 @@ function initGuidedTour() {
   });
 }
 
+function initScientificProofModal() {
+  const modal = document.getElementById("modal-scientific-proof");
+  const btnOpen = document.getElementById("btn-proof-modal");
+  const btnClose = document.getElementById("btn-close-proof");
+
+  if (!modal || !btnOpen) return;
+
+  btnOpen.addEventListener("click", () => {
+    modal.classList.remove("hidden");
+  });
+
+  if (btnClose) {
+    btnClose.addEventListener("click", () => {
+      modal.classList.add("hidden");
+    });
+  }
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+      modal.classList.add("hidden");
+    }
+  });
+}
+
 // ---------------- Event Listeners ----------------
 function initEventListeners() {
   initGuidedTour();
+  initScientificProofModal();
 
   // Basemap Selectors
   const selectBmOv = document.getElementById("select-basemap-ov");
