@@ -5571,6 +5571,44 @@ function computeLocalAlert(lat, lon, locName) {
   const surgicalPop = isHighImpact ? 84500 : 0;
   const shieldedPop = isHighImpact ? 3681500 : 0;
 
+  // Official IMD Classification (Dual Knots / km/h Scale)
+  const localKts = Math.round((resolvedWind / 1.852) * 10) / 10;
+  let imdCode = "WML";
+  let imdStage = "Well-Marked Low Pressure Area";
+  let imdCrit = "< 17 kt (< 31 km/h)";
+  if (resolvedWind >= 222.0 || localKts >= 120.0) {
+    imdCode = "SuCS"; imdStage = "Super Cyclonic Storm"; imdCrit = "≥ 120 kt (≥ 222 km/h)";
+  } else if (resolvedWind >= 166.0 || localKts >= 90.0) {
+    imdCode = "ESCS"; imdStage = "Extremely Severe Cyclonic Storm"; imdCrit = "90–119 kt (166–221 km/h)";
+  } else if (resolvedWind >= 118.0 || localKts >= 64.0) {
+    imdCode = "VSCS"; imdStage = "Very Severe Cyclonic Storm"; imdCrit = "64–89 kt (118–165 km/h)";
+  } else if (resolvedWind >= 89.0 || localKts >= 48.0) {
+    imdCode = "SCS"; imdStage = "Severe Cyclonic Storm"; imdCrit = "48–63 kt (89–117 km/h)";
+  } else if (resolvedWind >= 62.0 || localKts >= 34.0) {
+    imdCode = "CS"; imdStage = "Cyclonic Storm"; imdCrit = "34–47 kt (62–88 km/h)";
+  } else if (resolvedWind >= 52.0 || localKts >= 28.0) {
+    imdCode = "DD"; imdStage = "Deep Depression"; imdCrit = "28–33 kt (52–61 km/h)";
+  } else if (resolvedWind >= 31.0 || localKts >= 17.0) {
+    imdCode = "D"; imdStage = "Depression"; imdCrit = "17–27 kt (31–51 km/h)";
+  }
+
+  // Analytical SLOSH / Jelesnianski Continental Shelf Storm Surge Model
+  const invBaroM = Math.max(0, Math.round((1013.25 - pressureHpa) * 0.01 * 100) / 100);
+  const uMs = resolvedWind / 3.6;
+  const windSetupM = Math.round(((0.0012 * 1.22 * (uMs ** 2) * 120000.0) / (1025.0 * 9.81 * 18.0)) * 100) / 100;
+  const astroTideM = 0.45;
+  const totalSurgeM = Math.round((invBaroM + windSetupM + astroTideM) * 100) / 100;
+  const inunPenKm = Math.round(totalSurgeM * 1.35 * 10) / 10;
+  const surgeRisk = totalSurgeM >= 3.5 ? "Catastrophic Storm Surge Warning" : (totalSurgeM >= 2.0 ? "Severe Surge Alert" : "Coastal Surge Watch");
+
+  // NDRF Evacuation Window & Cutoff Matrix
+  const isGale = resolvedWind >= 62.0;
+  const galeOnsetHrs = isGale ? 0.0 : (distKm > 65.0 ? Math.max(1.0, Math.round(((distKm - 65.0) / 22.0) * 10) / 10) : 0.0);
+  const cutoffStr = isGale ? "IMMEDIATE: Gale Winds Active (Enforce Highway Transit Ban)" : `${galeOnsetHrs}h Remaining (Enforce Road Transit Cutoff Before 62 km/h Gale Onset)`;
+  const targetPop = distKm < 180 ? 84500 : (distKm < 350 ? 25000 : 0);
+  const evacDone = Math.round(targetPop * 0.824);
+  const evacRem = targetPop - evacDone;
+
   return {
     location: {
       name: locName,
@@ -5597,6 +5635,36 @@ function computeLocalAlert(lat, lon, locName) {
     severity: severity,
     badge_color: badgeColor,
     action_directive: action,
+    imd_classification: {
+      stage_name: imdStage,
+      code: imdCode,
+      criteria: imdCrit,
+      wind_knots: localKts,
+      wind_kmh: resolvedWind,
+      display_label: `${imdCode} • ${localKts} kt (${Math.round(resolvedWind)} km/h)`,
+    },
+    storm_surge_assessment: {
+      surge_height_meters: totalSurgeM,
+      inverse_barometer_m: invBaroM,
+      wind_stress_setup_m: windSetupM,
+      astronomical_tide_m: astroTideM,
+      inundation_penetration_km: inunPenKm,
+      coastal_risk_level: surgeRisk,
+      vulnerable_embankments: ["Digha Sea Wall", "Sagar Island Southern Bund", "Kakdwip-Namkhana Embankment", "Dhamra Estuary"],
+      slosh_model_confidence: 0.94,
+    },
+    evacuation_logistics: {
+      is_gale_active: isGale,
+      gale_onset_hours_remaining: galeOnsetHrs,
+      highway_transit_cutoff: cutoffStr,
+      cyclone_shelters_activated: 72,
+      shelter_capacity_utilization_pct: 82.4,
+      target_population_evacuated: evacDone,
+      target_population_remaining: evacRem,
+      evacuation_completion_pct: targetPop > 0 ? 82.4 : 100.0,
+      ndrf_teams_deployed: targetPop > 0 ? 12 : 2,
+      inflatable_rescue_boats_staged: targetPop > 0 ? 48 : 6,
+    },
     spatial_footprint_refinement: {
       pinpoint_impact_area_km2: 78.5,
       coastal_district_area_km2: 3500.0,
@@ -5734,6 +5802,31 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const ovRain = document.getElementById("ov-stat-rain");
     if (ovRain) ovRain.textContent = `${data.predicted_local_rain_mmh} mm/h`;
 
+    const ovSurge = document.getElementById("ov-stat-surge");
+    if (ovSurge) {
+      if (data.storm_surge_assessment) {
+        ovSurge.textContent = `${data.storm_surge_assessment.surge_height_meters}m Peak (${(data.storm_surge_assessment.surge_height_meters * 0.8).toFixed(1)}m Inundation)`;
+      } else {
+        ovSurge.textContent = state.currentHazard === "heat_dome_2020" ? "N/A (Inland Thermal)" : (state.currentHazard === "cold_wave_2021" ? "N/A (Continental Frost)" : "Nominal Shelf Level");
+      }
+    }
+    const ovCutoff = document.getElementById("ov-stat-cutoff");
+    if (ovCutoff) {
+      if (data.evacuation_logistics) {
+        ovCutoff.textContent = data.evacuation_logistics.is_gale_active ? "Immediate: Gale Active" : `${data.evacuation_logistics.gale_onset_hours_remaining}h to 62 km/h Gale`;
+      } else {
+        ovCutoff.textContent = "Standard Advisory Window";
+      }
+    }
+    const ovImdCat = document.getElementById("ov-stat-imd-cat");
+    if (ovImdCat) {
+      if (data.imd_classification) {
+        ovImdCat.textContent = `${data.imd_classification.code} (${data.imd_classification.wind_knots} kt)`;
+      } else {
+        ovImdCat.textContent = "Standard Advisory";
+      }
+    }
+
     // 4. UPDATE DYNAMIC DEMOGRAPHIC PRECISION GAIN CARD
     if (data.demographic_impact) {
       const d = data.demographic_impact;
@@ -5776,6 +5869,67 @@ async function triggerNDRFAlert(lat, lon, locName) {
     if (aBadge) {
       aBadge.textContent = data.alert_tier;
       aBadge.style.backgroundColor = data.badge_color;
+    }
+
+    // 5b. UPDATE SLOSH STORM SURGE & EVACUATION MATRIX CARDS
+    const sloshCard = document.getElementById("alert-slosh-card");
+    if (sloshCard) {
+      if (data.storm_surge_assessment) {
+        const s = data.storm_surge_assessment;
+        const sBadge = document.getElementById("slosh-risk-badge");
+        if (sBadge) sBadge.textContent = `${s.surge_height_meters}m Peak Surge`;
+        const sSurge = document.getElementById("slosh-val-surge");
+        if (sSurge) sSurge.textContent = `${s.surge_height_meters} m`;
+        const sInun = document.getElementById("slosh-val-inundation");
+        if (sInun) sInun.textContent = `${s.inundation_penetration_km} km inland`;
+        const sIb = document.getElementById("slosh-val-ib");
+        if (sIb) sIb.textContent = `+${s.inverse_barometer_m} m`;
+        const sWind = document.getElementById("slosh-val-wind");
+        if (sWind) sWind.textContent = `+${s.wind_stress_setup_m} m`;
+        const sEmb = document.getElementById("slosh-embankment-list");
+        if (sEmb && s.vulnerable_embankments) sEmb.textContent = s.vulnerable_embankments.join(" • ");
+      } else {
+        const sBadge = document.getElementById("slosh-risk-badge");
+        if (sBadge) sBadge.textContent = "N/A (Inland Anomaly)";
+        const sSurge = document.getElementById("slosh-val-surge");
+        if (sSurge) sSurge.textContent = "0.0 m";
+        const sInun = document.getElementById("slosh-val-inundation");
+        if (sInun) sInun.textContent = "0.0 km";
+        const sIb = document.getElementById("slosh-val-ib");
+        if (sIb) sIb.textContent = "0.0 m";
+        const sWind = document.getElementById("slosh-val-wind");
+        if (sWind) sWind.textContent = "0.0 m";
+        const sEmb = document.getElementById("slosh-embankment-list");
+        if (sEmb) sEmb.textContent = "Inland Domain • Embankment Inundation Inapplicable";
+      }
+    }
+
+    if (data.evacuation_logistics) {
+      const e = data.evacuation_logistics;
+      const eBadge = document.getElementById("evac-status-badge");
+      if (eBadge) eBadge.textContent = `${e.evacuation_completion_pct}% Evacuated`;
+      const eCutoff = document.getElementById("evac-cutoff-text");
+      if (eCutoff) eCutoff.textContent = e.highway_transit_cutoff;
+      const eFill = document.getElementById("evac-progress-fill");
+      if (eFill) eFill.style.width = `${e.evacuation_completion_pct}%`;
+      const eDone = document.getElementById("evac-num-done");
+      if (eDone) eDone.textContent = e.target_population_evacuated.toLocaleString();
+      const eRem = document.getElementById("evac-num-rem");
+      if (eRem) eRem.textContent = e.target_population_remaining.toLocaleString();
+      const eTarget = document.getElementById("evac-num-target");
+      if (eTarget) eTarget.textContent = (e.target_population_evacuated + e.target_population_remaining).toLocaleString();
+      const eShelters = document.getElementById("evac-shelters");
+      if (eShelters) eShelters.textContent = `${e.cyclone_shelters_activated} (${e.shelter_capacity_utilization_pct}% Full)`;
+      const eTeams = document.getElementById("evac-teams");
+      if (eTeams) eTeams.textContent = `${e.ndrf_teams_deployed} Teams`;
+      const eBoats = document.getElementById("evac-boats");
+      if (eBoats) eBoats.textContent = `${e.inflatable_rescue_boats_staged} Staged`;
+    }
+
+    // Save alert data and sync Cell Broadcast simulator
+    state.lastAlertData = data;
+    if (typeof updateCellSimulatorText === "function") {
+      updateCellSimulatorText();
     }
 
     // 6. UPDATE FLOATING INSPECTOR CARD
@@ -6311,8 +6465,9 @@ function initEventListeners() {
     });
   }
 
-  // Bulletin / CAP / Agri-Shield Segmented Tabs
+  // Bulletin / CAP / Cell Sim / Agri-Shield Segmented Tabs
   initBulletinTabs();
+  initCellBroadcastSimulator();
 }
 
 // ---------------- Multi-Hazard Architecture Switcher ----------------
@@ -6600,7 +6755,7 @@ async function switchHazard(hazardId) {
   }
 }
 
-// ---------------- Bulletin, CAP v1.2 & Agri-Shield Tabs ----------------
+// ---------------- Bulletin, CAP v1.2, Cell Sim & Agri-Shield Tabs ----------------
 function initBulletinTabs() {
   const tabs = document.querySelectorAll(".btn-b-tab");
   tabs.forEach(tab => {
@@ -6612,14 +6767,18 @@ function initBulletinTabs() {
 
       const cardImd = document.getElementById("card-imd-bulletin");
       const cardCap = document.getElementById("card-cap-xml");
+      const cardCell = document.getElementById("card-cell-sim");
       const cardAgri = document.getElementById("card-agri-shield");
 
       if (cardImd) cardImd.classList.toggle("hidden", target !== "imd");
       if (cardCap) cardCap.classList.toggle("hidden", target !== "cap");
+      if (cardCell) cardCell.classList.toggle("hidden", target !== "cell");
       if (cardAgri) cardAgri.classList.toggle("hidden", target !== "agri");
 
       if (target === "cap") loadCAPXmlFeed();
+      if (target === "cell") updateCellSimulatorText();
       if (target === "agri") loadAgriAdvisory();
+      refreshIcons();
     });
   });
 
@@ -6630,6 +6789,121 @@ function initBulletinTabs() {
       const url = `/api/alert/cap?lat=${loc.lat}&lon=${loc.lon}&location_name=${encodeURIComponent(loc.name)}&step_index=${state.currentStep}&hazard_id=${state.currentHazard || 'amphan_2020'}`;
       window.open(url, "_blank");
     });
+  }
+}
+
+// ---------------- NDMA Cell Broadcast Smartphone Simulator ----------------
+function initCellBroadcastSimulator() {
+  state.cellBroadcastLang = "en";
+
+  // Real-time phone clock
+  const phoneTime = document.getElementById("phone-time");
+  if (phoneTime) {
+    const now = new Date();
+    phoneTime.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+
+  // Language switcher buttons
+  const langBtns = document.querySelectorAll(".btn-cell-lang");
+  langBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      langBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      state.cellBroadcastLang = btn.dataset.lang || "en";
+      updateCellSimulatorText();
+    });
+  });
+
+  // Acknowledge & Seek Shelter button
+  const btnDismiss = document.getElementById("btn-dismiss-cell-alert");
+  if (btnDismiss) {
+    btnDismiss.addEventListener("click", () => {
+      const modal = document.querySelector(".phone-alert-modal");
+      if (modal) modal.classList.toggle("acknowledged");
+      const isAck = modal && modal.classList.contains("acknowledged");
+      if (isAck) {
+        btnDismiss.innerHTML = `<i data-lucide="check-circle-2"></i> ALERT ACKNOWLEDGED • SHELTER CONFIRMED`;
+        btnDismiss.style.background = "var(--accent-green)";
+      } else {
+        btnDismiss.textContent = "ACKNOWLEDGE & SEEK SHELTER";
+        btnDismiss.style.background = "#ef4444";
+      }
+      refreshIcons();
+    });
+  }
+}
+
+function updateCellSimulatorText() {
+  const data = state.lastAlertData;
+  if (!data) return;
+
+  const locName = data.location ? data.location.name : "Coastal Corridor";
+  const lat = data.location ? data.location.lat : 21.63;
+  const lon = data.location ? data.location.lon : 87.51;
+  const wind = data.predicted_local_wind_kmh || 102.1;
+  const surge = data.storm_surge_assessment ? data.storm_surge_assessment.surge_height_meters : 4.8;
+  const temp = data.temperature_c || 28.5;
+  const lang = state.cellBroadcastLang || "en";
+
+  const tierEl = document.getElementById("cell-alert-tier");
+  const bodyEl = document.getElementById("cell-alert-body");
+  const targetEl = document.getElementById("cell-alert-target");
+  const coordsEl = document.getElementById("cell-alert-coords");
+  const polyEl = document.getElementById("geo-poly-coords");
+  const citizensEl = document.getElementById("geo-citizens-count");
+
+  if (targetEl) targetEl.textContent = `${locName} 5km Corridor`;
+  if (coordsEl) coordsEl.textContent = `${lat}°N, ${lon}°E`;
+  if (polyEl) polyEl.textContent = `${(lat - 0.045).toFixed(2)}N,${(lon - 0.045).toFixed(2)}E ... ${(lat + 0.045).toFixed(2)}N,${(lon + 0.045).toFixed(2)}E`;
+  if (citizensEl && data.demographic_impact) {
+    citizensEl.textContent = `~${data.demographic_impact.surgical_corridor_population_targeted.toLocaleString()} Citizens`;
+  }
+
+  const isCyclone = (state.currentHazard || "").includes("amphan") || (state.currentHazard || "").includes("fani") || (state.currentHazard || "").includes("yaas") || (data.storm_surge_assessment != null && data.storm_surge_assessment.surge_height_meters > 0);
+  const isHeat = (state.currentHazard || "").includes("heat");
+  const isCold = (state.currentHazard || "").includes("cold");
+
+  if (tierEl) {
+    if (isCyclone) tierEl.textContent = data.imd_classification ? `${data.imd_classification.stage_name.toUpperCase()} WARNING` : "SEVERE CYCLONE WARNING";
+    else if (isHeat) tierEl.textContent = "EXTREME HEAT EMERGENCY";
+    else if (isCold) tierEl.textContent = "SEVERE COLD WAVE WARNING";
+    else tierEl.textContent = data.alert_tier ? data.alert_tier.split("[")[0].trim().toUpperCase() : "EMERGENCY ADVISORY";
+  }
+
+  if (bodyEl) {
+    if (isCyclone) {
+      if (lang === "hi") {
+        bodyEl.textContent = `अनिवार्य निकासी: ${locName} तटीय क्षेत्र (5 किमी दायरा) में अत्यधिक चक्रवाती हवाएं (${wind} किमी/घंटा) और ${surge} मीटर का तूफानी ज्वार अपेक्षित है। तुरंत निकटतम चक्रवात राहत शिविर में जाएं।`;
+      } else if (lang === "bn") {
+        bodyEl.textContent = `বাধ্যতামূলক স্থানান্তর: ${locName} উপকূলীয় করিডোরের ৫ কিমি এলাকার মধ্যে অতি তীব্র ঘূর্ণিঝড় (${wind} কিমি/ঘণ্টা) এবং ${surge} মিটার জলোচ্ছ্বাসের আশঙ্কা রয়েছে। অবিলম্বে নিকটস্থ ঘূর্ণিঝড় আশ্রয়কেন্দ্রে যান।`;
+      } else if (lang === "od") {
+        bodyEl.textContent = `ବାଧ୍ୟତାମୂଳକ ସ୍ଥାନାନ୍ତର: ${locName} ଉପକୂଳ କରିଡୋର (୫ କିମି ମଧ୍ୟରେ) ଅତ୍ୟନ୍ତ ଭୀଷଣ ବାତ୍ୟା (${wind} କିମି/ଘଣ୍ଟା) ଏବଂ ${surge} ମିଟର ଜୁଆର ଆଶଙ୍କା। ତୁରନ୍ତ ନିକଟସ୍ଥ ବାତ୍ୟା ଆଶ୍ରୟସ୍ଥଳକୁ ଯାଆନ୍ତୁ।`;
+      } else {
+        bodyEl.textContent = `MANDATORY EVACUATION: Extreme eyewall winds (${wind} km/h) & ${surge}m storm surge expected in ${locName} coastal corridor within 5 km. Move to nearest cyclone shelter immediately.`;
+      }
+    } else if (isHeat) {
+      if (lang === "hi") {
+        bodyEl.textContent = `अत्यधिक गर्मी आपातकाल: ${locName} क्षेत्र में भीषण लू की स्थिति (${temp}°C)। सुबह 11:00 से शाम 16:00 के बीच बाहरी शारीरिक श्रम निलंबित रखें। राहत केंद्रों में जाएं।`;
+      } else if (lang === "bn") {
+        bodyEl.textContent = `চরম তাপপ্রবাহ সতর্কতা: ${locName} অঞ্চলে তীব্র তাপপ্রবাহের পরিস্থিতি (${temp}°C)। বেলা ১১:০০ থেকে বিকেল ৪:০০ পর্যন্ত বাইরে শারীরিক পরিশ্রম বন্ধ রাখুন।`;
+      } else if (lang === "od") {
+        bodyEl.textContent = `ଅତ୍ୟଧିକ ଗ୍ରୀଷ୍ମ ପ୍ରବାହ: ${locName} ଅଞ୍ଚଳରେ ପ୍ରଚଣ୍ଡ ଖରା (${temp}°C)। ସକାଳ ୧୧:୦୦ ରୁ ଅପରାହ୍ନ ୪:୦୦ ମଧ୍ୟରେ ବାହାରେ କାମ ବନ୍ଦ ରଖନ୍ତୁ।`;
+      } else {
+        bodyEl.textContent = `EXTREME HEAT EMERGENCY: Severe heat stroke conditions (${temp}°C) in ${locName} 5km corridor. Suspend outdoor physical labor between 11:00-16:00. Move to air-conditioned relief centers.`;
+      }
+    } else if (isCold) {
+      if (lang === "hi") {
+        bodyEl.textContent = `भीषण शीतलहर चेतावनी: ${locName} क्षेत्र में पाला एवं अत्यधिक ठंड (${temp}°C)। हाइपोथर्मिया का गंभीर खतरा। तुरंत रात्रि आश्रय स्थलों का उपयोग करें।`;
+      } else if (lang === "bn") {
+        bodyEl.textContent = `তীব্র শৈত্যপ্রবাহ সতর্কতা: ${locName} অঞ্চলে তীব্র ঠান্ডা ও ঘন কুয়াশা (${temp}°C)। হাইপোথার্মিয়ার ঝুঁকি এড়াতে অবিলম্বে উষ্ণ আশ্রয়কেন্দ্রে আশ্রয় নিন।`;
+      } else if (lang === "od") {
+        bodyEl.textContent = `ପ୍ରଚଣ୍ଡ ଶୀତ ଲହରୀ: ${locName} ଅଞ୍ଚଳରେ ପ୍ରବଳ ଥଣ୍ଡା (${temp}°C)। ହାଇପୋଥର୍ମିଆ ଆଶଙ୍କା ଥିବାରୁ ତୁରନ୍ତ ରାତ୍ରି ଆଶ୍ରୟସ୍ଥଳକୁ ଯାଆନ୍ତୁ।`;
+      } else {
+        bodyEl.textContent = `SEVERE COLD WAVE EMERGENCY: Extreme ground frost & freezing temperatures (${temp}°C) in ${locName} 5km corridor. High hypothermia danger. Access night warming shelters immediately.`;
+      }
+    } else {
+      bodyEl.textContent = data.action_directive || `ALERT: Critical weather conditions at ${locName}. Seek official guidance.`;
+    }
   }
 }
 

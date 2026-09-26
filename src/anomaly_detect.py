@@ -241,30 +241,39 @@ class AnomalyTracker:
             gt_lon = float(ibtracs["lon"])
             track_error_km = self.haversine_distance_km(tracked_lat, tracked_lon, gt_lat, gt_lon)
 
-            # Official IMD Severity Classification
-            w_kmh = fine["peak_wind_kmh"]
-            if w_kmh >= 222.0 or (ibtracs.get("wind_kts") or 0) >= 120:
+            # Official IMD Severity Classification (Dual Knots / km/h Scale)
+            w_kmh = float(fine["peak_wind_kmh"])
+            w_kts = float(ibtracs.get("wind_kts") or (w_kmh / 1.852))
+            if w_kmh >= 222.0 or w_kts >= 120.0:
                 category = "Super Cyclonic Storm"
                 severity = "Catastrophic"
                 alert_tier = "Severe Alert (Evacuation Directive)"
-            elif w_kmh >= 166.0 or (ibtracs.get("wind_kts") or 0) >= 90:
+            elif w_kmh >= 166.0 or w_kts >= 90.0:
                 category = "Extremely Severe Cyclonic Storm"
                 severity = "Severe"
                 alert_tier = "High Warning (Life Threatening)"
-            elif w_kmh >= 118.0 or (ibtracs.get("wind_kts") or 0) >= 64:
+            elif w_kmh >= 118.0 or w_kts >= 64.0:
                 category = "Very Severe Cyclonic Storm"
                 severity = "Severe"
                 alert_tier = "High Warning"
-            elif w_kmh >= 88.0 or (ibtracs.get("wind_kts") or 0) >= 48:
+            elif w_kmh >= 89.0 or w_kts >= 48.0:
                 category = "Severe Cyclonic Storm"
                 severity = "Moderate"
                 alert_tier = "Moderate Alert"
-            elif w_kmh >= 62.0 or (ibtracs.get("wind_kts") or 0) >= 34:
+            elif w_kmh >= 62.0 or w_kts >= 34.0:
                 category = "Cyclonic Storm"
                 severity = "Moderate"
                 alert_tier = "Advisory / Watch"
-            else:
+            elif w_kmh >= 52.0 or w_kts >= 28.0:
                 category = "Deep Depression"
+                severity = "Moderate"
+                alert_tier = "Deep Depression Watch"
+            elif w_kmh >= 31.0 or w_kts >= 17.0:
+                category = "Depression"
+                severity = "Low"
+                alert_tier = "Depression Advisory"
+            else:
+                category = "Well-Marked Low Pressure Area"
                 severity = "Low"
                 alert_tier = "Advisory"
 
@@ -302,6 +311,9 @@ class AnomalyTracker:
                 "category": category,
                 "severity": severity,
                 "alert_tier": alert_tier,
+                "wind_kts": round(w_kts, 1),
+                "wind_kmh": round(w_kmh, 1),
+                "wind_classification_bracket": f"{category} ({round(w_kts)} kt / {round(w_kmh)} km/h)",
                 "ibtracs_ground_truth": {
                     "lat": gt_lat,
                     "lon": gt_lon,

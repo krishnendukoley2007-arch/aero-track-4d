@@ -542,10 +542,21 @@
           <div class="intel-target-node font-mono" id="ov-alert-target">
             Target: Digha Coast (21.63°N, 87.51°E)
           </div>
+          <div class="ov-surge-evac-strip font-mono" id="ov-surge-evac-strip">
+            <div class="strip-pill surge-pill">
+              <span class="strip-tag"><i data-lucide="waves"></i> SLOSH Surge:</span>
+              <strong id="ov-stat-surge" class="text-red">4.8m Peak (3.8m Inundation)</strong>
+            </div>
+            <div class="strip-pill evac-pill">
+              <span class="strip-tag"><i data-lucide="clock"></i> Road Cutoff:</span>
+              <strong id="ov-stat-cutoff" class="text-amber">14.5h to 62 km/h Gale</strong>
+            </div>
+          </div>
           <div class="intel-directive-text" id="ov-alert-text">
             MANDATORY EVACUATION: Immediate evacuation of vulnerable structures within 5 km impact radius. Move population to cyclone relief shelters. Suspend all marine, port, and coastal operations.
           </div>
           <div class="intel-footer-stats font-mono">
+            <div>IMD Cat: <strong id="ov-stat-imd-cat" class="text-cyan">SuCS (125 kt)</strong></div>
             <div>Local Wind: <strong id="ov-stat-wind">102.1 km/h</strong></div>
             <div>P90 Gust: <strong id="ov-stat-gust">108.4 km/h</strong></div>
             <div>Rain: <strong id="ov-stat-rain">18.4 mm/h</strong></div>
@@ -905,6 +916,62 @@
               <strong>MANDATORY EVACUATION:</strong> Immediate evacuation of all vulnerable populations living in kutcha structures within the 5 km threat corridor. Deploy NDRF swift-water rescue equipment at designated block shelters.
             </div>
 
+            <!-- SLOSH Storm Surge Assessment Box -->
+            <div class="slosh-surge-card font-mono" id="alert-slosh-card">
+              <div class="slosh-header">
+                <span class="slosh-title"><i data-lucide="waves"></i> SLOSH Coastal Storm Surge Estimator</span>
+                <span class="slosh-badge" id="slosh-risk-badge">4.8m Peak Surge</span>
+              </div>
+              <div class="slosh-grid">
+                <div class="slosh-stat">
+                  <span class="s-label">Peak Surge:</span>
+                  <strong class="text-red font-mono" id="slosh-val-surge">4.8 m</strong>
+                </div>
+                <div class="slosh-stat">
+                  <span class="s-label">Inundation Reach:</span>
+                  <strong class="text-amber font-mono" id="slosh-val-inundation">6.5 km inland</strong>
+                </div>
+                <div class="slosh-stat">
+                  <span class="s-label">Inverse Barometer:</span>
+                  <strong class="text-cyan font-mono" id="slosh-val-ib">+0.93 m</strong>
+                </div>
+                <div class="slosh-stat">
+                  <span class="s-label">Shelf Wind Setup:</span>
+                  <strong class="text-cyan font-mono" id="slosh-val-wind">+3.42 m</strong>
+                </div>
+              </div>
+              <div class="slosh-embankment-line">
+                <span class="s-sub">At-Risk Embankments:</span>
+                <span class="text-dim" id="slosh-embankment-list">Digha Sea Wall &bull; Sagar Island Bund &bull; Kakdwip-Namkhana</span>
+              </div>
+            </div>
+
+            <!-- NDRF Evacuation Window & Cutoff Matrix -->
+            <div class="evacuation-matrix-card font-mono" id="alert-evac-card">
+              <div class="evac-header">
+                <span class="evac-title"><i data-lucide="shield-alert"></i> NDRF Evacuation Logistics &amp; Highway Cutoff</span>
+                <span class="evac-status-badge text-green" id="evac-status-badge">82.4% Evacuated</span>
+              </div>
+              <div class="evac-cutoff-banner" id="evac-cutoff-banner">
+                <i data-lucide="alert-circle"></i> <span id="evac-cutoff-text">14.5h Remaining (Enforce Cutoff Before 62 km/h Gale Onset)</span>
+              </div>
+              <div class="evac-progress-wrap">
+                <div class="evac-progress-bar">
+                  <div class="evac-progress-fill" id="evac-progress-fill" style="width: 82.4%;"></div>
+                </div>
+                <div class="evac-progress-labels">
+                  <span>Evacuated: <strong id="evac-num-done" class="text-green">69,600</strong></span>
+                  <span>Remaining: <strong id="evac-num-rem" class="text-red">14,900</strong></span>
+                  <span>Target: <strong id="evac-num-target">84,500</strong></span>
+                </div>
+              </div>
+              <div class="evac-resources-row">
+                <div class="res-item">Shelters Active: <strong id="evac-shelters">72 (82.4% Full)</strong></div>
+                <div class="res-item">NDRF Teams: <strong id="evac-teams">12 Teams</strong></div>
+                <div class="res-item">IRB Rescue Boats: <strong id="evac-boats">48 Staged</strong></div>
+              </div>
+            </div>
+
             <div class="fatigue-banner" id="alert-fatigue-banner">
               <i data-lucide="crosshair"></i> <strong>Spatial Warning Refinement:</strong> Targeting a pinpoint 5 km radius impact corridor (78.5 km²) instead of a broad coastal district (~3,500 km²) reduces false-alarm warning footprint by <strong>97.8%</strong>, eliminating public complacency while directing NDRF battalions with surgical precision.
             </div>
@@ -915,7 +982,8 @@
         <div class="bulletin-display-column">
           <div class="bulletin-tabs-bar font-mono">
             <button class="btn-b-tab active" id="tab-btn-imd-text" data-btab="imd"><i data-lucide="file-text"></i> Official IMD Bulletin</button>
-            <button class="btn-b-tab" id="tab-btn-cap-xml" data-btab="cap"><i data-lucide="radio"></i> OASIS CAP v1.2 / NDMA SACHET</button>
+            <button class="btn-b-tab" id="tab-btn-cap-xml" data-btab="cap"><i data-lucide="radio"></i> OASIS CAP v1.2</button>
+            <button class="btn-b-tab" id="tab-btn-cell-sim" data-btab="cell"><i data-lucide="smartphone"></i> Cell Broadcast Sim</button>
             <button class="btn-b-tab" id="tab-btn-agri-shield" data-btab="agri"><i data-lucide="sprout"></i> Rural Agri-Shield</button>
           </div>
 
@@ -969,6 +1037,87 @@
             </div>
             <div class="agri-economic-box font-mono" id="agri-economic-box">
               <i data-lucide="shield-check"></i> Estimated Rs. 4.2 Lakh per 100 hectares crop loss prevented via 72h early harvest window.
+            </div>
+          </div>
+
+          <!-- Live NDMA Cell-Broadcast Smartphone Simulator -->
+          <div class="cell-broadcast-sim-card hidden" id="card-cell-sim">
+            <div class="cell-sim-header font-mono">
+              <div class="cell-sim-title-group">
+                <span class="cell-sim-title"><i data-lucide="smartphone"></i> OASIS CAP v1.2 &bull; NDMA Cell Broadcast Simulator</span>
+                <span class="cell-sim-sub">Verifying 5km Geofenced Multi-Language Smartphone Alert Delivery</span>
+              </div>
+              <div class="cell-lang-buttons">
+                <button class="btn-cell-lang active" data-lang="en">EN</button>
+                <button class="btn-cell-lang" data-lang="hi">हिन्दी</button>
+                <button class="btn-cell-lang" data-lang="bn">বাংলা</button>
+                <button class="btn-cell-lang" data-lang="od">ଓଡ଼ିଆ</button>
+              </div>
+            </div>
+
+            <div class="phone-mockup-wrapper">
+              <div class="phone-mockup-frame">
+                <div class="phone-notch">
+                  <div class="phone-speaker"></div>
+                  <div class="phone-lens"></div>
+                </div>
+                <div class="phone-screen">
+                  <div class="phone-status-bar font-mono">
+                    <span id="phone-time">14:32</span>
+                    <span class="phone-status-icons"><i data-lucide="wifi"></i> <i data-lucide="battery-charging"></i></span>
+                  </div>
+                  
+                  <div class="phone-alert-overlay">
+                    <div class="phone-alert-modal">
+                      <div class="phone-alert-header">
+                        <div class="alert-icon-ring">
+                          <i data-lucide="alert-octagon"></i>
+                        </div>
+                        <div class="alert-header-text font-mono">
+                          <div class="alert-agency">NDMA &bull; MOES EMERGENCY ALERT</div>
+                          <div class="alert-type" id="cell-alert-tier">SEVERE CYCLONE WARNING</div>
+                        </div>
+                      </div>
+                      
+                      <div class="phone-alert-body" id="cell-alert-body">
+                        MANDATORY EVACUATION: Extreme eyewall winds (102.1 km/h) & 4.8m storm surge expected in Digha coastal corridor within 5 km. Move to nearest cyclone shelter immediately.
+                      </div>
+
+                      <div class="phone-alert-meta font-mono">
+                        <div>Target: <strong id="cell-alert-target">Digha 5km Corridor</strong></div>
+                        <div>Coord: <strong id="cell-alert-coords">21.63°N, 87.51°E</strong></div>
+                        <div>Broadcast Channel: <strong>NDMA-CB-4370</strong></div>
+                      </div>
+
+                      <button class="phone-alert-dismiss font-mono" id="btn-dismiss-cell-alert">ACKNOWLEDGE &amp; SEEK SHELTER</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Geofence polygon verification card beside phone -->
+              <div class="geofence-stats-card font-mono">
+                <div class="geo-title"><i data-lucide="crosshair"></i> CAP 5km Geofence Cell Tower Precision</div>
+                <div class="geo-stat-row">
+                  <span>Geofence Boundary:</span>
+                  <strong class="text-cyan font-mono" id="geo-poly-coords">21.58N,87.46E ... 21.68N,87.55E</strong>
+                </div>
+                <div class="geo-stat-row">
+                  <span>Cell Towers Energized:</span>
+                  <strong class="text-green font-mono" id="geo-towers-count">14 BCF Towers</strong>
+                </div>
+                <div class="geo-stat-row">
+                  <span>Targeted Citizens:</span>
+                  <strong class="text-white font-mono" id="geo-citizens-count">~84,500 Citizens</strong>
+                </div>
+                <div class="geo-stat-row">
+                  <span>Citizens Shielded:</span>
+                  <strong class="text-green font-mono">3,681,500 (97.8%)</strong>
+                </div>
+                <div class="geo-footer-note">
+                  Standard alert broadcasts disrupt 3.76M phones across East Midnapore. Our 5km polygon targets ONLY towers overlapping the CorrDiff strike zone.
+                </div>
+              </div>
             </div>
           </div>
         </div>

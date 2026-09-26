@@ -2182,6 +2182,534 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
   line-height: 1.45;
 }
 
+/* Overview Surge & Evacuation Strip */
+.ov-surge-evac-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.strip-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #060a10;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+}
+
+.strip-tag {
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.strip-tag svg {
+  width: 13px;
+  height: 13px;
+}
+
+.surge-pill {
+  border-left: 3px solid #ef4444;
+}
+
+.evac-pill {
+  border-left: 3px solid #f59e0b;
+}
+
+/* SLOSH Storm Surge Assessment Card */
+.slosh-surge-card {
+  background: #080d16;
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  border-left: 4px solid #0ea5e9;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slosh-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slosh-title {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.slosh-title svg {
+  width: 14px;
+  height: 14px;
+}
+
+.slosh-badge {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.slosh-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 8px 10px;
+  border-radius: 4px;
+}
+
+.slosh-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.s-label {
+  font-size: 0.58rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.slosh-stat strong {
+  font-size: 0.82rem;
+}
+
+.slosh-embankment-line {
+  font-size: 0.64rem;
+  display: flex;
+  gap: 6px;
+}
+
+.s-sub {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* NDRF Evacuation Logistics Card */
+.evacuation-matrix-card {
+  background: #080d16;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-left: 4px solid #f59e0b;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.evac-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.evac-title {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.evac-title svg {
+  width: 14px;
+  height: 14px;
+}
+
+.evac-status-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.evac-cutoff-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 5px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.evac-cutoff-banner svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.evac-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.evac-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #141f30;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.evac-progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #10b981, #00d4e5);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.evac-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  color: #94a3b8;
+}
+
+.evac-resources-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.66rem;
+  color: #cbd5e1;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 5px 8px;
+  border-radius: 4px;
+}
+
+/* Smartphone Cell-Broadcast Simulator */
+.cell-broadcast-sim-card {
+  background: #06090e;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 520px;
+}
+
+.cell-sim-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 8px;
+}
+
+.cell-sim-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cell-sim-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #00d4e5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cell-sim-title svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cell-sim-sub {
+  font-size: 0.60rem;
+  color: #64748b;
+}
+
+.cell-lang-buttons {
+  display: flex;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px;
+  border-radius: 5px;
+}
+
+.btn-cell-lang {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-cell-lang:hover {
+  color: #fff;
+}
+
+.btn-cell-lang.active {
+  background: #00d4e5;
+  color: #040810;
+}
+
+.phone-mockup-wrapper {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.phone-mockup-frame {
+  width: 250px;
+  height: 440px;
+  background: #05080e;
+  border: 4px solid #1e293b;
+  border-radius: 32px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+.phone-notch {
+  width: 110px;
+  height: 16px;
+  background: #1e293b;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.phone-speaker {
+  width: 32px;
+  height: 3px;
+  background: #0a0f18;
+  border-radius: 2px;
+}
+
+.phone-lens {
+  width: 6px;
+  height: 6px;
+  background: #0a0f18;
+  border-radius: 50%;
+}
+
+.phone-screen {
+  flex: 1;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 22px 10px 10px 10px;
+  position: relative;
+}
+
+.phone-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.60rem;
+  color: #94a3b8;
+  padding: 0 4px 6px 4px;
+}
+
+.phone-status-icons {
+  display: flex;
+  gap: 4px;
+}
+
+.phone-status-icons svg {
+  width: 10px;
+  height: 10px;
+}
+
+.phone-alert-overlay {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-alert-modal {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border: 2px solid #ef4444;
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4);
+  animation: phoneAlertVibe 1.2s infinite ease-in-out;
+}
+
+@keyframes phoneAlertVibe {
+  0% { transform: scale(1); box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35); }
+  50% { transform: scale(1.02); box-shadow: 0 10px 32px rgba(239, 68, 68, 0.6); }
+  100% { transform: scale(1); box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35); }
+}
+
+.phone-alert-modal.acknowledged {
+  border-color: #22c55e;
+  animation: none;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.25);
+}
+
+.phone-alert-modal.acknowledged .alert-icon-ring {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.phone-alert-modal.acknowledged .phone-alert-header {
+  border-bottom-color: rgba(34, 197, 94, 0.3);
+}
+
+.phone-alert-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(239, 68, 68, 0.3);
+  padding-bottom: 6px;
+}
+
+.alert-icon-ring {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+  flex-shrink: 0;
+}
+
+.alert-icon-ring svg {
+  width: 16px;
+  height: 16px;
+}
+
+.alert-agency {
+  font-size: 0.52rem;
+  color: #f87171;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.alert-type {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.phone-alert-body {
+  font-size: 0.65rem;
+  line-height: 1.4;
+  color: #f1f5f9;
+}
+
+.phone-alert-meta {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 0.55rem;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.phone-alert-dismiss {
+  background: #ef4444;
+  border: none;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.62rem;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.04em;
+  transition: background 0.15s;
+}
+
+.phone-alert-dismiss:hover {
+  background: #dc2626;
+}
+
+.geofence-stats-card {
+  background: #080d16;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.70rem;
+}
+
+.geo-title {
+  color: #00d4e5;
+  font-weight: 700;
+  font-size: 0.76rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+
+.geo-title svg {
+  width: 14px;
+  height: 14px;
+}
+
+.geo-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #94a3b8;
+}
+
+.geo-footer-note {
+  margin-top: 6px;
+  font-size: 0.60rem;
+  color: #64748b;
+  line-height: 1.4;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-top: 6px;
+}
+
 /* Bulletin Paper Display */
 .bulletin-display-column {
   display: flex;
