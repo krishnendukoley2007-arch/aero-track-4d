@@ -4039,3 +4039,369 @@ body {
 .text-cyan { color: #00d4e5 !important; }
 .text-amber { color: #f59e0b !important; }
 
+/* ============================================================
+   RESPONSIVE DESIGN SYSTEM (Breakpoints: 1200px, 900px, 600px)
+   Ensures seamless, non-breaking presentation across:
+   - 1440px+ (Operations Room Ultrawide / Desktop)
+   - 1200px  (Standard Laptop / Small Desktop)
+   - 768px-900px (Tablets / Foldables)
+   - 375px-600px (Mobile Phones / Compact Handhelds)
+   ============================================================ */
+
+/* --- 1. Small Desktops & Laptops (max-width: 1200px) --- */
+@media (max-width: 1200px) {
+  .top-nav {
+    padding: 0 var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .ps-badge {
+    display: none; /* Hide secondary institutional badge to prioritize tabs */
+  }
+
+  .nav-tabs-container {
+    gap: 2px;
+  }
+
+  .nav-tab {
+    padding: 6px var(--space-2);
+    font-size: 0.72rem;
+  }
+
+  .ensemble-layout-grid,
+  .ensemble-main-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .alerts-layout-grid,
+  .alerts-split-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .bulletin-paper-card {
+    height: auto;
+    min-height: 440px;
+  }
+
+  .downscale-lab-grid,
+  .downscale-view-grid {
+    gap: var(--space-4);
+  }
+}
+
+/* --- 2. Tablets & Medium Screens (max-width: 900px) --- */
+@media (max-width: 900px) {
+  .top-nav {
+    height: auto;
+    max-height: none;
+    flex-wrap: wrap;
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+    overflow: visible;
+  }
+
+  .brand-container {
+    flex-shrink: 0;
+  }
+
+  .header-right-suite {
+    margin-left: auto;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+    max-width: calc(100% - 200px);
+  }
+
+  .hazard-selector-wrap {
+    max-width: 180px;
+  }
+
+  .select-hazard-pill {
+    max-width: 180px;
+    text-overflow: ellipsis;
+  }
+
+  .btn-op-mode {
+    padding: 3px 6px;
+    font-size: 0.65rem;
+  }
+
+  .header-actions .btn-action {
+    padding: 3px 6px;
+    font-size: 0.68rem;
+  }
+
+  .nav-tabs-container {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+  .nav-tabs-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .kpi-ribbon,
+  .metrics-summary-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+  .kpi-box {
+    min-width: 0;
+  }
+
+  .overview-intel-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .downscale-lab-grid,
+  .downscale-view-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .alerts-layout-grid,
+  .alerts-split-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .ensemble-layout-grid,
+  .ensemble-main-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .point-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .methodology-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .panel-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .map-section-card {
+    min-height: 480px;
+  }
+
+  .map-viewport-wrapper {
+    min-height: 420px;
+  }
+
+  .ground-truth-badge {
+    top: 54px;
+    right: 10px;
+    padding: 6px 10px;
+    font-size: 0.68rem;
+  }
+}
+
+/* --- 3. Smartphones & Narrow Viewports (max-width: 600px) --- */
+@media (max-width: 600px) {
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-size: 13px;
+  }
+
+  .main-container {
+    padding: var(--space-2);
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .top-nav {
+    padding: var(--space-2);
+    gap: 6px;
+    max-width: 100vw;
+  }
+
+  .brand-container {
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .logo-shield {
+    width: 26px;
+    height: 26px;
+  }
+
+  .main-title {
+    font-size: 0.88rem;
+    white-space: nowrap;
+  }
+
+  .hazard-selector-wrap {
+    max-width: 125px;
+    overflow: hidden;
+  }
+
+  .select-hazard-pill {
+    max-width: 125px;
+    font-size: 0.62rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .operational-mode-switch .btn-op-mode {
+    padding: 3px 5px;
+    font-size: 0.60rem;
+  }
+
+  .header-actions .btn-action {
+    padding: 3px 5px;
+    font-size: 0.64rem;
+  }
+
+  .kpi-ribbon,
+  .metrics-summary-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .kpi-box {
+    padding: var(--space-2);
+    min-width: 0;
+  }
+
+  .kpi-value {
+    font-size: 1.05rem;
+    word-break: break-word;
+  }
+
+  .alert-metrics-banner {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .downscale-lab-grid,
+  .downscale-view-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .swipe-comparison-card,
+  .transect-card {
+    padding: var(--space-2);
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .swipe-container {
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+  }
+
+  .alerts-layout-grid,
+  .alerts-split-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .alert-dispatch-column,
+  .bulletin-display-column {
+    max-width: 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .transect-stats-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .export-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .map-viewport-wrapper {
+    min-height: 340px;
+    height: 380px;
+  }
+
+  .leaflet-map {
+    min-height: 340px;
+    height: 100%;
+  }
+
+  /* Scrubber dock horizontal scroll / wrap */
+  .scrubber-dock {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .scrubber-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .scrubber-slider-wrap {
+    width: 100%;
+  }
+
+  /* Ensure wide tables are horizontally scrollable without breaking page width */
+  .track-table-card {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .table-scroll-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scientific-table {
+    min-width: 580px;
+  }
+
+  .cap-xml-view {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .ground-truth-badge {
+    position: static;
+    margin-bottom: var(--space-2);
+    width: 100%;
+  }
+
+  /* Mobile dock controls */
+  .zoom-overlay-dock {
+    top: 50px;
+    left: 8px;
+    width: 160px;
+  }
+
+  .zoom-wind-legend {
+    left: 8px;
+    bottom: 12px;
+    max-width: calc(100% - 16px);
+    width: auto;
+    padding: 6px 10px;
+  }
+}
+
