@@ -1544,7 +1544,7 @@ let activeBasemapKey = "dark";
 let activeBasemapLayers = [];
 
 function switchBasemap(key) {
-  if (!BASEMAP_PRESETS[key]) key = "streets";
+  if (!BASEMAP_PRESETS[key]) key = "dark";
   activeBasemapKey = key;
 
   activeBasemapLayers.forEach(layer => {

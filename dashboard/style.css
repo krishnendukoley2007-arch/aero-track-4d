@@ -4075,8 +4075,30 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
 }
 
 .leaflet-top.leaflet-right .leaflet-control-zoom a:hover {
-  background: rgba(0, 212, 229, 0.18) !important;
-  color: var(--accent-cyan) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(10, 16, 26, 0.82) !important;
+  color: #64748b !important;
+  font-size: 0.60rem !important;
+  padding: 2px 6px !important;
+  border-top-left-radius: 4px !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.leaflet-control-attribution a {
+  color: #94a3b8 !important;
+  text-decoration: none !important;
+}
+
+.leaflet-control-attribution a:hover {
+  text-decoration: underline !important;
+  color: #f1f5f9 !important;
 }
 
 .pressure-scale-bar {
