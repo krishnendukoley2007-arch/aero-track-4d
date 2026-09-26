@@ -2856,35 +2856,74 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
 .storm-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 0.67rem;
-  padding: 3px 8px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  gap: 6px;
+  font-size: 0.68rem;
+  padding: 3px 9px;
+  background: #0d1422;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
   color: var(--text-main);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.18s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .storm-pill:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.28);
+  background: #131b2e;
+  border-color: rgba(255, 255, 255, 0.25);
   color: #fff;
 }
 
 .storm-pill.active {
-  background: linear-gradient(135deg, rgba(225, 29, 72, 0.35) 0%, rgba(245, 158, 11, 0.35) 100%);
-  border-color: #ef4444;
+  background: #151e30;
+  border-color: var(--accent-cyan);
   color: #fff;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.45);
-  font-weight: 700;
+  box-shadow: 0 0 8px rgba(0, 212, 229, 0.2);
+}
+
+.storm-cat-badge {
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+.storm-cat-super {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.storm-cat-severe {
+  background: rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+}
+
+.storm-cat-heat {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+
+.storm-cat-cold {
+  background: rgba(56, 189, 248, 0.25);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.5);
 }
 
 .storm-pill-wind {
   font-weight: 700;
-  color: #f1f5f9;
+  font-family: var(--font-mono);
+  color: #f8fafc;
+}
+
+.storm-pill-meta {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
 }
 
 .radar-badge-active {

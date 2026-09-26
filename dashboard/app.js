@@ -2331,13 +2331,17 @@ const LiveGlobal = {
         this.activeStormsList.forEach((storm, idx) => {
           const pill = document.createElement("button");
           pill.className = `storm-pill font-mono ${idx === 0 ? 'active' : ''}`;
-          pill.innerHTML = `<span>🌀 ${storm.name}</span> <span class="storm-pill-wind">${Math.round(storm.current_wind_kmh)} km/h</span>`;
+          const catBadge = storm.current_wind_kmh >= 222 ? '<span class="storm-cat-badge storm-cat-super">CAT 5</span>' :
+                           (storm.current_wind_kmh >= 118 ? '<span class="storm-cat-badge storm-cat-severe">VSCS</span>' :
+                           '<span class="storm-cat-badge storm-cat-severe">GALE</span>');
+          pill.innerHTML = `<i data-lucide="wind"></i> <span>${storm.name}</span> ${catBadge} <span class="storm-pill-wind">${Math.round(storm.current_wind_kmh)} km/h</span> <span class="storm-pill-meta">${Math.round(storm.central_pressure_hpa || 998)} hPa</span>`;
           pill.title = `${storm.basin} • Stage: ${storm.current_stage} • Lead: T+0h to T+120h`;
           pill.addEventListener("click", () => {
             this.selectActiveStorm(storm.id, true);
           });
           pillsContainer.appendChild(pill);
         });
+        refreshIcons();
       });
 
       if (ThreeGlobeViewer.initialized) {
@@ -5729,7 +5733,8 @@ function initBotPresets() {
 async function loadBulletinText() {
   try {
     const loc = state.selectedLocation;
-    const url = `/api/bulletin?step_index=${state.currentStep}&lat=${loc.lat}&lon=${loc.lon}&loc_name=${encodeURIComponent(loc.name)}`;
+    const hazard = state.currentHazard || "amphan_2020";
+    const url = `/api/bulletin?step_index=${state.currentStep}&lat=${loc.lat}&lon=${loc.lon}&loc_name=${encodeURIComponent(loc.name)}&hazard_id=${hazard}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error("Bulletin API failed");
     const text = await res.text();
@@ -6147,16 +6152,7 @@ function initEventListeners() {
   }
 
   // Coastal Presets
-  document.querySelectorAll(".btn-preset").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      const lat = parseFloat(btn.dataset.lat);
-      const lon = parseFloat(btn.dataset.lon);
-      const name = btn.dataset.name;
-      triggerNDRFAlert(lat, lon, name);
-    });
-  });
+  initCoastalPresets();
 
   // Direct Bulletin Download Buttons
   const btnDl1 = document.getElementById("btn-direct-download-bulletin");
@@ -6218,6 +6214,188 @@ function initEventListeners() {
 }
 
 // ---------------- Multi-Hazard Architecture Switcher ----------------
+function initCoastalPresets() {
+  document.querySelectorAll(".btn-preset").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const lat = parseFloat(btn.dataset.lat);
+      const lon = parseFloat(btn.dataset.lon);
+      const name = btn.dataset.name;
+      triggerNDRFAlert(lat, lon, name);
+    });
+  });
+}
+
+function updatePresetButtonsForHazard(hazardId) {
+  const botPresetBar = document.getElementById("bot-preset-bar");
+  const coastalPresetsRow = document.querySelector(".coastal-presets-row");
+  const coastalHeaderTitle = document.querySelector(".alert-dispatch-column .card-headline span");
+
+  let presets = [];
+  if (hazardId === "heat_dome_2020") {
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Extreme Heat Station or Click Map`;
+    presets = [
+      { name: "Churu (Rajasthan - Epicenter)", lat: 28.290, lon: 74.960, label: "Churu 47.6°C", icon: "flame" },
+      { name: "Palam (Delhi NCR - Heat Island)", lat: 28.580, lon: 77.090, label: "Palam 46.8°C", icon: "building" },
+      { name: "Nagpur (Vidarbha)", lat: 21.145, lon: 79.088, label: "Nagpur 46.5°C", icon: "sun" },
+      { name: "Banda (Uttar Pradesh)", lat: 25.480, lon: 80.340, label: "Banda 47.2°C", icon: "thermometer" }
+    ];
+  } else if (hazardId === "cold_wave_2021") {
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Cold Wave Station or Click Map`;
+    presets = [
+      { name: "Sikar (Rajasthan - Ground Frost)", lat: 27.610, lon: 75.140, label: "Sikar 1.9°C", icon: "snowflake" },
+      { name: "Narnaul (Haryana)", lat: 28.040, lon: 76.110, label: "Narnaul 2.2°C", icon: "wind" },
+      { name: "Amritsar (Punjab - Dense Fog)", lat: 31.634, lon: 74.872, label: "Amritsar 2.8°C", icon: "cloud-fog" },
+      { name: "Safdarjung (Delhi NCR)", lat: 28.585, lon: 77.206, label: "Safdarjung 3.2°C", icon: "thermometer-snowflake" }
+    ];
+  } else if (hazardId === "fani_2019") {
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Coastal Node or Click Map`;
+    presets = [
+      { name: "Puri Coast (Odisha Landfall)", lat: 19.813, lon: 85.831, label: "Puri Coast", icon: "anchor" },
+      { name: "Bhubaneswar (Odisha)", lat: 20.296, lon: 85.825, label: "Bhubaneswar", icon: "building" },
+      { name: "Gopalpur Port (Odisha)", lat: 19.260, lon: 84.910, label: "Gopalpur", icon: "map-pin" },
+      { name: "Fani Eyewall Core", lat: 19.800, lon: 85.800, label: "Storm Eye", icon: "crosshair" }
+    ];
+  } else if (hazardId === "yaas_2021") {
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Coastal Node or Click Map`;
+    presets = [
+      { name: "Dhamra Port (Odisha Landfall)", lat: 20.800, lon: 86.970, label: "Dhamra Port", icon: "anchor" },
+      { name: "Balasore Coast (Odisha)", lat: 21.490, lon: 86.930, label: "Balasore", icon: "map-pin" },
+      { name: "Digha Coast (West Bengal)", lat: 21.626, lon: 87.508, label: "Digha", icon: "map-pin" },
+      { name: "Yaas Eyewall Core", lat: 20.800, lon: 87.000, label: "Storm Eye", icon: "crosshair" }
+    ];
+  } else {
+    // Amphan 2020 / Default
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Coastal Node or Click Map`;
+    presets = [
+      { name: "Digha Coast (West Bengal)", lat: 21.626, lon: 87.508, label: "Digha", icon: "map-pin" },
+      { name: "Paradip Port (Odisha)", lat: 20.316, lon: 86.611, label: "Paradip", icon: "anchor" },
+      { name: "Kolkata (West Bengal)", lat: 22.572, lon: 88.364, label: "Kolkata", icon: "building" },
+      { name: "Amphan Cyclone Eye", lat: 14.900, lon: 87.500, label: "Storm Eye", icon: "crosshair" }
+    ];
+  }
+
+  if (botPresetBar) {
+    botPresetBar.innerHTML = `<span class="bot-preset-label">QUICK PROBE:</span>` +
+      presets.map((p, idx) => `<button class="btn-bot-preset ${idx === 0 ? 'active' : ''}" data-lat="${p.lat}" data-lon="${p.lon}" data-name="${p.name}"><i data-lucide="${p.icon}"></i> ${p.label}</button>`).join(" ");
+  }
+
+  if (coastalPresetsRow) {
+    coastalPresetsRow.innerHTML = presets.map((p, idx) => `<button class="btn-preset ${idx === 0 ? 'active' : ''}" data-lat="${p.lat}" data-lon="${p.lon}" data-name="${p.name}">${p.label}</button>`).join(" ");
+  }
+
+  initBotPresets();
+  initCoastalPresets();
+  refreshIcons();
+}
+
+function updateTwoGapBreakdown(hazardId) {
+  const elCoarse = document.getElementById("tier-bar-coarse");
+  const elUnet = document.getElementById("tier-bar-unet");
+  const elExpl1 = document.getElementById("gap-expl-1");
+  const elCorrdiff = document.getElementById("tier-bar-corrdiff");
+  const elTarget = document.getElementById("tier-bar-target");
+  const elExpl2 = document.getElementById("gap-expl-2");
+  const elGtLbl = document.getElementById("tier-lbl-gt");
+  const elGtBar = document.getElementById("tier-bar-gt");
+
+  if (!elCoarse || !elCorrdiff) return;
+
+  if (hazardId === "heat_dome_2020") {
+    elCoarse.style.width = "44%";
+    elCoarse.textContent = "44.0°C (Regional Coarse NWP)";
+    elUnet.style.width = "42%";
+    elUnet.innerHTML = `42.1°C <span class="tag-smoothed">-5.5°C UHI Smoothing</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Recovers 47.6°C Asphalt Thermal Hotspot)`;
+    elCorrdiff.style.width = "48%";
+    elCorrdiff.innerHTML = `47.6°C <span class="tag-preserved">Preserved Peak</span>`;
+    if (elTarget) {
+      elTarget.style.width = "45%";
+      elTarget.textContent = "45.2°C (Regional Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Standard reanalysis blurs urban asphalt core. Resolved by 5.0 km downscaling.`;
+    if (elGtLbl) elGtLbl.textContent = "IMD Churu / Palam AWS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "48%";
+      elGtBar.textContent = "47.6°C (Official Station Record)";
+    }
+  } else if (hazardId === "cold_wave_2021") {
+    elCoarse.style.width = "50%";
+    elCoarse.textContent = "5.1°C (Averaged Regional NWP)";
+    elUnet.style.width = "48%";
+    elUnet.innerHTML = `4.8°C <span class="tag-smoothed">+2.9°C Ridge Bias</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Resolves 1.9°C Nocturnal Frost Valley)`;
+    elCorrdiff.style.width = "19%";
+    elCorrdiff.innerHTML = `1.9°C <span class="tag-preserved">Ground Frost Inversion</span>`;
+    if (elTarget) {
+      elTarget.style.width = "35%";
+      elTarget.textContent = "3.5°C (Reconstruction Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Broad grid misses cold air drainage in topographic hollows.`;
+    if (elGtLbl) elGtLbl.textContent = "IMD Sikar / Narnaul AWS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "19%";
+      elGtBar.textContent = "1.9°C (Recorded Minimum Tmin)";
+    }
+  } else if (hazardId === "fani_2019") {
+    elCoarse.style.width = "30%";
+    elCoarse.textContent = "64.9 km/h";
+    elUnet.style.width = "25%";
+    elUnet.innerHTML = `55.2 km/h <span class="tag-smoothed">-50.3% Loss</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Recovers 93.3 km/h; Held-Out Test Step)`;
+    elCorrdiff.style.width = "43%";
+    elCorrdiff.innerHTML = `93.3 km/h <span class="tag-preserved">84.0% Recovered</span>`;
+    if (elTarget) {
+      elTarget.style.width = "51%";
+      elTarget.textContent = "111.1 km/h (Native Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.`;
+    if (elGtLbl) elGtLbl.textContent = "NOAA IBTrACS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "100%";
+      elGtBar.textContent = "215.0 km/h (IBTrACS Landfall)";
+    }
+  } else if (hazardId === "yaas_2021") {
+    elCoarse.style.width = "38%";
+    elCoarse.textContent = "53.0 km/h";
+    elUnet.style.width = "33%";
+    elUnet.innerHTML = `46.2 km/h <span class="tag-smoothed">-50.0% Loss</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Recovers 85.1 km/h; Held-Out Test Step)`;
+    elCorrdiff.style.width = "61%";
+    elCorrdiff.innerHTML = `85.1 km/h <span class="tag-preserved">92.2% Recovered</span>`;
+    if (elTarget) {
+      elTarget.style.width = "66%";
+      elTarget.textContent = "92.3 km/h (Native Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.`;
+    if (elGtLbl) elGtLbl.textContent = "NOAA IBTrACS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "100%";
+      elGtBar.textContent = "140.0 km/h (IBTrACS Landfall)";
+    }
+  } else {
+    // Amphan 2020 Default
+    elCoarse.style.width = "28%";
+    elCoarse.textContent = "63.4 km/h";
+    elUnet.style.width = "25%";
+    elUnet.innerHTML = `56.5 km/h <span class="tag-smoothed">-49.1% Loss</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Recovers 102.1 km/h; P90: 108.4 km/h)`;
+    elCorrdiff.style.width = "46%";
+    elCorrdiff.innerHTML = `102.1 km/h <span class="tag-preserved">Preserved Peak</span>`;
+    if (elTarget) {
+      elTarget.style.width = "50%";
+      elTarget.textContent = "111.0 km/h (Reconstruction Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.`;
+    if (elGtLbl) elGtLbl.textContent = "NOAA IBTrACS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "100%";
+      elGtBar.textContent = "222.2 km/h (IBTrACS Best-Track Estimate)";
+    }
+  }
+}
+
 async function switchHazard(hazardId) {
   state.currentHazard = hazardId;
   const selectEl = document.getElementById("select-active-hazard");
@@ -6229,14 +6407,21 @@ async function switchHazard(hazardId) {
     if (btnBench) btnBench.click();
   }
 
+  updatePresetButtonsForHazard(hazardId);
+  updateTwoGapBreakdown(hazardId);
+
   try {
     if (hazardId === "amphan_2020") {
       await loadTrackData();
       await updateStep(5);
       if (state.map) state.map.setView([18.5, 87.5], 6);
+      const defaultPreset = { lat: 21.626, lon: 87.508, name: "Digha Coast (West Bengal)" };
+      triggerNDRFAlert(defaultPreset.lat, defaultPreset.lon, defaultPreset.name);
       loadCAPXmlFeed();
       loadAgriAdvisory();
+      loadBulletinText();
       updateExportLinks();
+      refreshIcons();
       return;
     }
 
@@ -6294,10 +6479,20 @@ async function switchHazard(hazardId) {
       }).addTo(state.map);
     }
 
+    // Automatically trigger alert for the primary preset of the newly selected hazard
+    const firstPreset = (hazardId === "heat_dome_2020") ? { lat: 28.290, lon: 74.960, name: "Churu (Rajasthan - Epicenter)" } :
+                        (hazardId === "cold_wave_2021" ? { lat: 27.610, lon: 75.140, name: "Sikar (Rajasthan - Ground Frost)" } :
+                        (hazardId === "fani_2019" ? { lat: 19.813, lon: 85.831, name: "Puri Coast (Odisha Landfall)" } :
+                        (hazardId === "yaas_2021" ? { lat: 20.800, lon: 86.970, name: "Dhamra Port (Odisha Landfall)" } :
+                        { lat: 21.626, lon: 87.508, name: "Digha Coast (West Bengal)" })));
+    triggerNDRFAlert(firstPreset.lat, firstPreset.lon, firstPreset.name);
+
     // Refresh advisory, CAP and export links
     loadCAPXmlFeed();
     loadAgriAdvisory();
+    loadBulletinText();
     updateExportLinks();
+    refreshIcons();
   } catch (err) {
     console.error("Switch hazard error:", err);
   }

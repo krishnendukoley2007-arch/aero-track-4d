@@ -754,34 +754,34 @@
               <span><i data-lucide="layers"></i> Decomposing the Two Error Gaps Honestly</span>
               <span class="peer-review-tag">Scientific Rigor</span>
             </div>
-            <div class="two-gaps-diagram font-mono">
+            <div class="two-gaps-diagram font-mono" id="two-gaps-diagram">
               <div class="gap-tier tier-coarse">
-                <div class="tier-label">Coarse NWP Input</div>
-                <div class="tier-bar" style="width: 28%;">63.4 km/h</div>
+                <div class="tier-label" id="tier-lbl-coarse">Coarse NWP Input</div>
+                <div class="tier-bar" id="tier-bar-coarse" style="width: 28%;">63.4 km/h</div>
               </div>
               <div class="gap-tier tier-unet">
-                <div class="tier-label">Standard U-Net (L2 Loss)</div>
-                <div class="tier-bar" style="width: 25%;">56.5 km/h <span class="tag-smoothed">-49.1% Loss</span></div>
+                <div class="tier-label" id="tier-lbl-unet">Standard U-Net (L2 Loss)</div>
+                <div class="tier-bar" id="tier-bar-unet" style="width: 25%;">56.5 km/h <span class="tag-smoothed">-49.1% Loss</span></div>
               </div>
               <div class="gap-callout gap-1-callout">
-                <span class="gap-badge">GAP 1: SPECTRAL SMOOTHING</span>
-                <span class="gap-expl">&rarr; CLOSED BY CORRDIFF (Recovers 102.1 km/h; P90: 108.4 km/h)</span>
+                <span class="gap-badge" id="gap-badge-1">GAP 1: SPECTRAL SMOOTHING</span>
+                <span class="gap-expl" id="gap-expl-1">&rarr; CLOSED BY CORRDIFF (Recovers 102.1 km/h; P90: 108.4 km/h)</span>
               </div>
               <div class="gap-tier tier-corrdiff">
-                <div class="tier-label">CorrDiff Diffusion (Ours)</div>
-                <div class="tier-bar" style="width: 46%;">102.1 km/h <span class="tag-preserved">Preserved Peak</span></div>
+                <div class="tier-label" id="tier-lbl-corrdiff">CorrDiff Diffusion (Ours)</div>
+                <div class="tier-bar" id="tier-bar-corrdiff" style="width: 46%;">102.1 km/h <span class="tag-preserved">Preserved Peak</span></div>
               </div>
               <div class="gap-tier tier-target">
-                <div class="tier-label">Native ERA5 Target</div>
-                <div class="tier-bar" style="width: 50%;">111.0 km/h (Reconstruction Baseline)</div>
+                <div class="tier-label" id="tier-lbl-target">Native ERA5 Target</div>
+                <div class="tier-bar" id="tier-bar-target" style="width: 50%;">111.0 km/h (Reconstruction Baseline)</div>
               </div>
               <div class="gap-callout gap-2-callout">
-                <span class="gap-badge">GAP 2: GLOBAL REANALYSIS RESOLUTION LIMIT</span>
-                <span class="gap-expl">&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.</span>
+                <span class="gap-badge" id="gap-badge-2">GAP 2: GLOBAL REANALYSIS RESOLUTION LIMIT</span>
+                <span class="gap-expl" id="gap-expl-2">&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.</span>
               </div>
               <div class="gap-tier tier-groundtruth">
-                <div class="tier-label">NOAA IBTrACS Ground Truth</div>
-                <div class="tier-bar" style="width: 100%;">222.2 km/h (IBTrACS Best-Track Estimate)</div>
+                <div class="tier-label" id="tier-lbl-gt">NOAA IBTrACS Ground Truth</div>
+                <div class="tier-bar" id="tier-bar-gt" style="width: 100%;">222.2 km/h (IBTrACS Best-Track Estimate)</div>
               </div>
             </div>
           </div>

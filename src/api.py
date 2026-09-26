@@ -729,13 +729,17 @@ def get_imd_bulletin(
     lat: float = Query(21.62),
     lon: float = Query(87.51),
     loc_name: str = Query("Digha Coast"),
-    lang: str = Query("en", description="Language: en, hi, bn, or")
+    lang: str = Query("en", description="Language: en, hi, bn, or"),
+    hazard_id: str = Query("amphan_2020", description="Hazard ID")
 ):
-    """Generates official IMD-formatted national cyclone warning bulletin in English, Hindi, Bengali, or Odia."""
-    step_data = tracker.detect_and_track_step(step_index)
-    req = AlertRequest(lat=lat, lon=lon, location_name=loc_name, step_index=step_index)
+    """Generates official IMD-formatted national advisory bulletin for cyclones, heat waves, or cold waves."""
+    if hazard_id in ["heat_dome_2020", "cold_wave_2021"]:
+        step_data = MultiHazardRegistry.generate_hazard_timesteps(hazard_id)["tracked_steps"][2]
+    else:
+        step_data = tracker.detect_and_track_step(step_index)
+    req = AlertRequest(lat=lat, lon=lon, location_name=loc_name, step_index=step_index, hazard_id=hazard_id)
     alert_data = calculate_ndrf_alert(req)
-    bulletin_text = IMDBulletinGenerator.generate_bulletin(step_data, alert_data, lang=lang)
+    bulletin_text = IMDBulletinGenerator.generate_bulletin(step_data, alert_data, lang=lang, hazard_id=hazard_id)
     return bulletin_text
 
 
@@ -745,11 +749,15 @@ def get_imd_bulletin_html(
     lat: float = Query(21.62),
     lon: float = Query(87.51),
     loc_name: str = Query("Digha Coast"),
-    lang: str = Query("en", description="Language: en, hi, bn, or")
+    lang: str = Query("en", description="Language: en, hi, bn, or"),
+    hazard_id: str = Query("amphan_2020", description="Hazard ID")
 ):
-    """Renders formatted HTML official IMD Cyclone Advisory Bulletin in English, Hindi, Bengali, or Odia."""
-    step_data = tracker.detect_and_track_step(step_index)
-    req = AlertRequest(lat=lat, lon=lon, location_name=loc_name, step_index=step_index)
+    """Renders formatted HTML official IMD Advisory Bulletin in English, Hindi, Bengali, or Odia."""
+    if hazard_id in ["heat_dome_2020", "cold_wave_2021"]:
+        step_data = MultiHazardRegistry.generate_hazard_timesteps(hazard_id)["tracked_steps"][2]
+    else:
+        step_data = tracker.detect_and_track_step(step_index)
+    req = AlertRequest(lat=lat, lon=lon, location_name=loc_name, step_index=step_index, hazard_id=hazard_id)
     alert_data = calculate_ndrf_alert(req)
     return IMDBulletinGenerator.generate_html_bulletin(step_data, alert_data, lang=lang)
 
@@ -760,14 +768,18 @@ def download_imd_bulletin(
     lat: float = Query(21.62),
     lon: float = Query(87.51),
     loc_name: str = Query("Digha Coast"),
-    lang: str = Query("en", description="Language: en, hi, bn, or")
+    lang: str = Query("en", description="Language: en, hi, bn, or"),
+    hazard_id: str = Query("amphan_2020", description="Hazard ID")
 ):
     """Generates downloadable HTML bulletin file with Census 2011 density-based demographic projections."""
-    step_data = tracker.detect_and_track_step(step_index)
-    req = AlertRequest(lat=lat, lon=lon, location_name=loc_name, step_index=step_index)
+    if hazard_id in ["heat_dome_2020", "cold_wave_2021"]:
+        step_data = MultiHazardRegistry.generate_hazard_timesteps(hazard_id)["tracked_steps"][2]
+    else:
+        step_data = tracker.detect_and_track_step(step_index)
+    req = AlertRequest(lat=lat, lon=lon, location_name=loc_name, step_index=step_index, hazard_id=hazard_id)
     alert_data = calculate_ndrf_alert(req)
     html_content = IMDBulletinGenerator.generate_html_bulletin(step_data, alert_data, lang=lang)
-    filename = f"IMD_Cyclone_Bulletin_Amphan_Step{step_index + 1}_{lang.lower()}.html"
+    filename = f"IMD_Advisory_Bulletin_{hazard_id}_Step{step_index + 1}_{lang.lower()}.html"
     return Response(
         content=html_content,
         media_type="text/html",
