@@ -43,6 +43,8 @@ from src.live_global import (
     get_live_global_anomalies,
     get_active_global_storms,
     get_live_radar_metadata,
+    get_live_precipitation_metadata,
+    get_live_precipitation_tile,
     get_global_wind_vectors,
 )
 
@@ -910,6 +912,26 @@ def api_live_radar_tiles():
     return get_live_radar_metadata()
 
 
+@app.get("/api/live/precipitation-meta")
+def api_live_precipitation_meta():
+    """Returns real-time DWD ICON global precipitation forecast model metadata and tile URL template."""
+    return get_live_precipitation_metadata()
+
+
+@app.get("/api/live/precipitation-tile/{z}/{x}/{y}.webp")
+def api_live_precipitation_tile(z: int, x: int, y: int):
+    """Proxies and caches real-time DWD ICON global precipitation forecast tiles (13km resolution)."""
+    tile_bytes = get_live_precipitation_tile(z, x, y)
+    return Response(
+        content=tile_bytes,
+        media_type="image/webp",
+        headers={
+            "Cache-Control": "public, max-age=1800",
+            "Access-Control-Allow-Origin": "*"
+        }
+    )
+
+
 @app.get("/api/live/global-wind-vectors")
 def api_live_global_wind_vectors():
     """Returns physical global u/v wind vector field from real atmospheric advection & storm vortex dynamics."""
@@ -1020,5 +1042,5 @@ def serve_dashboard():
     """Serves the main operations dashboard index.html."""
     index_file = os.path.join(DASHBOARD_DIR, "index.html")
     if os.path.exists(index_file):
-        return FileResponse(index_file)
+        return FileResponse(index_file, headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"})
     return {"message": "NCMRWF AI Weather Tracking API is online. Access /docs for OpenAPI specs."}

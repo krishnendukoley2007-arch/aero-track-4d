@@ -26,6 +26,8 @@ ENDPOINTS = [
     ("GET", "/api/live/global-anomalies", ["status", "active_anomalies", "total_basins_monitored"]),
     ("GET", "/api/live/point-forecast?lat=25.76&lon=-80.19", ["status", "current_conditions", "medium_range_ensemble_10day"]),
     ("GET", "/api/live/search?q=Tokyo", ["results"]),
+    ("GET", "/api/live/precipitation-meta", ["status", "model", "forecast_hour_str", "tile_url_template"]),
+    ("GET", "/api/live/precipitation-tile/4/11/7.webp", None),
     ("GET", "/api/credibility/imd-comparison", ["status", "event_id", "official_citations", "summary_metrics", "comparison_steps"]),
     ("GET", "/api/historical/verification", ["benchmark_event", "key_metrics", "two_gap_analysis"]),
     ("GET", "/api/hazards", None),
