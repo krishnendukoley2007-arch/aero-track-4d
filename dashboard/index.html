@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/static/style.css?v=proof_modal_v1">
+  <link rel="stylesheet" href="/static/style.css?v=aerotrack_v6_step2">
 
   <!-- Leaflet & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -49,22 +49,22 @@
     <!-- Center Navigation Tabs -->
     <nav class="nav-tabs-container" id="nav-tabs-container">
       <button class="nav-tab active" data-view="overview" id="tab-overview" title="Full-screen 3D Earth and 2D Interactive Tracking Map">
-        <span class="tab-icon">🌐</span> 1. Monitor
+        <span class="tab-icon">🌐</span> Monitor
       </button>
       <button class="nav-tab" data-view="timeline" id="tab-timeline" title="Trajectory audit and step-by-step IBTrACS validation">
-        <span class="tab-icon">⏱️</span> 2. Track &amp; Audit
+        <span class="tab-icon">⏱️</span> Track
       </button>
       <button class="nav-tab" data-view="downscale" id="tab-downscale" title="Swipe comparison: coarse NWP vs 5km CorrDiff generative diffusion">
-        <span class="tab-icon">🔬</span> 3. Downscale
+        <span class="tab-icon">🔬</span> Downscale
       </button>
       <button class="nav-tab" data-view="alerts" id="tab-alerts" title="Hyper-local 5km warnings, multilingual advisory, and OASIS CAP XML">
-        <span class="tab-icon">🚨</span> 4. Alert &amp; CAP
+        <span class="tab-icon">🚨</span> Alerts
       </button>
       <button class="nav-tab" data-view="ensemble" id="tab-ensemble" title="3-10 day medium-range EPS dispersion and cone of uncertainty">
-        <span class="tab-icon">🌪️</span> 5. Medium-Range
+        <span class="tab-icon">🌪️</span> Outlook
       </button>
       <button class="nav-tab" data-view="methodology" id="tab-methodology" title="Official problem statement rubric and mathematical validation">
-        <span class="tab-icon">📚</span> 6. Methodology
+        <span class="tab-icon">📚</span> Rubric
       </button>
     </nav>
 
@@ -72,11 +72,11 @@
     <div class="header-right-suite">
       <div class="hazard-selector-wrap" id="hazard-selector-wrap">
         <select id="select-active-hazard" class="select-hazard-pill" title="Switch between verified extreme anomaly benchmark case studies">
-          <option value="amphan_2020" selected>🌀 Super Cyclone Amphan (May 2020)</option>
-          <option value="fani_2019">🌀 Cyclone Fani (April-May 2019)</option>
-          <option value="yaas_2021">🌀 Cyclone Yaas (May 2021)</option>
-          <option value="heat_dome_2020">☀️ Northwest India Heat Dome (47.6°C)</option>
-          <option value="cold_wave_2021">❄️ North India Cold Wave (1.9°C)</option>
+          <option value="amphan_2020" selected>🌀 Super Cyclone Amphan</option>
+          <option value="fani_2019">🌀 Cyclone Fani</option>
+          <option value="yaas_2021">🌀 Cyclone Yaas</option>
+          <option value="heat_dome_2020">☀️ Heat Dome (47.6°C)</option>
+          <option value="cold_wave_2021">❄️ Cold Wave (1.9°C)</option>
         </select>
       </div>
 
@@ -85,13 +85,13 @@
           <span class="pulse-dot green"></span> Live Earth
         </button>
         <button class="btn-op-mode" id="btn-op-benchmark" data-op-mode="benchmark" title="Switch to Historical Cyclone Benchmark Studio (Amphan, Fani, Yaas)">
-          ⚡ Benchmark Studio
+          ⚡ Benchmark
         </button>
       </div>
 
       <div class="header-actions">
         <button id="btn-proof-modal" class="btn-action btn-proof" title="Official Model Verification & Science Proof (SIH 26078)">
-          <span class="icon">📊</span> 10/10 Proof
+          <span class="icon">📊</span> Proof
         </button>
         <button id="btn-guided-tour" class="btn-action btn-tour" title="Guided tour for reviewers">
           <span class="icon">🎯</span> Tour
@@ -138,26 +138,26 @@
         </p>
       </div>
 
-      <!-- Compact 4-Metric KPI Ribbon -->
+      <!-- Compact 4-Metric KPI Ribbon with Defined Hierarchy -->
       <div class="kpi-ribbon">
-        <div class="kpi-box">
+        <div class="kpi-box kpi-box-status">
           <span class="kpi-tag" id="ov-card1-label">Classification</span>
           <div class="kpi-value" id="ov-stage">Super Cyclone</div>
           <div class="kpi-sub" id="ov-stage-sub">Cat 5 &bull; 920 hPa</div>
         </div>
-        <div class="kpi-box">
+        <div class="kpi-box kpi-box-primary">
           <span class="kpi-tag" id="ov-card2-label">Eyewall Wind (5km)</span>
-          <div class="kpi-value text-cyan" id="ov-wind">102.1 km/h</div>
+          <div class="kpi-value" id="ov-wind">102.1 km/h</div>
           <div class="kpi-sub" id="ov-wind-sub">Coarse NWP: 63.4 km/h <span class="text-amber">(+61% recovered)</span></div>
         </div>
-        <div class="kpi-box">
+        <div class="kpi-box kpi-box-secondary">
           <span class="kpi-tag" id="ov-card3-label">Held-out Track Error</span>
-          <div class="kpi-value text-amber" id="ov-error">22.7 km</div>
+          <div class="kpi-value text-amber font-mono" id="ov-error">22.7 km</div>
           <div class="kpi-sub" id="ov-error-sub">Baseline: 46.2 km (51% closer)</div>
         </div>
-        <div class="kpi-box">
+        <div class="kpi-box kpi-box-secondary">
           <span class="kpi-tag" id="ov-card4-label">False-Alarm Reduction</span>
-          <div class="kpi-value text-green" id="ov-reduction">97.8%</div>
+          <div class="kpi-value text-green font-mono" id="ov-reduction">97.8%</div>
           <div class="kpi-sub" id="ov-reduction-sub">78.5 km² surgical zone vs 3,500 km²</div>
         </div>
       </div>
@@ -867,19 +867,19 @@
             </div>
             <h3 class="alert-target-title" id="alert-loc-name">Digha Coast (West Bengal)</h3>
             <div class="alert-metrics-banner">
-              <div class="banner-item">
+              <div class="banner-item banner-item-primary">
                 <span class="b-lbl">Predicted Wind:</span>
-                <span class="b-val font-mono text-cyan" id="alert-wind">102.1 km/h</span>
+                <span class="b-val font-mono" id="alert-wind">102.1 km/h</span>
               </div>
               <div class="banner-item">
                 <span class="b-lbl">P90 Gusts:</span>
-                <span class="b-val text-amber" id="alert-gust">108.4 km/h</span>
+                <span class="b-val font-mono text-amber" id="alert-gust">108.4 km/h</span>
               </div>
               <div class="banner-item">
                 <span class="b-lbl">Rainfall Rate:</span>
-                <span class="b-val text-cyan" id="alert-rain">18.4 mm/h</span>
+                <span class="b-val font-mono" id="alert-rain">18.4 mm/h</span>
               </div>
-              <div class="banner-item">
+              <div class="banner-item banner-item-priority">
                 <span class="b-lbl">NDRF Priority:</span>
                 <span class="b-val text-red" id="alert-priority">IMMEDIATE</span>
               </div>
