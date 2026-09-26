@@ -10,7 +10,10 @@ Provides standardized meteorological data products for:
 import io
 import json
 import numpy as np
-import xarray as xr
+try:
+    import xarray as xr
+except ImportError:
+    xr = None
 from typing import Dict, Any, Tuple
 from src.downscale.inference import CorrDiffInferenceEngine
 from src.multihazard_anomalies import MultiHazardRegistry
@@ -124,6 +127,11 @@ class OperationalDataExporter:
         lats = np.linspace(bbox["lat_min"], bbox["lat_max"], nrows, dtype=np.float32)
         lons = np.linspace(bbox["lon_min"], bbox["lon_max"], ncols, dtype=np.float32)
         
+        if xr is None:
+            buf = io.BytesIO()
+            np.savez_compressed(buf, corrdiff_5km=corrdiff_arr, coarse_12km=coarse_arr, lats=lats, lons=lons)
+            return buf.getvalue()
+
         # Build xarray dataset
         ds = xr.Dataset(
             data_vars={
