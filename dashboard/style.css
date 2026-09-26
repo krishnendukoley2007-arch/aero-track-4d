@@ -2872,7 +2872,6 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.28);
   color: #fff;
-  transform: translateY(-1px);
 }
 
 .storm-pill.active {
@@ -3179,7 +3178,6 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
 }
 
 .daily-card:hover {
-  transform: translateY(-2px);
   border-color: rgba(255, 255, 255, 0.25);
   background: rgba(15, 23, 42, 0.95);
 }
@@ -3642,7 +3640,6 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
 .export-btn:hover {
   background: rgba(0, 212, 229, 0.12);
   border-color: rgba(0, 212, 229, 0.4);
-  transform: translateY(-1px);
 }
 
 .export-icon {
@@ -3895,7 +3892,6 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.25);
   color: #fff;
-  transform: translateY(-1px);
 }
 
 /* ---------------- Live Active Storms Header Bar ---------------- */
@@ -3946,7 +3942,33 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
 }
 
 .live-storm-2d-eye:hover {
-  transform: scale(1.22);
+  filter: brightness(1.15);
+}
+
+/* ============================================================ */
+/* THE ONE DELIBERATE MOTION MOMENT: ACTIVE CYCLONE RADAR PULSE */
+/* Focused exclusively on the active storm eye marker on the    */
+/* live tactical map. All other cards remain static and solid.  */
+/* ============================================================ */
+@keyframes storm-radar-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0.9;
+    border-color: rgba(0, 212, 229, 0.9);
+    box-shadow: 0 0 4px rgba(0, 212, 229, 0.6);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.7);
+    opacity: 0.35;
+    border-color: rgba(0, 212, 229, 0.4);
+    box-shadow: 0 0 12px rgba(0, 212, 229, 0.2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.4);
+    opacity: 0;
+    border-color: rgba(0, 212, 229, 0);
+    box-shadow: none;
+  }
 }
 
 .live-storm-pulse-ring {
@@ -3954,13 +3976,12 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  border: 2px solid #00d4e5;
-  opacity: 0.7;
-  animation: botPulse 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  border: 1.5px solid var(--accent-cyan);
   pointer-events: none;
+  animation: storm-radar-pulse 2.2s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
 }
 
 .live-storm-symbol {
