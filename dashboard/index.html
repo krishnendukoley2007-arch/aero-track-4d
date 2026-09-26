@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/static/style.css?v=aerotrack_v6_step2">
+  <link rel="stylesheet" href="/static/style.css?v=aerotrack_v6_step3">
 
   <!-- Leaflet & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -128,8 +128,8 @@
         </div>
 
         <div class="telemetry-chips">
-          <span class="chip-item"><strong>Stage 1:</strong> <span class="val font-mono text-cyan" id="val-tracker">True Icosahedron (0.439% Area Var) + GAT</span></span>
-          <span class="chip-item"><strong>Stage 2:</strong> <span class="val font-mono text-cyan" id="val-corrdiff">CorrDiff Diffusion (5km Subgrid)</span></span>
+          <span class="chip-item"><strong>Stage 1:</strong> <span class="val font-mono" id="val-tracker">True Icosahedron (0.439% Area Var) + GAT</span></span>
+          <span class="chip-item"><strong>Stage 2:</strong> <span class="val font-mono" id="val-corrdiff">CorrDiff Diffusion (5km Subgrid)</span></span>
           <span class="chip-item"><strong>Track Accuracy:</strong> <span class="val font-mono text-green" id="val-track-accuracy">50.9 km (8.7 km Landfall)</span></span>
         </div>
 
@@ -329,7 +329,7 @@
             </div>
             <div class="gt-content">
               <div class="gt-row"><span>Bay of Bengal:</span> <strong class="text-emerald font-mono">12–16 km/h (Calm)</strong></div>
-              <div class="gt-row"><span>Monsoon Low (UP):</span> <strong class="text-cyan font-mono">997.8 hPa (L)</strong></div>
+              <div class="gt-row"><span>Monsoon Low (UP):</span> <strong class="font-mono text-white">997.8 hPa (L)</strong></div>
               <div class="gt-row"><span>Himalayan High:</span> <strong class="text-amber font-mono">1020+ hPa (H)</strong></div>
               <div class="gt-source">ECMWF IFS &bull; Matches Zoom Earth 1:1</div>
             </div>
@@ -432,7 +432,7 @@
               </div>
               <div class="inspector-stat-box highlight-box">
                 <div class="inspector-stat-label">CORRDIFF 5km</div>
-                <div class="inspector-stat-val text-cyan" id="insp-resolved-wind">-- km/h</div>
+                <div class="inspector-stat-val" id="insp-resolved-wind">-- km/h</div>
               </div>
               <div class="inspector-stat-box">
                 <div class="inspector-stat-label">GUST (P90)</div>
@@ -552,7 +552,7 @@
             </div>
             <div class="calc-row">
               <span>5 km Pinpoint Target:</span>
-              <strong class="text-cyan">~84,500 citizens</strong>
+              <strong>~84,500 citizens</strong>
             </div>
             <div class="calc-divider"></div>
             <div class="calc-row highlight">
@@ -606,7 +606,7 @@
         </div>
         <div class="kpi-box">
           <span class="kpi-tag">Mesh Area Variance</span>
-          <div class="kpi-value text-cyan">0.439%</div>
+          <div class="kpi-value">0.439%</div>
           <div class="kpi-sub">Acceptance: &lt; 5.0% (Passed)</div>
         </div>
       </div>
@@ -691,7 +691,7 @@
             </div>
             <div class="live-inspection-readout">
               <span id="stat-cd-label">CorrDiff Resolved Peak:</span>
-              <strong id="stat-corrdiff-wind" class="text-cyan font-mono">102.1 km/h</strong>
+              <strong id="stat-corrdiff-wind" class="font-mono text-white">102.1 km/h</strong>
               <span class="text-muted">(Coarse NWP: <span id="stat-coarse-wind" class="font-mono">63.4 km/h</span>)</span>
             </div>
           </div>
@@ -792,7 +792,7 @@
             <div class="physics-metrics-row font-mono">
               <div class="phys-metric">
                 <span class="p-label">2D Mass Divergence:</span>
-                <span class="p-val text-cyan" id="val-div">3.20 &times; 10<sup>-5</sup> s<sup>-1</sup></span>
+                <span class="p-val" id="val-div">3.20 &times; 10<sup>-5</sup> s<sup>-1</sup></span>
                 <span class="p-sub">&nabla; &bull; V &approx; 0 (Continuity)</span>
               </div>
               <div class="phys-metric">
@@ -802,7 +802,7 @@
               </div>
               <div class="phys-metric">
                 <span class="p-label">Diagnostic Conformity:</span>
-                <span class="p-val text-cyan" id="val-phys-score">-- / 100</span>
+                <span class="p-val" id="val-phys-score">-- / 100</span>
                 <span class="p-sub" title="Post-hoc audit measuring boundary layer MFC alignment & divergence in turbulent eyewall">Post-Hoc Eyewall Dynamics Audit</span>
               </div>
             </div>
@@ -995,7 +995,7 @@
         </div>
         <div class="kpi-box">
           <span class="kpi-tag">Chaos Growth Law</span>
-          <div class="kpi-value text-cyan font-mono">&sigma;(t) ~ t<sup>1.2</sup></div>
+          <div class="kpi-value font-mono">&sigma;(t) ~ t<sup>1.2</sup></div>
           <div class="kpi-sub">Bounded on 269-node Mesh</div>
         </div>
       </div>
@@ -1045,10 +1045,10 @@
               <div class="sector-prob-item">
                 <div class="sector-prob-header font-mono">
                   <span>Bangladesh Sunderbans Delta</span>
-                  <strong class="text-cyan">10.0%</strong>
+                  <strong class="text-green">10.0%</strong>
                 </div>
                 <div class="sector-prob-bar-bg">
-                  <div class="sector-prob-bar-fill" style="width: 10%; background: #00d4e5;"></div>
+                  <div class="sector-prob-bar-fill" style="width: 10%; background: #10b981;"></div>
                 </div>
               </div>
             </div>
@@ -1214,12 +1214,12 @@
           <div class="metpy-audit-grid" id="metpy-audit-grid">
             <div class="metpy-stat-box">
               <span class="metpy-stat-label">Coriolis Parameter (f)</span>
-              <span class="metpy-stat-val text-cyan" id="audit-coriolis">4.63 &times; 10<sup>-5</sup> s<sup>-1</sup></span>
+              <span class="metpy-stat-val" id="audit-coriolis">4.63 &times; 10<sup>-5</sup> s<sup>-1</sup></span>
               <span class="metpy-stat-sub">f = 2&Omega; sin(&phi;) at 18.5&deg;N</span>
             </div>
             <div class="metpy-stat-box">
               <span class="metpy-stat-label">Rossby Deformation Radius (R_D)</span>
-              <span class="metpy-stat-val text-cyan" id="audit-rossby-radius">6,198 km</span>
+              <span class="metpy-stat-val" id="audit-rossby-radius">6,198 km</span>
               <span class="metpy-stat-sub">R_D = &radic;(gH) / f</span>
             </div>
             <div class="metpy-stat-box">
@@ -1234,7 +1234,7 @@
             </div>
             <div class="metpy-stat-box">
               <span class="metpy-stat-label">1000-500 hPa Thickness</span>
-              <span class="metpy-stat-val text-cyan" id="audit-thickness">5,845 m</span>
+              <span class="metpy-stat-val" id="audit-thickness">5,845 m</span>
               <span class="metpy-stat-sub">&Delta;&Phi; = -(R T_mean / g) ln(p2/p1)</span>
             </div>
             <div class="metpy-stat-box">
@@ -1329,7 +1329,7 @@
         <!-- 4 Core Measured Metrics -->
         <div class="proof-kpi-grid font-mono">
           <div class="proof-kpi-card">
-            <span class="kpi-num text-cyan">83.9%</span>
+            <span class="kpi-num text-white">83.9%</span>
             <span class="kpi-title">Amplitude Recovery</span>
             <span class="kpi-detail">+43.6 km/h gain over U-Net</span>
           </div>
@@ -1339,7 +1339,7 @@
             <span class="kpi-detail">8.7 km error at Landfall (Step 10)</span>
           </div>
           <div class="proof-kpi-card">
-            <span class="kpi-num text-cyan">7.26 km/h</span>
+            <span class="kpi-num text-white">7.26 km/h</span>
             <span class="kpi-title">CRPS Calibration</span>
             <span class="kpi-detail">Probabilistic diffusion spread</span>
           </div>
@@ -1376,7 +1376,7 @@
               <div class="amp-bar-track">
                 <div class="amp-bar-fill fill-cyan" style="width: 83.9%;"></div>
               </div>
-              <span class="amp-bar-val text-cyan font-bold">92.6 km/h (83.9% Recovered &bull; +43.6 km/h)</span>
+              <span class="amp-bar-val font-bold text-white">92.6 km/h (83.9% Recovered &bull; +43.6 km/h)</span>
             </div>
             <div class="amp-bar-row">
               <span class="amp-bar-label">ERA5 Ground Target</span>
@@ -1413,7 +1413,7 @@
                   <td>Super Cyclone (Cat 5)</td>
                   <td>110.5 km/h</td>
                   <td>63.4 km/h</td>
-                  <td class="text-cyan font-bold">83.9% (92.6 km/h)</td>
+                  <td class="font-bold text-white">83.9% (92.6 km/h)</td>
                   <td>7.26 km/h</td>
                   <td><span class="tag-status tag-train">Training Benchmark</span></td>
                 </tr>
@@ -1422,7 +1422,7 @@
                   <td>Extremely Severe (Cat 5)</td>
                   <td>111.1 km/h</td>
                   <td>64.9 km/h</td>
-                  <td class="text-cyan font-bold">76.6% (85.1 km/h)</td>
+                  <td class="font-bold text-white">76.6% (85.1 km/h)</td>
                   <td>8.17 km/h</td>
                   <td><span class="tag-status tag-unseen">Unseen &bull; Zero-Shot</span></td>
                 </tr>
@@ -1431,7 +1431,7 @@
                   <td>Very Severe (Cat 3)</td>
                   <td>92.3 km/h</td>
                   <td>53.0 km/h</td>
-                  <td class="text-cyan font-bold">85.9% (79.3 km/h)</td>
+                  <td class="font-bold text-white">85.9% (79.3 km/h)</td>
                   <td>6.55 km/h</td>
                   <td><span class="tag-status tag-unseen">Unseen &bull; Zero-Shot</span></td>
                 </tr>
