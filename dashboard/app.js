@@ -5481,7 +5481,11 @@ async function loadBulletinText() {
     const text = await res.text();
     document.getElementById("bulletin-text-content").textContent = text;
   } catch (err) {
-    document.getElementById("bulletin-text-content").textContent = "Unable to load IMD bulletin: server error.";
+    console.warn("Bulletin text unavailable:", err);
+    const el = document.getElementById("bulletin-text-content");
+    if (el) {
+      el.textContent = "⚠️ Official IMD Advisory Bulletin stream unavailable. Telemetry server operating in offline resilience mode.";
+    }
   }
 }
 
@@ -5511,7 +5515,11 @@ async function loadTrackTableEmbedded() {
       tbody.appendChild(tr);
     });
   } catch (err) {
-    console.error("Error loading track table:", err);
+    console.warn("Track error table unavailable:", err);
+    const tbody = document.getElementById("track-error-tbody");
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px; color: var(--sev-mod); font-family: var(--font-mono); font-size: 0.76rem;">⚠️ NOAA IBTrACS comparison data temporarily unavailable. Verify local endpoint status.</td></tr>`;
+    }
   }
 }
 

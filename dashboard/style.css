@@ -4405,3 +4405,88 @@ body {
   }
 }
 
+/* ============================================================
+   ACCESSIBILITY & INTERACTION POLISH: FOCUS-VISIBLE & HOVER
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--accent-cyan) !important;
+  outline-offset: 2px !important;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+.nav-tab:focus-visible,
+.dock-pill:focus-visible,
+.dock-basemap-btn:focus-visible,
+.btn-action:focus-visible,
+.btn-b-tab:focus-visible,
+.btn-realization:focus-visible,
+.btn-mode-toggle:focus-visible,
+.btn-op-mode:focus-visible,
+.btn-layer-pill:focus-visible,
+.select-hazard-pill:focus-visible,
+.select-basemap:focus-visible,
+.btn-unit-toggle:focus-visible,
+.btn-pace-toggle:focus-visible,
+.btn-lead-filter:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  box-shadow: 0 0 10px rgba(0, 212, 229, 0.4);
+}
+
+.dock-pill:hover,
+.dock-basemap-btn:hover,
+.btn-layer-pill:hover,
+.btn-unit-toggle:hover,
+.btn-pace-toggle:hover,
+.btn-realization:hover,
+.btn-b-tab:hover,
+.btn-lead-filter:hover {
+  filter: brightness(1.15);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================================
+   LOADING SKELETONS & GRACEFUL ERROR STATES
+   ============================================================ */
+
+.loading-skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(0, 212, 229, 0.10) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.8s infinite;
+  border-radius: var(--radius-sm);
+  min-height: 18px;
+}
+
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.card-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  gap: var(--space-2);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px dashed rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-md);
+  color: #fca5a5;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.card-error-state .error-icon {
+  font-size: 1.4rem;
+}
+
+.card-error-state .retry-hint {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
