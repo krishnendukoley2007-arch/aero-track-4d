@@ -24,9 +24,9 @@ const state = {
   districtsData: null,
   windVectorsData: null,
   globalWindVectorsData: null,
-  showMeshLayer: true,
-  showConeLayer: true,
-  showDistrictsLayer: true,
+  showMeshLayer: false,
+  showConeLayer: false,
+  showDistrictsLayer: false,
   showWindLayer: true,
   showPressureLayer: false,
   showRadarLayer: false,
@@ -1986,6 +1986,8 @@ const LiveGlobal = {
         if (card) card.style.display = "none";
         const btnToggleInsp = document.getElementById("btn-toggle-inspector");
         if (btnToggleInsp) btnToggleInsp.classList.remove("active");
+        const wrapper = document.getElementById("map-viewport-wrapper");
+        if (wrapper) wrapper.classList.remove("inspector-open");
       });
     }
 
@@ -2256,7 +2258,7 @@ const LiveGlobal = {
           pill.innerHTML = `<span>🌀 ${storm.name}</span> <span class="storm-pill-wind">${Math.round(storm.current_wind_kmh)} km/h</span>`;
           pill.title = `${storm.basin} • Stage: ${storm.current_stage} • Lead: T+0h to T+120h`;
           pill.addEventListener("click", () => {
-            this.selectActiveStorm(storm.id);
+            this.selectActiveStorm(storm.id, true);
           });
           pillsContainer.appendChild(pill);
         });
@@ -2267,7 +2269,7 @@ const LiveGlobal = {
       }
 
       if (this.activeStormsList.length > 0) {
-        this.selectActiveStorm(this.activeStormsList[0].id);
+        this.selectActiveStorm(this.activeStormsList[0].id, false);
       }
     } catch (err) {
       console.warn("Failed to load active storms:", err);
@@ -2277,7 +2279,7 @@ const LiveGlobal = {
     }
   },
 
-  selectActiveStorm(stormId) {
+  selectActiveStorm(stormId, openDrawer = false) {
     const storm = this.activeStormsList.find(s => s.id === stormId);
     if (!storm) return;
     this.selectedStorm = storm;
@@ -2300,10 +2302,10 @@ const LiveGlobal = {
     }
 
     // Scrub step 0 (updates 2D map, 3D globe, overview, and inspector)
-    this.scrubStormStep(0);
+    this.scrubStormStep(0, openDrawer);
   },
 
-  scrubStormStep(stepIdx) {
+  scrubStormStep(stepIdx, openDrawer = false) {
     if (!this.selectedStorm || !this.selectedStorm.forecast_steps) return;
     const step = this.selectedStorm.forecast_steps[stepIdx];
     if (!step) return;
@@ -2333,7 +2335,7 @@ const LiveGlobal = {
 
     // Update Overview and Inspector HUD
     this.updateOverviewFromStorm(this.selectedStorm, stepIdx);
-    this.updateInspectorFromStorm(this.selectedStorm, stepIdx);
+    this.updateInspectorFromStorm(this.selectedStorm, stepIdx, openDrawer);
   },
 
   renderTimelineCheckpoints(isLive, storm) {
@@ -2532,7 +2534,7 @@ const LiveGlobal = {
     if (stageText) stageText.textContent = step.stage;
   },
 
-  updateInspectorFromStorm(storm, stepIdx) {
+  updateInspectorFromStorm(storm, stepIdx, openDrawer = false) {
     const step = storm.forecast_steps[stepIdx] || storm.forecast_steps[0];
     if (!step) return;
 
@@ -2544,11 +2546,13 @@ const LiveGlobal = {
     const reduction = document.getElementById("insp-reduction");
     const coordSub = document.getElementById("insp-coords-sub");
 
-    if (card) {
+    if (openDrawer && card) {
       card.style.display = "flex";
+      const btnToggle = document.getElementById("btn-toggle-inspector");
+      if (btnToggle) btnToggle.classList.add("active");
+      const wrapper = document.getElementById("map-viewport-wrapper");
+      if (wrapper) wrapper.classList.add("inspector-open");
     }
-    const btnToggle = document.getElementById("btn-toggle-inspector");
-    if (btnToggle) btnToggle.classList.add("active");
     if (title) title.textContent = `🌀 ${storm.name} [${step.lead_time_label}]`;
     if (coarseWind) coarseWind.textContent = `${step.coarse_nwp_wind_kmh} km/h`;
     if (resolvedWind) resolvedWind.textContent = `${step.corrdiff_resolved_wind_kmh} km/h`;
@@ -2684,8 +2688,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   initWindStreamlines();
   initMapHoverInspector();
   initZoomEarthOverlays();
-  // Enable authentic Zoom Earth real-time MSLP thermodynamic pressure overlay by default
-  PressureOverlay.toggle(true);
+  // Pressure is off by default on startup/restart (user can toggle on demand)
+  PressureOverlay.toggle(false);
 
   // Pre-cache downscaling data, CAP alert, and scientific audit in background
   fetchDownscaleData(state.currentStep || 5);
@@ -2716,8 +2720,10 @@ function initMap() {
     zoom: 5,
     minZoom: 2,
     maxZoom: 18,
-    zoomControl: true,
+    zoomControl: false,
   });
+
+  L.control.zoom({ position: "topright" }).addTo(state.map);
 
   switchBasemap(activeBasemapKey);
 
@@ -5741,6 +5747,12 @@ function initEventListeners() {
     btnMesh.addEventListener("click", () => {
       state.showMeshLayer = !state.showMeshLayer;
       btnMesh.classList.toggle("active", state.showMeshLayer);
+      const dockBtnMesh = document.getElementById("dock-toggle-mesh");
+      if (dockBtnMesh) {
+        dockBtnMesh.classList.toggle("active", state.showMeshLayer);
+        const status = dockBtnMesh.querySelector(".dock-pill-status");
+        if (status) status.textContent = state.showMeshLayer ? "ON" : "OFF";
+      }
       renderSphericalMesh();
     });
   }
@@ -5749,6 +5761,12 @@ function initEventListeners() {
     btnCone.addEventListener("click", () => {
       state.showConeLayer = !state.showConeLayer;
       btnCone.classList.toggle("active", state.showConeLayer);
+      const dockBtnCone = document.getElementById("dock-toggle-cone");
+      if (dockBtnCone) {
+        dockBtnCone.classList.toggle("active", state.showConeLayer);
+        const status = dockBtnCone.querySelector(".dock-pill-status");
+        if (status) status.textContent = state.showConeLayer ? "ON" : "OFF";
+      }
       renderEnsembleCone();
     });
   }
@@ -5757,6 +5775,12 @@ function initEventListeners() {
     btnDistricts.addEventListener("click", () => {
       state.showDistrictsLayer = !state.showDistrictsLayer;
       btnDistricts.classList.toggle("active", state.showDistrictsLayer);
+      const dockBtnDistricts = document.getElementById("dock-toggle-districts");
+      if (dockBtnDistricts) {
+        dockBtnDistricts.classList.toggle("active", state.showDistrictsLayer);
+        const status = dockBtnDistricts.querySelector(".dock-pill-status");
+        if (status) status.textContent = state.showDistrictsLayer ? "ON" : "OFF";
+      }
       renderCoastalDistricts();
     });
   }
@@ -5765,6 +5789,12 @@ function initEventListeners() {
     btnWind.addEventListener("click", () => {
       state.showWindLayer = !state.showWindLayer;
       btnWind.classList.toggle("active", state.showWindLayer);
+      const dockBtnWind = document.getElementById("dock-toggle-wind");
+      if (dockBtnWind) {
+        dockBtnWind.classList.toggle("active", state.showWindLayer);
+        const status = dockBtnWind.querySelector(".dock-pill-status");
+        if (status) status.textContent = state.showWindLayer ? "ON" : "OFF";
+      }
       const canvas = document.getElementById("canvas-wind-streamlines");
       if (canvas) canvas.style.display = state.showWindLayer ? "block" : "none";
     });
@@ -5777,12 +5807,15 @@ function initEventListeners() {
       const card = document.getElementById("globe-live-inspector");
       if (!card) return;
       const isVisible = card.style.display !== "none" && getComputedStyle(card).display !== "none";
+      const wrapper = document.getElementById("map-viewport-wrapper");
       if (isVisible) {
         card.style.display = "none";
         btnToggleInsp.classList.remove("active");
+        if (wrapper) wrapper.classList.remove("inspector-open");
       } else {
         card.style.display = "flex";
         btnToggleInsp.classList.add("active");
+        if (wrapper) wrapper.classList.add("inspector-open");
       }
     });
   }
