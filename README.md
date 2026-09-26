@@ -54,7 +54,7 @@
 
 ## 📸 Operations Room Visual Gallery
 
-| 1. Overview (Vibrant 2D Leaflet Basemap) | 2. 3D Earth Monitor (Terminator Glow & 4D Prism) |
+| 1. Overview (Tactical Dark CARTO Basemap) | 2. 3D Earth Monitor (Terminator Glow & 4D Prism) |
 | :---: | :---: |
 | ![Overview 2D](docs/screenshots/01_overview_dashboard.png) | ![Overview 3D Globe](docs/screenshots/11_3d_earth_satellite_nasa.png) |
 | **3. Track & Timeline (Scrubber & NOAA Table)** | **4. Downscaling Lab (Swipe Slider & Spectral Proof)** |
