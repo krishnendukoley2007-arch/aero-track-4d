@@ -32,6 +32,7 @@
   --sev-cat-bg: rgba(225, 29, 72, 0.22);
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 
   /* 8-Step Spacing Scale */
@@ -68,13 +69,31 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---------------- Utility Classes ---------------- */
-.font-mono { font-family: var(--font-mono); }
+/* ---------------- Utility & Typography System ---------------- */
+.font-display { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .text-cyan { color: var(--accent-cyan); }
 .text-green { color: var(--sev-low); }
 .text-amber { color: var(--sev-mod); }
 .text-red { color: var(--sev-sev); }
 .text-muted { color: var(--text-muted); }
+
+h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .section-title, .alert-target-title {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.kpi-value, .hero-metric, .b-val {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.kpi-tag, .b-lbl, .dock-group-title, .dock-title, .storms-bar-label, .filter-label, .mode-label, .cb-label, .pace-tag {
+  font-family: var(--font-sans);
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
 
 /* ---------------- Top Navigation Bar ---------------- */
 .top-nav {
@@ -408,22 +427,29 @@ body {
 }
 
 .kpi-tag {
-  font-size: 0.65rem;
-  font-weight: 700;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
   color: var(--text-dim);
-  letter-spacing: 0.5px;
+  text-transform: none;
+  letter-spacing: 0.01em;
 }
 
 .kpi-value {
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 700;
   color: #fff;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
 }
 
 .kpi-sub {
-  font-size: 0.7rem;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
   color: var(--text-muted);
+  line-height: 1.4;
 }
 
 /* Hero Map & Section Card (Full Width) */

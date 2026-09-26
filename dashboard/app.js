@@ -1715,7 +1715,7 @@ const LiveGlobal = {
     const card1Label = document.getElementById("ov-card1-label");
     const elStage = document.getElementById("ov-stage");
     const elStageSub = document.getElementById("ov-stage-sub");
-    if (card1Label) card1Label.textContent = "GLOBAL ANOMALY STATUS";
+    if (card1Label) card1Label.textContent = "Global Anomaly Status";
     if (elStage) {
       const wind = cc.corrdiff_resolved_wind_kmh;
       if (wind >= 100) elStage.textContent = "Severe Cyclonic Low";
@@ -1728,21 +1728,21 @@ const LiveGlobal = {
     const card2Label = document.getElementById("ov-card2-label");
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (card2Label) card2Label.textContent = "CORRDIFF RESOLVED WIND";
+    if (card2Label) card2Label.textContent = "CorrDiff Resolved Wind";
     if (elWind) elWind.textContent = `${cc.corrdiff_resolved_wind_kmh} km/h`;
     if (elWindSub) elWindSub.innerHTML = `Coarse NWP: ${cc.coarse_nwp_wind_kmh} km/h <span class="text-amber">(+${cc.amplitude_recovery_gain_pct}% recovered)</span>`;
 
     const card3Label = document.getElementById("ov-card3-label");
     const elError = document.getElementById("ov-error");
     const elErrorSub = document.getElementById("ov-error-sub");
-    if (card3Label) card3Label.textContent = "CORRDIFF GUST (P90)";
+    if (card3Label) card3Label.textContent = "CorrDiff Gust (P90)";
     if (elError) elError.textContent = `${cc.corrdiff_p90_extreme_gust_kmh} km/h`;
     if (elErrorSub) elErrorSub.textContent = `Precipitation: ${cc.precipitation_mmh || 0} mm/h`;
 
     const card4Label = document.getElementById("ov-card4-label");
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (card4Label) card4Label.textContent = "FALSE-ALARM REDUCTION";
+    if (card4Label) card4Label.textContent = "False-Alarm Reduction";
     if (elRed) elRed.textContent = `${data.precision_impact.false_alarm_area_reduction_pct}%`;
     if (elRedSub) elRedSub.textContent = `78.5 km² zone vs 3,500 km² district`;
   },
@@ -1897,28 +1897,28 @@ const LiveGlobal = {
     const card1Label = document.getElementById("ov-card1-label");
     const elStage = document.getElementById("ov-stage");
     const elStageSub = document.getElementById("ov-stage-sub");
-    if (card1Label) card1Label.textContent = "CURRENT STORM STAGE";
+    if (card1Label) card1Label.textContent = "Current Storm Stage";
     if (elStage) elStage.textContent = "Super Cyclone";
     if (elStageSub) elStageSub.innerHTML = "Category 5 Equivalent &bull; 920 hPa";
 
     const card2Label = document.getElementById("ov-card2-label");
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (card2Label) card2Label.textContent = "RESOLVED EYEWALL WIND";
+    if (card2Label) card2Label.textContent = "Resolved Eyewall Wind";
     if (elWind) elWind.textContent = "102.1 km/h";
     if (elWindSub) elWindSub.innerHTML = `Coarse NWP: 63.4 km/h <span class="text-amber">(+61% recovered)</span>`;
 
     const card3Label = document.getElementById("ov-card3-label");
     const elError = document.getElementById("ov-error");
     const elErrorSub = document.getElementById("ov-error-sub");
-    if (card3Label) card3Label.textContent = "TRACK ERROR VS IBTrACS";
+    if (card3Label) card3Label.textContent = "Track Error vs IBTrACS";
     if (elError) elError.textContent = "225.3 km";
     if (elErrorSub) elErrorSub.textContent = "Mean across 5-day track: 286.9 km";
 
     const card4Label = document.getElementById("ov-card4-label");
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (card4Label) card4Label.textContent = "FALSE-ALARM REDUCTION";
+    if (card4Label) card4Label.textContent = "False-Alarm Reduction";
     if (elRed) elRed.textContent = "97.8%";
     if (elRedSub) elRedSub.textContent = "78.5 km² zone vs 3,500 km² district";
   },
@@ -5542,7 +5542,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elCard1 = document.getElementById("ov-card1-label");
     const elStage = document.getElementById("ov-stage");
     const elStageSub = document.getElementById("ov-stage-sub");
-    if (elCard1) elCard1.textContent = "LOCAL WEATHER STATUS";
+    if (elCard1) elCard1.textContent = "Local Weather Status";
     if (elStage) {
       elStage.textContent = data.alert_tier ? data.alert_tier.split("/")[0].trim() : data.weather_desc;
     }
@@ -5553,7 +5553,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elCard2 = document.getElementById("ov-card2-label");
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (elCard2) elCard2.textContent = "CORRDIFF RESOLVED WIND";
+    if (elCard2) elCard2.textContent = "CorrDiff Resolved Wind";
     if (elWind) elWind.textContent = `${data.predicted_local_wind_kmh} km/h`;
     if (elWindSub) {
       elWindSub.innerHTML = `Coarse NWP: ${data.coarse_nwp_wind_kmh || (data.predicted_local_wind_kmh * 0.62).toFixed(1)} km/h <span class="text-amber">(+${data.corrdiff_gain_pct || 61.5}% peak recovered)</span>`;
@@ -5563,11 +5563,11 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elError = document.getElementById("ov-error");
     const elErrorSub = document.getElementById("ov-error-sub");
     if (state.currentHazard === "amphan_2020" && data.location.distance_to_eye_km > 0) {
-      if (elCard3) elCard3.textContent = "DISTANCE TO EYE";
+      if (elCard3) elCard3.textContent = "Distance to Eye";
       if (elError) elError.textContent = `${data.location.distance_to_eye_km} km`;
       if (elErrorSub) elErrorSub.textContent = `Target: ${data.location.name}`;
     } else {
-      if (elCard3) elCard3.textContent = "GUST (P90) / INTENSITY";
+      if (elCard3) elCard3.textContent = "Gust (P90) / Intensity";
       if (elError) elError.textContent = `${data.predicted_p90_gust_kmh} km/h`;
       if (elErrorSub) elErrorSub.textContent = `Precipitation: ${data.predicted_local_rain_mmh} mm/h • Rain Rate`;
     }
@@ -5575,7 +5575,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elCard4 = document.getElementById("ov-card4-label");
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (elCard4) elCard4.textContent = "FALSE-ALARM REDUCTION";
+    if (elCard4) elCard4.textContent = "False-Alarm Reduction";
     if (elRed) elRed.textContent = "97.8%";
     if (elRedSub) elRedSub.textContent = "78.5 km² zone vs 3,500 km² district";
 
@@ -6239,15 +6239,15 @@ async function switchHazard(hazardId) {
     document.getElementById("summary-subtext").innerHTML = `Pinpoint 5 km alert corridor active near <strong>${peakStep.centroid.lat}°N, ${peakStep.centroid.lon}°E</strong>. Generative CorrDiff diffusion recovers true peak amplitude, delivering a <strong>97.8%+ reduction in false-alarm warning area</strong> vs broad regional warnings.`;
     document.getElementById("summary-severity-badge").textContent = `SEVERITY: ${peakStep.severity.toUpperCase()}`;
 
-    document.getElementById("ov-card1-label").textContent = "HAZARD STAGE";
+    document.getElementById("ov-card1-label").textContent = "Hazard Stage";
     document.getElementById("ov-stage").textContent = peakStep.stage;
     document.getElementById("ov-stage-sub").textContent = `${hData.hazard_type} • Peak Step 3`;
 
-    document.getElementById("ov-card2-label").textContent = peakStep.metric_name || "RESOLVED PEAK";
+    document.getElementById("ov-card2-label").textContent = peakStep.metric_name ? peakStep.metric_name.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()) : "Resolved Peak";
     document.getElementById("ov-wind").textContent = `${peakStep.metric_val} ${peakStep.unit}`;
     document.getElementById("ov-wind-sub").textContent = `Coarse NWP: ${peakStep.stage.includes("Heat") ? "44.0" : "5.1"} ${peakStep.unit} (Preserved by CorrDiff)`;
 
-    document.getElementById("ov-card3-label").textContent = "MEAN TRACK ERROR";
+    document.getElementById("ov-card3-label").textContent = "Mean Track Error";
     document.getElementById("ov-error").textContent = `${hData.mean_track_error_km || 56.3} km`;
     document.getElementById("ov-error-sub").textContent = "Evaluated against ground truth station network";
 
