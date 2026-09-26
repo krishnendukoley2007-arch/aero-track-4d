@@ -46,6 +46,7 @@ from src.live_global import (
     get_live_precipitation_metadata,
     get_live_precipitation_tile,
     get_global_wind_vectors,
+    get_live_pressure_field,
 )
 
 app = FastAPI(
@@ -936,6 +937,12 @@ def api_live_precipitation_tile(z: int, x: int, y: int):
 def api_live_global_wind_vectors():
     """Returns physical global u/v wind vector field from real atmospheric advection & storm vortex dynamics."""
     return get_global_wind_vectors()
+
+
+@app.get("/api/live/pressure-field")
+def api_live_pressure_field():
+    """Returns real-time Mean Sea Level Pressure (MSLP) grid, isobars, L/H centers, and city readings matching Zoom Earth."""
+    return get_live_pressure_field()
 
 
 

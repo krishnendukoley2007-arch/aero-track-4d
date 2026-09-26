@@ -46,6 +46,7 @@ ENDPOINTS = [
     ("GET", "/api/export/asc-grid", None),
     ("GET", "/api/export/geojson", ["type", "features", "metadata"]),
     ("GET", "/api/export/agri-csv", None),
+    ("GET", "/api/live/pressure-field", ["status", "grid", "cities", "centers"]),
 ]
 
 

@@ -28,6 +28,7 @@ const state = {
   showConeLayer: true,
   showDistrictsLayer: true,
   showWindLayer: true,
+  showPressureLayer: false,
   showRadarLayer: false,
   activeWindUnit: "kmh",
   windSpeedScale: 0.95, // Calibrated flow pace (calm: 0.65, realistic: 0.95, fast: 1.35)
@@ -1523,6 +1524,9 @@ const LiveGlobal = {
       const stormsBar = document.getElementById("live-storms-bar");
       if (stormsBar) stormsBar.classList.remove("hidden");
 
+      const gtBadge = document.getElementById("live-ground-truth-badge");
+      if (gtBadge) gtBadge.style.display = "block";
+
       // Hide Amphan benchmark layers from 2D map and 3D globe
       setBenchmarkMapLayersVisible(false);
       if (ThreeGlobeViewer.initialized) {
@@ -1549,6 +1553,19 @@ const LiveGlobal = {
 
       const stormsBar = document.getElementById("live-storms-bar");
       if (stormsBar) stormsBar.classList.add("hidden");
+
+      const gtBadge = document.getElementById("live-ground-truth-badge");
+      if (gtBadge) gtBadge.style.display = "none";
+
+      // Turn off live pressure overlay if active
+      if (window.PressureOverlay) PressureOverlay.toggle(false);
+      const dockBtnPressure = document.getElementById("dock-toggle-pressure");
+      if (dockBtnPressure) {
+        dockBtnPressure.classList.remove("active");
+        const st = dockBtnPressure.querySelector(".dock-pill-status");
+        if (st) st.textContent = "OFF";
+      }
+      state.showPressureLayer = false;
 
       // Remove live anomaly markers from 2D and 3D
       this.removeGlobalAnomalyMarkers();
@@ -2605,6 +2622,9 @@ const LiveGlobal = {
   }
 };
 
+window.LiveGlobal = LiveGlobal;
+window.LiveGlobalController = LiveGlobal;
+
 // ---------------- Immersive Fullscreen Mode (2D Map & 3D Globe) ----------------
 function initFullscreenController() {
   const btn = document.getElementById("btn-fullscreen-map");
@@ -2664,6 +2684,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   initWindStreamlines();
   initMapHoverInspector();
   initZoomEarthOverlays();
+  // Enable authentic Zoom Earth real-time MSLP thermodynamic pressure overlay by default
+  PressureOverlay.toggle(true);
 
   // Pre-cache downscaling data, CAP alert, and scientific audit in background
   fetchDownscaleData(state.currentStep || 5);
@@ -3207,8 +3229,14 @@ function sampleWeatherAt(lat, lon) {
   if (!sampled) {
     const absLat = Math.abs(nLat);
     if (absLat < 25.0) {
-      u = -28.0 * Math.cos((nLat * Math.PI) / 50.0);
-      v = nLat > 0 ? -6.0 : 6.0;
+      // Over Indian subcontinent & Bay of Bengal: genuine SW monsoon flow heading towards northern trough
+      if (nLat >= 6.0 && nLat <= 28.0 && nLon >= 65.0 && nLon <= 95.0) {
+        u = 12.5 + 3.0 * Math.sin(nLat * 0.25);
+        v = 14.0 + 4.0 * Math.cos(nLon * 0.20);
+      } else {
+        u = -28.0 * Math.cos((nLat * Math.PI) / 50.0);
+        v = nLat > 0 ? -6.0 : 6.0;
+      }
     } else if (absLat < 60.0) {
       const jet = Math.exp(-Math.pow((absLat - 48.0) / 9.0, 2)) * 36.0;
       u = 42.0 + jet;
@@ -3222,17 +3250,28 @@ function sampleWeatherAt(lat, lon) {
   }
 
   // 4. Inject Active Cyclonic Vortices into Planetary Flow
-  // Live mode: inject all active storms from LiveGlobalController
-  if (state.opMode === "live" && typeof LiveGlobalController !== "undefined" && LiveGlobalController.activeStormsList && LiveGlobalController.activeStormsList.length > 0) {
-    for (const storm of LiveGlobalController.activeStormsList) {
+  // Live mode: inject all active storms from LiveGlobal
+  const liveCtrl = (typeof LiveGlobal !== "undefined") ? LiveGlobal : (typeof LiveGlobalController !== "undefined" ? LiveGlobalController : null);
+  if (state.opMode === "live" && liveCtrl && liveCtrl.activeStormsList && liveCtrl.activeStormsList.length > 0) {
+    // If a storm is actively selected, evaluate it first so its eye circulation is never overridden
+    const stormsToEvaluate = [...liveCtrl.activeStormsList];
+    if (liveCtrl.selectedStorm) {
+      const sIdx = stormsToEvaluate.findIndex(s => s.id === liveCtrl.selectedStorm.id);
+      if (sIdx > 0) {
+        const sel = stormsToEvaluate.splice(sIdx, 1)[0];
+        stormsToEvaluate.unshift(sel);
+      }
+    }
+
+    for (const storm of stormsToEvaluate) {
       let sLat = storm.current_lat;
       let sLon = storm.current_lon;
       let vMax = storm.current_wind_kmh || 110.0;
 
       // If this storm is actively selected and has a forecast step, track its active step centroid
-      if (LiveGlobalController.selectedStorm && LiveGlobalController.selectedStorm.id === storm.id) {
-        const stepIdx = LiveGlobalController.currentForecastStep || 0;
-        const curStep = LiveGlobalController.selectedStorm.forecast_steps ? LiveGlobalController.selectedStorm.forecast_steps[stepIdx] : null;
+      if (liveCtrl.selectedStorm && liveCtrl.selectedStorm.id === storm.id) {
+        const stepIdx = liveCtrl.currentForecastStep || 0;
+        const curStep = liveCtrl.selectedStorm.forecast_steps ? liveCtrl.selectedStorm.forecast_steps[stepIdx] : null;
         if (curStep && curStep.centroid) {
           sLat = curStep.centroid.lat;
           sLon = curStep.centroid.lon;
@@ -3246,11 +3285,11 @@ function sampleWeatherAt(lat, lon) {
       const dy = nLat - sLat;
       const distDeg = Math.hypot(dx, dy);
 
-      const stormRadius = 15.0; // Synoptic cyclonic influence envelope (~1500 km)
+      const stormRadius = 14.5; // Synoptic cyclonic influence envelope (~1500 km)
       if (distDeg < stormRadius && distDeg > 0.04) {
         const rMax = 1.35; // Core radius of maximum winds (~150 km)
-        const vTangent = distDeg <= rMax ? vMax * (distDeg / rMax) : vMax * Math.pow(rMax / distDeg, 0.65);
-        const vInflow = 0.22 * vTangent; // Frictional boundary layer spiral inflow towards center
+        const vTangent = distDeg <= rMax ? vMax * (distDeg / rMax) : vMax * Math.pow(rMax / distDeg, 0.60);
+        const vInflow = 0.24 * vTangent; // Frictional boundary layer spiral inflow towards center
 
         // Meteorological cyclonic rotation: Counter-Clockwise in Northern Hemisphere, Clockwise in Southern Hemisphere
         const hemiSign = sLat >= 0 ? 1.0 : -1.0;
@@ -3260,7 +3299,7 @@ function sampleWeatherAt(lat, lon) {
         // Core dominance: near eyewall (r <= 3*rMax), vortex circulation completely dominates over ambient westerlies/trades
         const rNorm = distDeg / stormRadius;
         const blendWeight = Math.max(0.0, 1.0 - Math.pow(rNorm, 1.25));
-        const coreDominance = Math.min(1.0, blendWeight * 1.45);
+        const coreDominance = Math.min(1.0, blendWeight * 1.55);
 
         u = u * (1.0 - coreDominance) + uVortex * coreDominance;
         v = v * (1.0 - coreDominance) + vVortex * coreDominance;
@@ -3361,13 +3400,21 @@ function spawnParticleInViewport() {
     ? state.map.latLngToContainerPoint([lat, lon])
     : { x: -999, y: -999 };
 
+  // Sample speed at spawn location to scale initial tail length & lifecycle
+  const sample = sampleWeatherAt(lat, lon);
+  const localSpeed = Math.max(1.0, sample.speed || 15.0);
+  // Calm air (< 15 km/h): short lifespan 10-18 frames -> small, compact tails
+  // High wind / cyclone (> 75 km/h): long lifespan 70-110 frames -> big, sweeping tails
+  const speedRatio = Math.pow(localSpeed / 22.0, 1.30);
+  const initialMaxAge = Math.round(10 + Math.min(95, speedRatio * 22));
+
   return {
     lat: lat,
     lon: lon,
     x: pt.x,
     y: pt.y,
-    age: Math.floor(Math.random() * 30),
-    maxAge: 45 + Math.floor(Math.random() * 45), // 45-90 frame lifecycle allows graceful, long flowing tails
+    age: Math.floor(Math.random() * Math.max(2, Math.floor(initialMaxAge * 0.35))),
+    maxAge: initialMaxAge,
     speedMult: 0.90 + Math.random() * 0.20
   };
 }
@@ -3478,15 +3525,14 @@ function animateWindParticles() {
   // Exact Web Mercator degrees per pixel at current zoom
   const degPerPixel = 1.40625 * Math.pow(2, -currentZoom);
 
-  // 6 Speed-calibrated color buckets matching Zoom Earth luminous streamline aesthetics
-  // Calm air flows gently with soft translucent trails; gale/eyewall air flows with sleek, luminous ribbons
+  // 6 Speed-calibrated color buckets: small delicate trails for calm air, long bold ribbons for storms
   const buckets = [
-    { color: "rgba(220, 240, 255, 0.50)", width: 1.15, lines: [] }, // Calm (< 20 km/h): Soft translucent ice-white
-    { color: "rgba(125, 211, 252, 0.72)", width: 1.35, lines: [] }, // Light/Moderate Breeze (20-45 km/h): Luminous cyan
-    { color: "rgba(56, 189, 248, 0.85)",  width: 1.65, lines: [] }, // Fresh/Strong Breeze (45-75 km/h): Electric blue
-    { color: "rgba(250, 204, 21, 0.90)",  width: 2.05, lines: [] }, // Gale (75-105 km/h): Luminous gold
-    { color: "rgba(251, 146, 60, 0.95)",  width: 2.45, lines: [] }, // Storm (105-135 km/h): Amber orange
-    { color: "rgba(244, 63, 94, 1.00)",   width: 2.85, lines: [] }  // Eyewall / Cyclone (> 135 km/h): Vivid crimson
+    { color: "rgba(220, 240, 255, 0.38)", width: 0.95, lines: [] }, // Calm (< 20 km/h): Delicate, small compact trails
+    { color: "rgba(125, 211, 252, 0.65)", width: 1.30, lines: [] }, // Light/Moderate Breeze (20-45 km/h): Luminous cyan
+    { color: "rgba(56, 189, 248, 0.82)",  width: 1.70, lines: [] }, // Fresh/Strong Breeze (45-75 km/h): Electric blue
+    { color: "rgba(250, 204, 21, 0.92)",  width: 2.15, lines: [] }, // Gale (75-105 km/h): Luminous gold, sweeping tails
+    { color: "rgba(251, 146, 60, 0.96)",  width: 2.65, lines: [] }, // Storm (105-135 km/h): Amber orange, bold ribbons
+    { color: "rgba(244, 63, 94, 1.00)",   width: 3.25, lines: [] }  // Eyewall / Cyclone (> 135 km/h): Vivid crimson, massive vortex trails
   ];
 
   const particles = state.particles;
@@ -3505,12 +3551,16 @@ function animateWindParticles() {
     const dirU1 = u1 / mag1;
     const dirV1 = v1 / mag1;
 
-    // --- CONTINUOUS STREAMLINE ADVECTION (No static flecks/dots) ---
-    // Calm air drifts gently; severe winds accelerate smoothly without chaotic tearing
+    // --- SPEED-SCALED TAIL LENGTH & STEPPING ---
+    // Calm wind (< 15 km/h): small, compact tails (step 0.35-0.70px, maxAge 10-18 frames -> ~5-10px tail)
+    // High wind / cyclone (> 75 km/h): long, sweeping tails (step 3.0-4.5px, maxAge 75-110 frames -> ~200-300px tail)
     const normSpeed = Math.max(1.0, speed);
-    const speedFactor = Math.pow(normSpeed / 30.0, 0.62);
+    const speedRatio = Math.pow(normSpeed / 22.0, 1.30);
+    const targetMaxAge = Math.round(10 + Math.min(95, speedRatio * 22));
+    p.maxAge = Math.round(p.maxAge * 0.88 + targetMaxAge * 0.12);
+
     const speedScale = (state.windSpeedScale !== undefined) ? state.windSpeedScale : 1.0;
-    const baseSpeed = Math.max(0.55, Math.min(4.2, speedFactor * 1.65));
+    const baseSpeed = Math.max(0.35, Math.min(4.5, Math.pow(normSpeed / 25.0, 1.15) * 1.55));
     const targetPixels = baseSpeed * (p.speedMult || 1.0) * speedScale;
 
     const cosLat = Math.cos((p.lat * Math.PI) / 180);
@@ -3630,9 +3680,16 @@ function initMapHoverInspector() {
       }
     } else {
       let nearStorm = null;
-      if (typeof LiveGlobalController !== "undefined" && LiveGlobalController.activeStormsList) {
-        for (const s of LiveGlobalController.activeStormsList) {
-          if (Math.hypot(lat - s.current_lat, lon - s.current_lon) < 5.0) {
+      const liveCtrl = (typeof LiveGlobal !== "undefined") ? LiveGlobal : (typeof LiveGlobalController !== "undefined" ? LiveGlobalController : null);
+      if (liveCtrl && liveCtrl.activeStormsList) {
+        for (const s of liveCtrl.activeStormsList) {
+          const sLat = (liveCtrl.selectedStorm && liveCtrl.selectedStorm.id === s.id && liveCtrl.selectedStorm.forecast_steps)
+            ? (liveCtrl.selectedStorm.forecast_steps[liveCtrl.currentForecastStep || 0].centroid.lat)
+            : s.current_lat;
+          const sLon = (liveCtrl.selectedStorm && liveCtrl.selectedStorm.id === s.id && liveCtrl.selectedStorm.forecast_steps)
+            ? (liveCtrl.selectedStorm.forecast_steps[liveCtrl.currentForecastStep || 0].centroid.lon)
+            : s.current_lon;
+          if (Math.hypot(lat - sLat, lon - sLon) < 5.0) {
             nearStorm = s;
             break;
           }
@@ -3692,6 +3749,317 @@ function initMapHoverInspector() {
   });
 }
 
+// ---------------- Zoom Earth Style Real-Time MSLP Pressure & Isobar Controller ----------------
+const PressureOverlay = {
+  data: null,
+  canvas: null,
+  ctx: null,
+  centerMarkers: [],
+  cityMarkers: [],
+  _listenersBound: false,
+
+  init() {
+    this.canvas = document.getElementById("canvas-pressure-overlay");
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext("2d");
+  },
+
+  setVisibility(show) {
+    return this.toggle(show);
+  },
+
+  async toggle(show) {
+    if (!this.canvas) this.init();
+    if (show === undefined) show = !state.showPressureLayer;
+    state.showPressureLayer = !!show;
+    this.isVisible = !!show;
+
+    if (this.canvas) {
+      this.canvas.style.display = show ? "block" : "none";
+    }
+
+    const legend = document.getElementById("zoom-pressure-legend");
+    if (legend) legend.style.display = show ? "block" : "none";
+
+    const dockBtnPressure = document.getElementById("dock-toggle-pressure");
+    if (dockBtnPressure) {
+      dockBtnPressure.classList.toggle("active", state.showPressureLayer);
+      const status = dockBtnPressure.querySelector(".dock-pill-status");
+      if (status) status.textContent = state.showPressureLayer ? "ON" : "OFF";
+    }
+
+    if (!show) {
+      this.clear();
+      return;
+    }
+
+    if (!this.data) {
+      await this.fetchData();
+    }
+    this.render();
+
+    // Hook into map movements with requestAnimationFrame throttling
+    if (state.map && !this._listenersBound) {
+      state.map.on("move", () => this.requestRender());
+      state.map.on("zoomend", () => this.requestRender());
+      this._listenersBound = true;
+    }
+  },
+
+  requestRender() {
+    if (this._animFrame) return;
+    this._animFrame = requestAnimationFrame(() => {
+      this._animFrame = null;
+      if (state.showPressureLayer) this.render();
+    });
+  },
+
+  async fetchData() {
+    try {
+      const res = await fetch("/api/live/pressure-field");
+      if (res.ok) {
+        this.data = await res.json();
+      }
+    } catch (e) {
+      console.warn("Failed to fetch pressure field:", e);
+    }
+  },
+
+  clear() {
+    if (this._animFrame) {
+      cancelAnimationFrame(this._animFrame);
+      this._animFrame = null;
+    }
+    if (this.ctx && this.canvas) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+    if (state.map) {
+      this.centerMarkers.forEach(m => state.map.removeLayer(m));
+      this.cityMarkers.forEach(m => state.map.removeLayer(m));
+    }
+    this.centerMarkers = [];
+    this.cityMarkers = [];
+  },
+
+  render() {
+    if (!this.data || !state.map) return;
+    if (!this.canvas) this.init();
+    if (!this.canvas) return;
+
+    const container = document.getElementById("leaflet-map");
+    if (!container) return;
+
+    const containerW = container.clientWidth;
+    const containerH = container.clientHeight;
+    if (this.canvas.width !== containerW || this.canvas.height !== containerH) {
+      this.canvas.width = containerW;
+      this.canvas.height = containerH;
+    }
+    this.canvas.style.display = "block";
+
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, containerW, containerH);
+
+    // 1. Continuous Worldwide Thermodynamic Raster Field (100% Seamless, No Circular Artifacts)
+    const samplePoints = [...(this.data.cities || []), ...(this.data.grid || [])];
+    if (samplePoints.length > 0) {
+      const offW = 120;
+      const offH = 75;
+      if (!this._offCanvas) {
+        this._offCanvas = document.createElement("canvas");
+      }
+      this._offCanvas.width = offW;
+      this._offCanvas.height = offH;
+      const offCtx = this._offCanvas.getContext("2d");
+      const imgData = offCtx.createImageData(offW, offH);
+      const data = imgData.data;
+
+      for (let y = 0; y < offH; y++) {
+        const screenY = (y / (offH - 1)) * containerH;
+        for (let x = 0; x < offW; x++) {
+          const screenX = (x / (offW - 1)) * containerW;
+
+          // Robust Mercator coordinate projection with clamping to avoid NaN at map poles
+          let lat = 0;
+          let lng = 0;
+          try {
+            const rawPt = state.map.containerPointToLatLng([screenX, screenY]);
+            lat = Number.isFinite(rawPt.lat) ? Math.max(-84.0, Math.min(84.0, rawPt.lat)) : 0;
+            lng = Number.isFinite(rawPt.lng) ? rawPt.lng : 0;
+          } catch (e) {
+            lat = 0;
+            lng = 0;
+          }
+
+          // Smooth Synoptic Inverse Distance Weighting (Power 2 with 4° kernel)
+          let sw = 0.0;
+          let sp = 0.0;
+          const cosLat = Math.cos((lat * Math.PI) / 180);
+
+          for (let i = 0; i < samplePoints.length; i++) {
+            const pt = samplePoints[i];
+            const dLat = lat - pt.lat;
+            let dLon = lng - pt.lon;
+            // Antimeridian wraparound for global coverage
+            dLon = ((dLon + 540) % 360) - 180;
+            const dLonKm = dLon * cosLat;
+            const d2 = Math.max(0.1, dLat * dLat + dLonKm * dLonKm);
+            const w = 1.0 / (d2 + 16.0); // Smooth 4-degree synoptic transition
+            if (Number.isFinite(w) && w > 0) {
+              sw += w;
+              sp += w * pt.mslp;
+            }
+          }
+          let mslp = (sw > 0 && Number.isFinite(sp / sw)) ? (sp / sw) : 1012.0;
+          mslp = Math.max(940.0, Math.min(1050.0, mslp));
+
+          // Authentic Zoom Earth thermodynamic color ramp: seamless mixing of rich blues and warm reds
+          // Lows (< 1008): Deep cobalt blue to vibrant cyan
+          // Transition (1008 - 1014): Soft seafoam aqua to pale neutral ivory
+          // Highs (> 1014): Warm peach, vibrant terracotta, coral, and deep crimson
+          let r = 75, g = 155, b = 175, a = 180;
+          if (mslp <= 992.0) {
+            // Intense Cyclone / Polar Low: Deep Indigo-Blue
+            r = 2; g = 110; b = 190; a = 230;
+          } else if (mslp <= 998.0) {
+            // Low Pressure / Monsoon Low: Vibrant Ocean Blue
+            const t = (mslp - 992.0) / 6.0;
+            r = Math.round(2 + t * (14 - 2));
+            g = Math.round(110 + t * (165 - 110));
+            b = Math.round(190 + t * (233 - 190));
+            a = Math.round(230 + t * (220 - 230));
+          } else if (mslp <= 1004.0) {
+            // Cool Trough: Vibrant Cyan-Aqua
+            const t = (mslp - 998.0) / 6.0;
+            r = Math.round(14 + t * (6 - 14));
+            g = Math.round(165 + t * (182 - 165));
+            b = Math.round(233 + t * (212 - 233));
+            a = Math.round(220 + t * (210 - 220));
+          } else if (mslp <= 1010.0) {
+            // Mild Marine Low: Soft Seafoam Mint
+            const t = (mslp - 1004.0) / 6.0;
+            r = Math.round(6 + t * (75 - 6));
+            g = Math.round(182 + t * (215 - 182));
+            b = Math.round(212 + t * (205 - 212));
+            a = Math.round(210 + t * (185 - 210));
+          } else if (mslp <= 1014.0) {
+            // Standard Atmospheric Pressure (1013.25 hPa): Neutral Pale Almond
+            const t = (mslp - 1010.0) / 4.0;
+            r = Math.round(75 + t * (235 - 75));
+            g = Math.round(215 + t * (235 - 215));
+            b = Math.round(205 + t * (225 - 205));
+            a = Math.round(185 + t * (155 - 185));
+          } else if (mslp <= 1018.0) {
+            // Emerging Subtropical Ridge: Warm Peach-Apricot
+            const t = (mslp - 1014.0) / 4.0;
+            r = Math.round(235 + t * (251 - 235));
+            g = Math.round(235 + t * (150 - 235));
+            b = Math.round(225 + t * (80 - 225));
+            a = Math.round(155 + t * (195 - 155));
+          } else if (mslp <= 1024.0) {
+            // High Pressure: Rich Terracotta to Coral Orange-Red
+            const t = (mslp - 1018.0) / 6.0;
+            r = Math.round(251 + t * (240 - 251));
+            g = Math.round(150 + t * (60 - 150));
+            b = Math.round(80 + t * (50 - 80));
+            a = Math.round(195 + t * (225 - 195));
+          } else {
+            // Continental / Polar Anticyclone: Deep Crimson High
+            const t = Math.min(1.0, (mslp - 1024.0) / 8.0);
+            r = Math.round(240 + t * (190 - 240));
+            g = Math.round(60 + t * (20 - 60));
+            b = Math.round(50 + t * (25 - 50));
+            a = Math.round(225 + t * (240 - 225));
+          }
+
+          const idx = (y * offW + x) * 4;
+          data[idx] = r;
+          data[idx + 1] = g;
+          data[idx + 2] = b;
+          data[idx + 3] = a;
+        }
+      }
+
+      offCtx.putImageData(imgData, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(this._offCanvas, 0, 0, containerW, containerH);
+    }
+
+    // 2. Extrema Badges on Map (Worldwide Zoom Earth Open Circle Badges)
+    this.centerMarkers.forEach(m => state.map.removeLayer(m));
+    this.centerMarkers = [];
+
+    const bounds = state.map.getBounds().pad(0.25);
+    const visibleCenters = (this.data.centers || []).filter(c => bounds.contains([c.lat, c.lon]));
+
+    if (this.data.centers) {
+      visibleCenters.forEach(c => {
+        const icon = L.divIcon({
+          className: "pressure-center-divicon",
+          html: `
+            <div class="pressure-center-badge" title="${c.name}: ${c.mslp} hPa">
+              <span class="center-letter">${c.type}</span>
+              <span class="center-val">${Math.round(c.mslp)}</span>
+            </div>
+          `,
+          iconSize: [38, 38],
+          iconAnchor: [19, 19]
+        });
+
+        const marker = L.marker([c.lat, c.lon], { icon, interactive: false }).addTo(state.map);
+        this.centerMarkers.push(marker);
+      });
+    }
+
+    // 4. Render City Pressure Pills on Map (Worldwide Authentic Zoom Earth White Pills)
+    this.cityMarkers.forEach(m => state.map.removeLayer(m));
+    this.cityMarkers = [];
+
+    if (this.data.cities) {
+      const currentZoom = state.map.getZoom();
+      const cityBounds = state.map.getBounds().pad(0.06);
+
+      // Primary global anchor metropolises shown at low zoom levels
+      const globalPrimaryHubs = new Set([
+        "Tokyo", "London", "New York", "Delhi", "Sydney", "Cairo",
+        "Sao Paulo", "Paris", "Moscow", "Los Angeles", "Beijing",
+        "Singapore", "Honolulu", "Reykjavik", "Mumbai", "Johannesburg"
+      ]);
+
+      const visibleCities = this.data.cities.filter(c => {
+        if (!cityBounds.contains([c.lat, c.lon])) return false;
+        if (currentZoom <= 3) {
+          return globalPrimaryHubs.has(c.name);
+        }
+        if (currentZoom <= 5) {
+          return globalPrimaryHubs.has(c.name) || (c.mslp <= 1002 || c.mslp >= 1018);
+        }
+        return true;
+      });
+
+      visibleCities.forEach(city => {
+        const icon = L.divIcon({
+          className: "city-pressure-divicon",
+          html: `
+            <div class="zoom-city-label" title="${city.name} • MSLP: ${city.mslp} hPa • Wind: ${city.wind_kmh || '--'} km/h">
+              <span class="zoom-city-name">${city.name}</span>
+              <span class="zoom-city-pill">${Math.round(city.mslp)}</span>
+            </div>
+          `,
+          iconSize: [80, 36],
+          iconAnchor: [40, 18]
+        });
+
+        const marker = L.marker([city.lat, city.lon], { icon, interactive: true }).addTo(state.map);
+        marker.bindTooltip(`<strong>${city.name}</strong><br>MSLP: ${city.mslp} hPa<br>Temp: ${city.temp_c || '--'}°C<br>Wind: ${city.wind_kmh || '--'} km/h @ ${city.wind_dir || '--'}°`);
+        this.cityMarkers.push(marker);
+      });
+    }
+  }
+};
+window.PressureOverlay = PressureOverlay;
+
 // ---------------- Zoom Earth Floating Overlays Dock & Speed Legend Controller ----------------
 function initZoomEarthOverlays() {
   // 1. Collapse / Expand Dock
@@ -3716,6 +4084,18 @@ function initZoomEarthOverlays() {
       if (canvas) canvas.style.display = state.showWindLayer ? "block" : "none";
       const pill = document.getElementById("toggle-layer-wind");
       if (pill) pill.classList.toggle("active", state.showWindLayer);
+    });
+  }
+
+  // 2b. Pressure (MSLP & Isobars) Toggle
+  const dockBtnPressure = document.getElementById("dock-toggle-pressure");
+  if (dockBtnPressure) {
+    dockBtnPressure.addEventListener("click", () => {
+      state.showPressureLayer = !state.showPressureLayer;
+      dockBtnPressure.classList.toggle("active", state.showPressureLayer);
+      const status = dockBtnPressure.querySelector(".dock-pill-status");
+      if (status) status.textContent = state.showPressureLayer ? "ON" : "OFF";
+      PressureOverlay.toggle(state.showPressureLayer);
     });
   }
 
