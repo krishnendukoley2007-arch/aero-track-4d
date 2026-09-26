@@ -1424,11 +1424,15 @@ const COLORMAPS = {
 const BASEMAP_PRESETS = {
   dark: {
     layers: [
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: "abcd",
-        maxNativeZoom: 19,
-        maxZoom: 20,
+      L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+        attribution: '&copy; Esri, DeLorme, NAVTEQ, &copy; OpenStreetMap',
+        maxNativeZoom: 16,
+        maxZoom: 18,
+      }),
+      L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+        maxNativeZoom: 16,
+        maxZoom: 18,
+        opacity: 0.65,
       })
     ]
   },
@@ -2976,11 +2980,16 @@ function initEnsembleMap() {
     zoomControl: true,
   });
 
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: "abcd",
-    maxNativeZoom: 19,
-    maxZoom: 20,
+  L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+    attribution: '&copy; Esri, DeLorme, NAVTEQ, &copy; OpenStreetMap',
+    maxNativeZoom: 16,
+    maxZoom: 18,
+  }).addTo(state.ensembleMap);
+
+  L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}", {
+    maxNativeZoom: 16,
+    maxZoom: 18,
+    opacity: 0.65,
   }).addTo(state.ensembleMap);
 
   const ensEl = document.getElementById("ensemble-leaflet-map");
