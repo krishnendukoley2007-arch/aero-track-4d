@@ -1544,7 +1544,7 @@ let activeBasemapKey = "dark";
 let activeBasemapLayers = [];
 
 function switchBasemap(key) {
-  if (!BASEMAP_PRESETS[key]) key = "streets";
+  if (!BASEMAP_PRESETS[key]) key = "dark";
   activeBasemapKey = key;
 
   activeBasemapLayers.forEach(layer => {
@@ -1715,7 +1715,7 @@ const LiveGlobal = {
     const card1Label = document.getElementById("ov-card1-label");
     const elStage = document.getElementById("ov-stage");
     const elStageSub = document.getElementById("ov-stage-sub");
-    if (card1Label) card1Label.textContent = "GLOBAL ANOMALY STATUS";
+    if (card1Label) card1Label.textContent = "Global Anomaly Status";
     if (elStage) {
       const wind = cc.corrdiff_resolved_wind_kmh;
       if (wind >= 100) elStage.textContent = "Severe Cyclonic Low";
@@ -1728,21 +1728,21 @@ const LiveGlobal = {
     const card2Label = document.getElementById("ov-card2-label");
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (card2Label) card2Label.textContent = "CORRDIFF RESOLVED WIND";
+    if (card2Label) card2Label.textContent = "CorrDiff Resolved Wind";
     if (elWind) elWind.textContent = `${cc.corrdiff_resolved_wind_kmh} km/h`;
     if (elWindSub) elWindSub.innerHTML = `Coarse NWP: ${cc.coarse_nwp_wind_kmh} km/h <span class="text-amber">(+${cc.amplitude_recovery_gain_pct}% recovered)</span>`;
 
     const card3Label = document.getElementById("ov-card3-label");
     const elError = document.getElementById("ov-error");
     const elErrorSub = document.getElementById("ov-error-sub");
-    if (card3Label) card3Label.textContent = "CORRDIFF GUST (P90)";
+    if (card3Label) card3Label.textContent = "CorrDiff Gust (P90)";
     if (elError) elError.textContent = `${cc.corrdiff_p90_extreme_gust_kmh} km/h`;
     if (elErrorSub) elErrorSub.textContent = `Precipitation: ${cc.precipitation_mmh || 0} mm/h`;
 
     const card4Label = document.getElementById("ov-card4-label");
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (card4Label) card4Label.textContent = "FALSE-ALARM REDUCTION";
+    if (card4Label) card4Label.textContent = "False-Alarm Reduction";
     if (elRed) elRed.textContent = `${data.precision_impact.false_alarm_area_reduction_pct}%`;
     if (elRedSub) elRedSub.textContent = `78.5 km² zone vs 3,500 km² district`;
   },
@@ -1897,28 +1897,28 @@ const LiveGlobal = {
     const card1Label = document.getElementById("ov-card1-label");
     const elStage = document.getElementById("ov-stage");
     const elStageSub = document.getElementById("ov-stage-sub");
-    if (card1Label) card1Label.textContent = "CURRENT STORM STAGE";
+    if (card1Label) card1Label.textContent = "Current Storm Stage";
     if (elStage) elStage.textContent = "Super Cyclone";
     if (elStageSub) elStageSub.innerHTML = "Category 5 Equivalent &bull; 920 hPa";
 
     const card2Label = document.getElementById("ov-card2-label");
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (card2Label) card2Label.textContent = "RESOLVED EYEWALL WIND";
+    if (card2Label) card2Label.textContent = "Resolved Eyewall Wind";
     if (elWind) elWind.textContent = "102.1 km/h";
     if (elWindSub) elWindSub.innerHTML = `Coarse NWP: 63.4 km/h <span class="text-amber">(+61% recovered)</span>`;
 
     const card3Label = document.getElementById("ov-card3-label");
     const elError = document.getElementById("ov-error");
     const elErrorSub = document.getElementById("ov-error-sub");
-    if (card3Label) card3Label.textContent = "TRACK ERROR VS IBTrACS";
+    if (card3Label) card3Label.textContent = "Track Error vs IBTrACS";
     if (elError) elError.textContent = "225.3 km";
     if (elErrorSub) elErrorSub.textContent = "Mean across 5-day track: 286.9 km";
 
     const card4Label = document.getElementById("ov-card4-label");
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (card4Label) card4Label.textContent = "FALSE-ALARM REDUCTION";
+    if (card4Label) card4Label.textContent = "False-Alarm Reduction";
     if (elRed) elRed.textContent = "97.8%";
     if (elRedSub) elRedSub.textContent = "78.5 km² zone vs 3,500 km² district";
   },
@@ -2331,13 +2331,17 @@ const LiveGlobal = {
         this.activeStormsList.forEach((storm, idx) => {
           const pill = document.createElement("button");
           pill.className = `storm-pill font-mono ${idx === 0 ? 'active' : ''}`;
-          pill.innerHTML = `<span>🌀 ${storm.name}</span> <span class="storm-pill-wind">${Math.round(storm.current_wind_kmh)} km/h</span>`;
+          const catBadge = storm.current_wind_kmh >= 222 ? '<span class="storm-cat-badge storm-cat-super">CAT 5</span>' :
+                           (storm.current_wind_kmh >= 118 ? '<span class="storm-cat-badge storm-cat-severe">VSCS</span>' :
+                           '<span class="storm-cat-badge storm-cat-severe">GALE</span>');
+          pill.innerHTML = `<i data-lucide="wind"></i> <span>${storm.name}</span> ${catBadge} <span class="storm-pill-wind">${Math.round(storm.current_wind_kmh)} km/h</span> <span class="storm-pill-meta">${Math.round(storm.central_pressure_hpa || 998)} hPa</span>`;
           pill.title = `${storm.basin} • Stage: ${storm.current_stage} • Lead: T+0h to T+120h`;
           pill.addEventListener("click", () => {
             this.selectActiveStorm(storm.id, true);
           });
           pillsContainer.appendChild(pill);
         });
+        refreshIcons();
       });
 
       if (ThreeGlobeViewer.initialized) {
@@ -2750,6 +2754,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   initFullscreenController();
   initChart();
 
+  // Initialize Lucide iconography
+  refreshIcons();
+
   // Initialize Live Global Earth module
   LiveGlobal.init();
 
@@ -2823,6 +2830,17 @@ function initMap() {
   }
 }
 
+// ---------------- Lucide Icon Controller ----------------
+function refreshIcons() {
+  if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) {
+    try {
+      lucide.createIcons();
+    } catch (e) {
+      console.warn("Lucide createIcons error:", e);
+    }
+  }
+}
+
 // ---------------- View Tab Controller ----------------
 function initViewTabs() {
   const tabs = document.querySelectorAll(".nav-tab");
@@ -2844,6 +2862,9 @@ function switchView(viewName) {
   document.querySelectorAll(".view-panel").forEach(p => {
     p.classList.toggle("active", p.id === `view-${viewName}`);
   });
+
+  // Ensure Lucide icons render in newly exposed tab views
+  refreshIcons();
 
   // If entering Overview, Timeline, or Ensemble, invalidate map size to prevent gray gaps
   if (viewName === "overview" || viewName === "timeline" || viewName === "ensemble") {
@@ -3470,7 +3491,8 @@ function getZoomParticleCount(zoom) {
   // Zoom 5-7 (regional/storm): ~1150 - 1650 lines
   // Zoom 8-18 (local/hyperlocal 5km impact zone): ~1900 - 2450 lines (capped for 60fps)
   const z = Math.max(1, Math.min(10, zoom || 3));
-  return Math.round(350 * Math.pow(1.24, z - 1));
+  const mult = state.streamlineDensityMult || 1.0;
+  return Math.round(350 * Math.pow(1.24, z - 1) * mult);
 }
 
 function spawnParticleInViewport() {
@@ -3552,6 +3574,8 @@ function initWindStreamlines() {
       }
     }
   }
+  window.reseedAllWindParticles = reseedAllParticles;
+  window.updateParticleCountForZoom = updateParticleCountForZoom;
 
   resizeCanvas();
   window.addEventListener("resize", clearCanvas);
@@ -4284,6 +4308,41 @@ function initZoomEarthOverlays() {
     });
   });
 
+  // 7b. Streamline Density Buttons
+  const densityBtns = document.querySelectorAll(".dock-density-btn");
+  densityBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      densityBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const d = btn.dataset.density || "med";
+      if (d === "low") state.streamlineDensityMult = 0.6;
+      else if (d === "high") state.streamlineDensityMult = 1.6;
+      else state.streamlineDensityMult = 1.0;
+      if (typeof window.updateParticleCountForZoom === "function") {
+        window.updateParticleCountForZoom();
+      }
+      if (typeof window.reseedAllWindParticles === "function") {
+        window.reseedAllWindParticles();
+      }
+    });
+  });
+
+  // 7c. Layer Opacity Slider
+  const opacitySlider = document.getElementById("dock-layer-opacity-slider");
+  const opacityLabel = document.getElementById("dock-opacity-label");
+  if (opacitySlider) {
+    opacitySlider.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (opacityLabel) opacityLabel.textContent = `${val}%`;
+      const op = val / 100.0;
+      const windCanvas = document.getElementById("canvas-wind-streamlines");
+      if (windCanvas) windCanvas.style.opacity = op;
+      const pressureCanvas = document.getElementById("canvas-pressure-overlay");
+      if (pressureCanvas) pressureCanvas.style.opacity = op;
+      if (state.layers.radarTileLayer) state.layers.radarTileLayer.setOpacity(op * 0.75);
+    });
+  }
+
   // 8. Wind Speed Legend Unit Toggle
   const unitBtns = document.querySelectorAll(".legend-unit-toggle .btn-unit-toggle");
   unitBtns.forEach(btn => {
@@ -4801,6 +4860,70 @@ function renderTransectProfile(data) {
   ctx.fillText("◂ [A]", padL, h - 4);
   ctx.fillStyle = "#ec4899";
   ctx.fillText("[B] ▸", w - padR - 18, h - 4);
+
+  // Bathymetric & Topographic Terrain Cross-Section (Mission-Control Ergonomics)
+  const isMarineHazard = !isTemp;
+  const bathyYBase = h - 6;
+  const bathyMaxH = 14;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(padL, bathyYBase);
+  for (let i = 0; i < nPts; i++) {
+    const t = i / (nPts - 1);
+    const px = padL + t * plotW;
+    let elevNormalized = 0;
+    if (isMarineHazard) {
+      if (t < 0.58) {
+        const shelfDepth = -60 * Math.pow(1 - t / 0.58, 1.4);
+        elevNormalized = shelfDepth / 80;
+      } else {
+        const landElev = 18 * Math.sin(((t - 0.58) / 0.42) * Math.PI * 0.5);
+        elevNormalized = landElev / 40;
+      }
+    } else {
+      const inlandElev = 180 + 90 * Math.sin(t * Math.PI);
+      elevNormalized = inlandElev / 300;
+    }
+    const py = bathyYBase - elevNormalized * bathyMaxH;
+    ctx.lineTo(px, py);
+  }
+  ctx.lineTo(padL + plotW, bathyYBase);
+  ctx.closePath();
+
+  if (isMarineHazard) {
+    const grad = ctx.createLinearGradient(padL, 0, padL + plotW, 0);
+    grad.addColorStop(0, "rgba(14, 165, 233, 0.20)");
+    grad.addColorStop(0.55, "rgba(56, 189, 248, 0.25)");
+    grad.addColorStop(0.60, "rgba(16, 185, 129, 0.25)");
+    grad.addColorStop(1, "rgba(16, 185, 129, 0.16)");
+    ctx.fillStyle = grad;
+  } else {
+    ctx.fillStyle = "rgba(245, 158, 11, 0.16)";
+  }
+  ctx.fill();
+
+  if (isMarineHazard) {
+    const shoreX = padL + 0.58 * plotW;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath();
+    ctx.moveTo(shoreX, padT + 12);
+    ctx.lineTo(shoreX, bathyYBase);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+    ctx.font = "8px 'JetBrains Mono', monospace";
+    ctx.fillText("╎ Coast (0m)", shoreX - 28, padT + 10);
+
+    ctx.fillStyle = "#38bdf8";
+    ctx.fillText("≈ Shelf (-60m)", padL + 18, h - 5);
+    ctx.fillStyle = "#34d399";
+    ctx.fillText("⌂ Coastal Land", padL + plotW - 84, h - 5);
+  }
+  ctx.restore();
 
   function drawCurve(pts, strokeStyle, lineWidth, dashed = false) {
     ctx.save();
@@ -5542,7 +5665,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elCard1 = document.getElementById("ov-card1-label");
     const elStage = document.getElementById("ov-stage");
     const elStageSub = document.getElementById("ov-stage-sub");
-    if (elCard1) elCard1.textContent = "LOCAL WEATHER STATUS";
+    if (elCard1) elCard1.textContent = "Local Weather Status";
     if (elStage) {
       elStage.textContent = data.alert_tier ? data.alert_tier.split("/")[0].trim() : data.weather_desc;
     }
@@ -5553,7 +5676,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elCard2 = document.getElementById("ov-card2-label");
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (elCard2) elCard2.textContent = "CORRDIFF RESOLVED WIND";
+    if (elCard2) elCard2.textContent = "CorrDiff Resolved Wind";
     if (elWind) elWind.textContent = `${data.predicted_local_wind_kmh} km/h`;
     if (elWindSub) {
       elWindSub.innerHTML = `Coarse NWP: ${data.coarse_nwp_wind_kmh || (data.predicted_local_wind_kmh * 0.62).toFixed(1)} km/h <span class="text-amber">(+${data.corrdiff_gain_pct || 61.5}% peak recovered)</span>`;
@@ -5563,11 +5686,11 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elError = document.getElementById("ov-error");
     const elErrorSub = document.getElementById("ov-error-sub");
     if (state.currentHazard === "amphan_2020" && data.location.distance_to_eye_km > 0) {
-      if (elCard3) elCard3.textContent = "DISTANCE TO EYE";
+      if (elCard3) elCard3.textContent = "Distance to Eye";
       if (elError) elError.textContent = `${data.location.distance_to_eye_km} km`;
       if (elErrorSub) elErrorSub.textContent = `Target: ${data.location.name}`;
     } else {
-      if (elCard3) elCard3.textContent = "GUST (P90) / INTENSITY";
+      if (elCard3) elCard3.textContent = "Gust (P90) / Intensity";
       if (elError) elError.textContent = `${data.predicted_p90_gust_kmh} km/h`;
       if (elErrorSub) elErrorSub.textContent = `Precipitation: ${data.predicted_local_rain_mmh} mm/h • Rain Rate`;
     }
@@ -5575,7 +5698,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elCard4 = document.getElementById("ov-card4-label");
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (elCard4) elCard4.textContent = "FALSE-ALARM REDUCTION";
+    if (elCard4) elCard4.textContent = "False-Alarm Reduction";
     if (elRed) elRed.textContent = "97.8%";
     if (elRedSub) elRedSub.textContent = "78.5 km² zone vs 3,500 km² district";
 
@@ -5712,7 +5835,8 @@ function initBotPresets() {
 async function loadBulletinText() {
   try {
     const loc = state.selectedLocation;
-    const url = `/api/bulletin?step_index=${state.currentStep}&lat=${loc.lat}&lon=${loc.lon}&loc_name=${encodeURIComponent(loc.name)}`;
+    const hazard = state.currentHazard || "amphan_2020";
+    const url = `/api/bulletin?step_index=${state.currentStep}&lat=${loc.lat}&lon=${loc.lon}&loc_name=${encodeURIComponent(loc.name)}&hazard_id=${hazard}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error("Bulletin API failed");
     const text = await res.text();
@@ -6130,16 +6254,7 @@ function initEventListeners() {
   }
 
   // Coastal Presets
-  document.querySelectorAll(".btn-preset").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      const lat = parseFloat(btn.dataset.lat);
-      const lon = parseFloat(btn.dataset.lon);
-      const name = btn.dataset.name;
-      triggerNDRFAlert(lat, lon, name);
-    });
-  });
+  initCoastalPresets();
 
   // Direct Bulletin Download Buttons
   const btnDl1 = document.getElementById("btn-direct-download-bulletin");
@@ -6201,6 +6316,188 @@ function initEventListeners() {
 }
 
 // ---------------- Multi-Hazard Architecture Switcher ----------------
+function initCoastalPresets() {
+  document.querySelectorAll(".btn-preset").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const lat = parseFloat(btn.dataset.lat);
+      const lon = parseFloat(btn.dataset.lon);
+      const name = btn.dataset.name;
+      triggerNDRFAlert(lat, lon, name);
+    });
+  });
+}
+
+function updatePresetButtonsForHazard(hazardId) {
+  const botPresetBar = document.getElementById("bot-preset-bar");
+  const coastalPresetsRow = document.querySelector(".coastal-presets-row");
+  const coastalHeaderTitle = document.querySelector(".alert-dispatch-column .card-headline span");
+
+  let presets = [];
+  if (hazardId === "heat_dome_2020") {
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Extreme Heat Station or Click Map`;
+    presets = [
+      { name: "Churu (Rajasthan - Epicenter)", lat: 28.290, lon: 74.960, label: "Churu 47.6°C", icon: "flame" },
+      { name: "Palam (Delhi NCR - Heat Island)", lat: 28.580, lon: 77.090, label: "Palam 46.8°C", icon: "building" },
+      { name: "Nagpur (Vidarbha)", lat: 21.145, lon: 79.088, label: "Nagpur 46.5°C", icon: "sun" },
+      { name: "Banda (Uttar Pradesh)", lat: 25.480, lon: 80.340, label: "Banda 47.2°C", icon: "thermometer" }
+    ];
+  } else if (hazardId === "cold_wave_2021") {
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Cold Wave Station or Click Map`;
+    presets = [
+      { name: "Sikar (Rajasthan - Ground Frost)", lat: 27.610, lon: 75.140, label: "Sikar 1.9°C", icon: "snowflake" },
+      { name: "Narnaul (Haryana)", lat: 28.040, lon: 76.110, label: "Narnaul 2.2°C", icon: "wind" },
+      { name: "Amritsar (Punjab - Dense Fog)", lat: 31.634, lon: 74.872, label: "Amritsar 2.8°C", icon: "cloud-fog" },
+      { name: "Safdarjung (Delhi NCR)", lat: 28.585, lon: 77.206, label: "Safdarjung 3.2°C", icon: "thermometer-snowflake" }
+    ];
+  } else if (hazardId === "fani_2019") {
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Coastal Node or Click Map`;
+    presets = [
+      { name: "Puri Coast (Odisha Landfall)", lat: 19.813, lon: 85.831, label: "Puri Coast", icon: "anchor" },
+      { name: "Bhubaneswar (Odisha)", lat: 20.296, lon: 85.825, label: "Bhubaneswar", icon: "building" },
+      { name: "Gopalpur Port (Odisha)", lat: 19.260, lon: 84.910, label: "Gopalpur", icon: "map-pin" },
+      { name: "Fani Eyewall Core", lat: 19.800, lon: 85.800, label: "Storm Eye", icon: "crosshair" }
+    ];
+  } else if (hazardId === "yaas_2021") {
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Coastal Node or Click Map`;
+    presets = [
+      { name: "Dhamra Port (Odisha Landfall)", lat: 20.800, lon: 86.970, label: "Dhamra Port", icon: "anchor" },
+      { name: "Balasore Coast (Odisha)", lat: 21.490, lon: 86.930, label: "Balasore", icon: "map-pin" },
+      { name: "Digha Coast (West Bengal)", lat: 21.626, lon: 87.508, label: "Digha", icon: "map-pin" },
+      { name: "Yaas Eyewall Core", lat: 20.800, lon: 87.000, label: "Storm Eye", icon: "crosshair" }
+    ];
+  } else {
+    // Amphan 2020 / Default
+    if (coastalHeaderTitle) coastalHeaderTitle.innerHTML = `<i data-lucide="map-pin"></i> Select Coastal Node or Click Map`;
+    presets = [
+      { name: "Digha Coast (West Bengal)", lat: 21.626, lon: 87.508, label: "Digha", icon: "map-pin" },
+      { name: "Paradip Port (Odisha)", lat: 20.316, lon: 86.611, label: "Paradip", icon: "anchor" },
+      { name: "Kolkata (West Bengal)", lat: 22.572, lon: 88.364, label: "Kolkata", icon: "building" },
+      { name: "Amphan Cyclone Eye", lat: 14.900, lon: 87.500, label: "Storm Eye", icon: "crosshair" }
+    ];
+  }
+
+  if (botPresetBar) {
+    botPresetBar.innerHTML = `<span class="bot-preset-label">QUICK PROBE:</span>` +
+      presets.map((p, idx) => `<button class="btn-bot-preset ${idx === 0 ? 'active' : ''}" data-lat="${p.lat}" data-lon="${p.lon}" data-name="${p.name}"><i data-lucide="${p.icon}"></i> ${p.label}</button>`).join(" ");
+  }
+
+  if (coastalPresetsRow) {
+    coastalPresetsRow.innerHTML = presets.map((p, idx) => `<button class="btn-preset ${idx === 0 ? 'active' : ''}" data-lat="${p.lat}" data-lon="${p.lon}" data-name="${p.name}">${p.label}</button>`).join(" ");
+  }
+
+  initBotPresets();
+  initCoastalPresets();
+  refreshIcons();
+}
+
+function updateTwoGapBreakdown(hazardId) {
+  const elCoarse = document.getElementById("tier-bar-coarse");
+  const elUnet = document.getElementById("tier-bar-unet");
+  const elExpl1 = document.getElementById("gap-expl-1");
+  const elCorrdiff = document.getElementById("tier-bar-corrdiff");
+  const elTarget = document.getElementById("tier-bar-target");
+  const elExpl2 = document.getElementById("gap-expl-2");
+  const elGtLbl = document.getElementById("tier-lbl-gt");
+  const elGtBar = document.getElementById("tier-bar-gt");
+
+  if (!elCoarse || !elCorrdiff) return;
+
+  if (hazardId === "heat_dome_2020") {
+    elCoarse.style.width = "44%";
+    elCoarse.textContent = "44.0°C (Regional Coarse NWP)";
+    elUnet.style.width = "42%";
+    elUnet.innerHTML = `42.1°C <span class="tag-smoothed">-5.5°C UHI Smoothing</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Recovers 47.6°C Asphalt Thermal Hotspot)`;
+    elCorrdiff.style.width = "48%";
+    elCorrdiff.innerHTML = `47.6°C <span class="tag-preserved">Preserved Peak</span>`;
+    if (elTarget) {
+      elTarget.style.width = "45%";
+      elTarget.textContent = "45.2°C (Regional Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Standard reanalysis blurs urban asphalt core. Resolved by 5.0 km downscaling.`;
+    if (elGtLbl) elGtLbl.textContent = "IMD Churu / Palam AWS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "48%";
+      elGtBar.textContent = "47.6°C (Official Station Record)";
+    }
+  } else if (hazardId === "cold_wave_2021") {
+    elCoarse.style.width = "50%";
+    elCoarse.textContent = "5.1°C (Averaged Regional NWP)";
+    elUnet.style.width = "48%";
+    elUnet.innerHTML = `4.8°C <span class="tag-smoothed">+2.9°C Ridge Bias</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Resolves 1.9°C Nocturnal Frost Valley)`;
+    elCorrdiff.style.width = "19%";
+    elCorrdiff.innerHTML = `1.9°C <span class="tag-preserved">Ground Frost Inversion</span>`;
+    if (elTarget) {
+      elTarget.style.width = "35%";
+      elTarget.textContent = "3.5°C (Reconstruction Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Broad grid misses cold air drainage in topographic hollows.`;
+    if (elGtLbl) elGtLbl.textContent = "IMD Sikar / Narnaul AWS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "19%";
+      elGtBar.textContent = "1.9°C (Recorded Minimum Tmin)";
+    }
+  } else if (hazardId === "fani_2019") {
+    elCoarse.style.width = "30%";
+    elCoarse.textContent = "64.9 km/h";
+    elUnet.style.width = "25%";
+    elUnet.innerHTML = `55.2 km/h <span class="tag-smoothed">-50.3% Loss</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Recovers 93.3 km/h; Held-Out Test Step)`;
+    elCorrdiff.style.width = "43%";
+    elCorrdiff.innerHTML = `93.3 km/h <span class="tag-preserved">84.0% Recovered</span>`;
+    if (elTarget) {
+      elTarget.style.width = "51%";
+      elTarget.textContent = "111.1 km/h (Native Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.`;
+    if (elGtLbl) elGtLbl.textContent = "NOAA IBTrACS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "100%";
+      elGtBar.textContent = "215.0 km/h (IBTrACS Landfall)";
+    }
+  } else if (hazardId === "yaas_2021") {
+    elCoarse.style.width = "38%";
+    elCoarse.textContent = "53.0 km/h";
+    elUnet.style.width = "33%";
+    elUnet.innerHTML = `46.2 km/h <span class="tag-smoothed">-50.0% Loss</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Recovers 85.1 km/h; Held-Out Test Step)`;
+    elCorrdiff.style.width = "61%";
+    elCorrdiff.innerHTML = `85.1 km/h <span class="tag-preserved">92.2% Recovered</span>`;
+    if (elTarget) {
+      elTarget.style.width = "66%";
+      elTarget.textContent = "92.3 km/h (Native Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.`;
+    if (elGtLbl) elGtLbl.textContent = "NOAA IBTrACS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "100%";
+      elGtBar.textContent = "140.0 km/h (IBTrACS Landfall)";
+    }
+  } else {
+    // Amphan 2020 Default
+    elCoarse.style.width = "28%";
+    elCoarse.textContent = "63.4 km/h";
+    elUnet.style.width = "25%";
+    elUnet.innerHTML = `56.5 km/h <span class="tag-smoothed">-49.1% Loss</span>`;
+    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Recovers 102.1 km/h; P90: 108.4 km/h)`;
+    elCorrdiff.style.width = "46%";
+    elCorrdiff.innerHTML = `102.1 km/h <span class="tag-preserved">Preserved Peak</span>`;
+    if (elTarget) {
+      elTarget.style.width = "50%";
+      elTarget.textContent = "111.0 km/h (Reconstruction Baseline)";
+    }
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.`;
+    if (elGtLbl) elGtLbl.textContent = "NOAA IBTrACS Ground Truth";
+    if (elGtBar) {
+      elGtBar.style.width = "100%";
+      elGtBar.textContent = "222.2 km/h (IBTrACS Best-Track Estimate)";
+    }
+  }
+}
+
 async function switchHazard(hazardId) {
   state.currentHazard = hazardId;
   const selectEl = document.getElementById("select-active-hazard");
@@ -6212,14 +6509,21 @@ async function switchHazard(hazardId) {
     if (btnBench) btnBench.click();
   }
 
+  updatePresetButtonsForHazard(hazardId);
+  updateTwoGapBreakdown(hazardId);
+
   try {
     if (hazardId === "amphan_2020") {
       await loadTrackData();
       await updateStep(5);
       if (state.map) state.map.setView([18.5, 87.5], 6);
+      const defaultPreset = { lat: 21.626, lon: 87.508, name: "Digha Coast (West Bengal)" };
+      triggerNDRFAlert(defaultPreset.lat, defaultPreset.lon, defaultPreset.name);
       loadCAPXmlFeed();
       loadAgriAdvisory();
+      loadBulletinText();
       updateExportLinks();
+      refreshIcons();
       return;
     }
 
@@ -6239,15 +6543,15 @@ async function switchHazard(hazardId) {
     document.getElementById("summary-subtext").innerHTML = `Pinpoint 5 km alert corridor active near <strong>${peakStep.centroid.lat}°N, ${peakStep.centroid.lon}°E</strong>. Generative CorrDiff diffusion recovers true peak amplitude, delivering a <strong>97.8%+ reduction in false-alarm warning area</strong> vs broad regional warnings.`;
     document.getElementById("summary-severity-badge").textContent = `SEVERITY: ${peakStep.severity.toUpperCase()}`;
 
-    document.getElementById("ov-card1-label").textContent = "HAZARD STAGE";
+    document.getElementById("ov-card1-label").textContent = "Hazard Stage";
     document.getElementById("ov-stage").textContent = peakStep.stage;
     document.getElementById("ov-stage-sub").textContent = `${hData.hazard_type} • Peak Step 3`;
 
-    document.getElementById("ov-card2-label").textContent = peakStep.metric_name || "RESOLVED PEAK";
+    document.getElementById("ov-card2-label").textContent = peakStep.metric_name ? peakStep.metric_name.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase()) : "Resolved Peak";
     document.getElementById("ov-wind").textContent = `${peakStep.metric_val} ${peakStep.unit}`;
     document.getElementById("ov-wind-sub").textContent = `Coarse NWP: ${peakStep.stage.includes("Heat") ? "44.0" : "5.1"} ${peakStep.unit} (Preserved by CorrDiff)`;
 
-    document.getElementById("ov-card3-label").textContent = "MEAN TRACK ERROR";
+    document.getElementById("ov-card3-label").textContent = "Mean Track Error";
     document.getElementById("ov-error").textContent = `${hData.mean_track_error_km || 56.3} km`;
     document.getElementById("ov-error-sub").textContent = "Evaluated against ground truth station network";
 
@@ -6277,10 +6581,20 @@ async function switchHazard(hazardId) {
       }).addTo(state.map);
     }
 
+    // Automatically trigger alert for the primary preset of the newly selected hazard
+    const firstPreset = (hazardId === "heat_dome_2020") ? { lat: 28.290, lon: 74.960, name: "Churu (Rajasthan - Epicenter)" } :
+                        (hazardId === "cold_wave_2021" ? { lat: 27.610, lon: 75.140, name: "Sikar (Rajasthan - Ground Frost)" } :
+                        (hazardId === "fani_2019" ? { lat: 19.813, lon: 85.831, name: "Puri Coast (Odisha Landfall)" } :
+                        (hazardId === "yaas_2021" ? { lat: 20.800, lon: 86.970, name: "Dhamra Port (Odisha Landfall)" } :
+                        { lat: 21.626, lon: 87.508, name: "Digha Coast (West Bengal)" })));
+    triggerNDRFAlert(firstPreset.lat, firstPreset.lon, firstPreset.name);
+
     // Refresh advisory, CAP and export links
     loadCAPXmlFeed();
     loadAgriAdvisory();
+    loadBulletinText();
     updateExportLinks();
+    refreshIcons();
   } catch (err) {
     console.error("Switch hazard error:", err);
   }
@@ -6358,7 +6672,7 @@ async function loadAgriAdvisory() {
 
     zoneEl.textContent = `${data.agro_climatic_zone} • ${data.threat_metric}`;
     badgeEl.textContent = data.urgency_level;
-    econEl.textContent = `💰 ${data.economic_shield_estimate}`;
+    econEl.innerHTML = `<i data-lucide="shield-check"></i> ${data.economic_shield_estimate}`;
 
     if (cropsListEl && data.target_crops) {
       cropsListEl.innerHTML = data.target_crops.map(c => `<span class="agri-crop-tag">${c}</span>`).join("");
@@ -6367,11 +6681,12 @@ async function loadAgriAdvisory() {
     if (data.actionable_protocols) {
       listEl.innerHTML = data.actionable_protocols.map(p => `
         <div class="agri-protocol-item">
-          <span>⚡</span>
+          <span><i data-lucide="zap"></i></span>
           <span>${p}</span>
         </div>
       `).join("");
     }
+    refreshIcons();
   } catch (err) {
     console.error("Agri advisory error:", err);
   }

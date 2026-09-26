@@ -3491,7 +3491,8 @@ function getZoomParticleCount(zoom) {
   // Zoom 5-7 (regional/storm): ~1150 - 1650 lines
   // Zoom 8-18 (local/hyperlocal 5km impact zone): ~1900 - 2450 lines (capped for 60fps)
   const z = Math.max(1, Math.min(10, zoom || 3));
-  return Math.round(350 * Math.pow(1.24, z - 1));
+  const mult = state.streamlineDensityMult || 1.0;
+  return Math.round(350 * Math.pow(1.24, z - 1) * mult);
 }
 
 function spawnParticleInViewport() {
@@ -3573,6 +3574,8 @@ function initWindStreamlines() {
       }
     }
   }
+  window.reseedAllWindParticles = reseedAllParticles;
+  window.updateParticleCountForZoom = updateParticleCountForZoom;
 
   resizeCanvas();
   window.addEventListener("resize", clearCanvas);
@@ -4305,6 +4308,41 @@ function initZoomEarthOverlays() {
     });
   });
 
+  // 7b. Streamline Density Buttons
+  const densityBtns = document.querySelectorAll(".dock-density-btn");
+  densityBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      densityBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const d = btn.dataset.density || "med";
+      if (d === "low") state.streamlineDensityMult = 0.6;
+      else if (d === "high") state.streamlineDensityMult = 1.6;
+      else state.streamlineDensityMult = 1.0;
+      if (typeof window.updateParticleCountForZoom === "function") {
+        window.updateParticleCountForZoom();
+      }
+      if (typeof window.reseedAllWindParticles === "function") {
+        window.reseedAllWindParticles();
+      }
+    });
+  });
+
+  // 7c. Layer Opacity Slider
+  const opacitySlider = document.getElementById("dock-layer-opacity-slider");
+  const opacityLabel = document.getElementById("dock-opacity-label");
+  if (opacitySlider) {
+    opacitySlider.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (opacityLabel) opacityLabel.textContent = `${val}%`;
+      const op = val / 100.0;
+      const windCanvas = document.getElementById("canvas-wind-streamlines");
+      if (windCanvas) windCanvas.style.opacity = op;
+      const pressureCanvas = document.getElementById("canvas-pressure-overlay");
+      if (pressureCanvas) pressureCanvas.style.opacity = op;
+      if (state.layers.radarTileLayer) state.layers.radarTileLayer.setOpacity(op * 0.75);
+    });
+  }
+
   // 8. Wind Speed Legend Unit Toggle
   const unitBtns = document.querySelectorAll(".legend-unit-toggle .btn-unit-toggle");
   unitBtns.forEach(btn => {
@@ -4822,6 +4860,70 @@ function renderTransectProfile(data) {
   ctx.fillText("◂ [A]", padL, h - 4);
   ctx.fillStyle = "#ec4899";
   ctx.fillText("[B] ▸", w - padR - 18, h - 4);
+
+  // Bathymetric & Topographic Terrain Cross-Section (Mission-Control Ergonomics)
+  const isMarineHazard = !isTemp;
+  const bathyYBase = h - 6;
+  const bathyMaxH = 14;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(padL, bathyYBase);
+  for (let i = 0; i < nPts; i++) {
+    const t = i / (nPts - 1);
+    const px = padL + t * plotW;
+    let elevNormalized = 0;
+    if (isMarineHazard) {
+      if (t < 0.58) {
+        const shelfDepth = -60 * Math.pow(1 - t / 0.58, 1.4);
+        elevNormalized = shelfDepth / 80;
+      } else {
+        const landElev = 18 * Math.sin(((t - 0.58) / 0.42) * Math.PI * 0.5);
+        elevNormalized = landElev / 40;
+      }
+    } else {
+      const inlandElev = 180 + 90 * Math.sin(t * Math.PI);
+      elevNormalized = inlandElev / 300;
+    }
+    const py = bathyYBase - elevNormalized * bathyMaxH;
+    ctx.lineTo(px, py);
+  }
+  ctx.lineTo(padL + plotW, bathyYBase);
+  ctx.closePath();
+
+  if (isMarineHazard) {
+    const grad = ctx.createLinearGradient(padL, 0, padL + plotW, 0);
+    grad.addColorStop(0, "rgba(14, 165, 233, 0.20)");
+    grad.addColorStop(0.55, "rgba(56, 189, 248, 0.25)");
+    grad.addColorStop(0.60, "rgba(16, 185, 129, 0.25)");
+    grad.addColorStop(1, "rgba(16, 185, 129, 0.16)");
+    ctx.fillStyle = grad;
+  } else {
+    ctx.fillStyle = "rgba(245, 158, 11, 0.16)";
+  }
+  ctx.fill();
+
+  if (isMarineHazard) {
+    const shoreX = padL + 0.58 * plotW;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath();
+    ctx.moveTo(shoreX, padT + 12);
+    ctx.lineTo(shoreX, bathyYBase);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+    ctx.font = "8px 'JetBrains Mono', monospace";
+    ctx.fillText("╎ Coast (0m)", shoreX - 28, padT + 10);
+
+    ctx.fillStyle = "#38bdf8";
+    ctx.fillText("≈ Shelf (-60m)", padL + 18, h - 5);
+    ctx.fillStyle = "#34d399";
+    ctx.fillText("⌂ Coastal Land", padL + plotW - 84, h - 5);
+  }
+  ctx.restore();
 
   function drawCurve(pts, strokeStyle, lineWidth, dashed = false) {
     ctx.save();

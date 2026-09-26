@@ -259,6 +259,19 @@
                 <button class="dock-basemap-btn" data-bm="streets" title="OpenStreetMap streets"><i data-lucide="map"></i> Streets</button>
                 <button class="dock-basemap-btn" data-bm="topo" title="Topographic terrain"><i data-lucide="mountain"></i> Topo</button>
               </div>
+
+              <div class="dock-group-title" style="margin-top: 8px;">Streamline Density</div>
+              <div class="dock-density-row">
+                <button class="dock-density-btn" data-density="low" title="Low particle density (60% count)">Low</button>
+                <button class="dock-density-btn active" data-density="med" title="Standard density (100% count)">Med</button>
+                <button class="dock-density-btn" data-density="high" title="High density (160% count)">High</button>
+              </div>
+
+              <div class="dock-group-title" style="margin-top: 8px;">Layer Opacity</div>
+              <div class="dock-opacity-row">
+                <input type="range" id="dock-layer-opacity-slider" class="dock-opacity-slider" min="20" max="100" value="85" title="Adjust dynamic overlays opacity">
+                <span id="dock-opacity-label" class="dock-opacity-val">85%</span>
+              </div>
             </div>
           </div>
 

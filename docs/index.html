@@ -6,24 +6,27 @@
   <title>AERO-TRACK 4D // MoES &amp; NCMRWF (SIH 26078)</title>
   <meta name="description" content="AI-Driven Spatio-Temporal Tracking &amp; CorrDiff Downscaling of Extreme Weather Anomalies. MoES/NCMRWF SIH 26078.">
 
-  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <!-- Google Fonts: Inter, JetBrains Mono & Space Grotesk -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="./style.css?v=proof_modal_v1">
+  <link rel="stylesheet" href="/static/style.css?v=aerotrack_v6_step6">
 
   <!-- Leaflet & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <!-- Lucide Icons -->
+  <script src="/static/vendor/lucide.min.js"></script>
+
   <!-- Three.js & OrbitControls for 3D Earth Monitor -->
-  <script src="./vendor/three.min.js"></script>
-  <script src="./vendor/OrbitControls.js"></script>
+  <script src="/static/vendor/three.min.js"></script>
+  <script src="/static/vendor/OrbitControls.js"></script>
 </head>
 <body>
   <!-- ============================================================== -->
@@ -49,22 +52,22 @@
     <!-- Center Navigation Tabs -->
     <nav class="nav-tabs-container" id="nav-tabs-container">
       <button class="nav-tab active" data-view="overview" id="tab-overview" title="Full-screen 3D Earth and 2D Interactive Tracking Map">
-        <span class="tab-icon">🌐</span> 1. Monitor
+        <span class="tab-icon"><i data-lucide="activity"></i></span> Monitor
       </button>
       <button class="nav-tab" data-view="timeline" id="tab-timeline" title="Trajectory audit and step-by-step IBTrACS validation">
-        <span class="tab-icon">⏱️</span> 2. Track &amp; Audit
+        <span class="tab-icon"><i data-lucide="navigation"></i></span> Track
       </button>
       <button class="nav-tab" data-view="downscale" id="tab-downscale" title="Swipe comparison: coarse NWP vs 5km CorrDiff generative diffusion">
-        <span class="tab-icon">🔬</span> 3. Downscale
+        <span class="tab-icon"><i data-lucide="sliders"></i></span> Downscale
       </button>
       <button class="nav-tab" data-view="alerts" id="tab-alerts" title="Hyper-local 5km warnings, multilingual advisory, and OASIS CAP XML">
-        <span class="tab-icon">🚨</span> 4. Alert &amp; CAP
+        <span class="tab-icon"><i data-lucide="alert-triangle"></i></span> Alerts
       </button>
       <button class="nav-tab" data-view="ensemble" id="tab-ensemble" title="3-10 day medium-range EPS dispersion and cone of uncertainty">
-        <span class="tab-icon">🌪️</span> 5. Medium-Range
+        <span class="tab-icon"><i data-lucide="wind"></i></span> Outlook
       </button>
       <button class="nav-tab" data-view="methodology" id="tab-methodology" title="Official problem statement rubric and mathematical validation">
-        <span class="tab-icon">📚</span> 6. Methodology
+        <span class="tab-icon"><i data-lucide="book-open"></i></span> Rubric
       </button>
     </nav>
 
@@ -72,35 +75,35 @@
     <div class="header-right-suite">
       <div class="hazard-selector-wrap" id="hazard-selector-wrap">
         <select id="select-active-hazard" class="select-hazard-pill" title="Switch between verified extreme anomaly benchmark case studies">
-          <option value="amphan_2020" selected>🌀 Super Cyclone Amphan (May 2020)</option>
-          <option value="fani_2019">🌀 Cyclone Fani (April-May 2019)</option>
-          <option value="yaas_2021">🌀 Cyclone Yaas (May 2021)</option>
-          <option value="heat_dome_2020">☀️ Northwest India Heat Dome (47.6°C)</option>
-          <option value="cold_wave_2021">❄️ North India Cold Wave (1.9°C)</option>
+          <option value="amphan_2020" selected>Amphan (Cat 5 Cyclone)</option>
+          <option value="fani_2019">Fani (Cat 5 Cyclone)</option>
+          <option value="yaas_2021">Yaas (Cat 3 Cyclone)</option>
+          <option value="heat_dome_2020">Heat Dome (47.6°C)</option>
+          <option value="cold_wave_2021">Cold Wave (1.9°C)</option>
         </select>
       </div>
 
-      <div class="operational-mode-switch font-mono" id="op-mode-switch">
+      <div class="operational-mode-switch" id="op-mode-switch">
         <button class="btn-op-mode active" id="btn-op-live" data-op-mode="live" title="100% Real-Time Live Earth (ECMWF & NOAA GFS)">
           <span class="pulse-dot green"></span> Live Earth
         </button>
         <button class="btn-op-mode" id="btn-op-benchmark" data-op-mode="benchmark" title="Switch to Historical Cyclone Benchmark Studio (Amphan, Fani, Yaas)">
-          ⚡ Benchmark Studio
+          <i data-lucide="zap"></i> Benchmark
         </button>
       </div>
 
       <div class="header-actions">
         <button id="btn-proof-modal" class="btn-action btn-proof" title="Official Model Verification & Science Proof (SIH 26078)">
-          <span class="icon">📊</span> 10/10 Proof
+          <span class="icon"><i data-lucide="shield-check"></i></span> Proof
         </button>
         <button id="btn-guided-tour" class="btn-action btn-tour" title="Guided tour for reviewers">
-          <span class="icon">🎯</span> Tour
+          <span class="icon"><i data-lucide="compass"></i></span> Tour
         </button>
         <button id="btn-direct-download-bulletin" class="btn-action btn-download" title="Download official IMD Bulletin (.html)">
-          <span class="icon">📥</span> Bulletin
+          <span class="icon"><i data-lucide="file-text"></i></span> Bulletin
         </button>
         <button id="btn-export-pdf" class="btn-action btn-print" title="Print / save report as PDF">
-          <span class="icon">🖨️</span> PDF
+          <span class="icon"><i data-lucide="printer"></i></span> PDF
         </button>
       </div>
     </div>
@@ -127,10 +130,10 @@
           <span class="summary-badge" id="summary-severity-badge">SEVERITY: CATASTROPHIC</span>
         </div>
 
-        <div class="telemetry-chips font-mono">
-          <span class="chip-item"><strong>STAGE 1:</strong> <span class="val text-cyan" id="val-tracker">True Icosahedron (0.439% Area Var) + GAT</span></span>
-          <span class="chip-item"><strong>STAGE 2:</strong> <span class="val text-cyan" id="val-corrdiff">CorrDiff Diffusion (5km Subgrid)</span></span>
-          <span class="chip-item"><strong>TRACK ACCURACY:</strong> <span class="val text-green" id="val-track-accuracy">50.9 km (8.7 km Landfall)</span></span>
+        <div class="telemetry-chips">
+          <span class="chip-item"><strong>Stage 1:</strong> <span class="val font-mono" id="val-tracker">True Icosahedron (0.439% Area Var) + GAT</span></span>
+          <span class="chip-item"><strong>Stage 2:</strong> <span class="val font-mono" id="val-corrdiff">CorrDiff Diffusion (5km Subgrid)</span></span>
+          <span class="chip-item"><strong>Track Accuracy:</strong> <span class="val font-mono text-green" id="val-track-accuracy">50.9 km (8.7 km Landfall)</span></span>
         </div>
 
         <p class="summary-subtext-hidden" id="summary-subtext" style="display:none;">
@@ -138,26 +141,26 @@
         </p>
       </div>
 
-      <!-- Compact 4-Metric KPI Ribbon -->
-      <div class="kpi-ribbon font-mono">
-        <div class="kpi-box">
-          <span class="kpi-tag" id="ov-card1-label">CLASSIFICATION</span>
+      <!-- Compact 4-Metric KPI Ribbon with Defined Hierarchy -->
+      <div class="kpi-ribbon">
+        <div class="kpi-box kpi-box-status">
+          <span class="kpi-tag" id="ov-card1-label">Classification</span>
           <div class="kpi-value" id="ov-stage">Super Cyclone</div>
           <div class="kpi-sub" id="ov-stage-sub">Cat 5 &bull; 920 hPa</div>
         </div>
-        <div class="kpi-box">
-          <span class="kpi-tag" id="ov-card2-label">EYEWALL WIND (5km)</span>
-          <div class="kpi-value text-cyan" id="ov-wind">102.1 km/h</div>
+        <div class="kpi-box kpi-box-primary">
+          <span class="kpi-tag" id="ov-card2-label">Eyewall Wind (5km)</span>
+          <div class="kpi-value" id="ov-wind">102.1 km/h</div>
           <div class="kpi-sub" id="ov-wind-sub">Coarse NWP: 63.4 km/h <span class="text-amber">(+61% recovered)</span></div>
         </div>
-        <div class="kpi-box">
-          <span class="kpi-tag" id="ov-card3-label">HELD-OUT TRACK ERROR</span>
-          <div class="kpi-value text-amber" id="ov-error">22.7 km</div>
+        <div class="kpi-box kpi-box-secondary">
+          <span class="kpi-tag" id="ov-card3-label">Held-out Track Error</span>
+          <div class="kpi-value text-amber font-mono" id="ov-error">22.7 km</div>
           <div class="kpi-sub" id="ov-error-sub">Baseline: 46.2 km (51% closer)</div>
         </div>
-        <div class="kpi-box">
-          <span class="kpi-tag" id="ov-card4-label">FALSE-ALARM REDUCTION</span>
-          <div class="kpi-value text-green" id="ov-reduction">97.8%</div>
+        <div class="kpi-box kpi-box-secondary">
+          <span class="kpi-tag" id="ov-card4-label">False-Alarm Reduction</span>
+          <div class="kpi-value text-green font-mono" id="ov-reduction">97.8%</div>
           <div class="kpi-sub" id="ov-reduction-sub">78.5 km² surgical zone vs 3,500 km²</div>
         </div>
       </div>
@@ -167,45 +170,45 @@
         <div class="section-card-header">
           <div class="header-left">
             <!-- 2D / 3D Mode Toggle -->
-            <div class="view-mode-toggle font-mono">
-              <button class="btn-mode-toggle active" id="btn-mode-2d" data-mode="2d">🗺️ 2D Map</button>
-              <button class="btn-mode-toggle" id="btn-mode-3d" data-mode="3d">🪐 3D Earth</button>
+            <div class="view-mode-toggle">
+              <button class="btn-mode-toggle active" id="btn-mode-2d" data-mode="2d"><i data-lucide="map"></i> 2D Map</button>
+              <button class="btn-mode-toggle" id="btn-mode-3d" data-mode="3d"><i data-lucide="globe"></i> 3D Earth</button>
             </div>
 
             <!-- Basemap Selector -->
             <div class="basemap-selector-wrap" id="basemap-selector-wrap">
-              <select id="select-basemap-ov" class="select-basemap font-mono" title="Select Leaflet basemap layer">
-                <option value="dark" selected>🌑 Tactical Dark (Esri Canvas)</option>
-                <option value="satellite">🛰️ Photorealistic Satellite</option>
-                <option value="streets">🗺️ Streets (OpenStreetMap)</option>
-                <option value="topo">⛰️ Topographic Terrain</option>
+              <select id="select-basemap-ov" class="select-basemap" title="Select Leaflet basemap layer">
+                <option value="dark" selected>Tactical Dark (Esri Canvas)</option>
+                <option value="satellite">Photorealistic Satellite</option>
+                <option value="streets">Streets (OpenStreetMap)</option>
+                <option value="topo">Topographic Terrain</option>
               </select>
             </div>
 
             <!-- Layer Toggles -->
-            <div class="map-layer-pills font-mono">
-              <button class="btn-layer-pill" id="toggle-layer-mesh" title="Toggle 269-node Icosahedral Geodesic Mesh">🌐 Mesh</button>
-              <button class="btn-layer-pill" id="toggle-layer-cone" title="Toggle 3-10 Day Expanding Cone of Uncertainty">🌪️ Cone</button>
-              <button class="btn-layer-pill" id="toggle-layer-districts" title="Toggle Coastal District Vulnerability Footprint">🗺️ Districts</button>
-              <button class="btn-layer-pill active" id="toggle-layer-wind" title="Toggle Animated Wind Streamline Vectors">💨 Streamlines</button>
+            <div class="map-layer-pills">
+              <button class="btn-layer-pill" id="toggle-layer-mesh" title="Toggle 269-node Icosahedral Geodesic Mesh"><i data-lucide="grid"></i> Mesh</button>
+              <button class="btn-layer-pill" id="toggle-layer-cone" title="Toggle 3-10 Day Expanding Cone of Uncertainty"><i data-lucide="triangle"></i> Cone</button>
+              <button class="btn-layer-pill" id="toggle-layer-districts" title="Toggle Coastal District Vulnerability Footprint"><i data-lucide="map-pin"></i> Districts</button>
+              <button class="btn-layer-pill active" id="toggle-layer-wind" title="Toggle Animated Wind Streamline Vectors"><i data-lucide="wind"></i> Streamlines</button>
             </div>
           </div>
 
           <div class="header-right-controls">
             <!-- Weather Inspector Drawer Toggle -->
-            <button class="btn-inspector-toggle font-mono" id="btn-toggle-inspector" title="Toggle real-time weather inspector drawer">
-              📍 Weather Inspector
+            <button class="btn-inspector-toggle" id="btn-toggle-inspector" title="Toggle real-time weather inspector drawer">
+              <i data-lucide="crosshair"></i> Weather Inspector
             </button>
             <!-- Fullscreen Toggle -->
-            <button class="btn-fullscreen-toggle font-mono" id="btn-fullscreen-map" title="Expand to full screen (Esc to exit)">
-              ⛶ Fullscreen
+            <button class="btn-fullscreen-toggle" id="btn-fullscreen-map" title="Expand to full screen (Esc to exit)">
+              <i data-lucide="maximize-2"></i> Fullscreen
             </button>
           </div>
         </div>
 
         <!-- ACTIVE GLOBAL STORMS BAR (Visible in Live Mode across 2D Map & 3D Earth) -->
-        <div class="live-storms-bar font-mono" id="live-storms-bar">
-          <span class="storms-bar-label">🌀 ACTIVE STORMS:</span>
+        <div class="live-storms-bar" id="live-storms-bar">
+          <span class="storms-bar-label">Active Storms:</span>
           <div class="storms-pill-list" id="live-storms-pills"></div>
         </div>
 
@@ -217,59 +220,72 @@
           <canvas id="canvas-wind-streamlines" class="wind-streamline-canvas"></canvas>
 
           <!-- Zoom Earth Floating Overlays Dock -->
-          <div id="zoom-overlay-dock" class="zoom-overlay-dock font-mono">
+          <div id="zoom-overlay-dock" class="zoom-overlay-dock">
             <div class="dock-header">
-              <span class="dock-title">MAP LAYERS</span>
+              <span class="dock-title">Map Layers</span>
               <button class="dock-collapse-btn" id="btn-collapse-dock" title="Collapse / Expand Layers">◀</button>
             </div>
             <div class="dock-body" id="dock-body">
-              <div class="dock-group-title">DYNAMIC OVERLAYS</div>
+              <div class="dock-group-title">Dynamic Overlays</div>
               <button class="dock-pill active" id="dock-toggle-wind" title="Toggle animated wind streamline particle flow">
-                <span><span class="dock-pill-icon">💨</span> Wind Streamlines</span>
+                <span><i data-lucide="wind"></i> Wind Streamlines</span>
                 <span class="dock-pill-status">ON</span>
               </button>
               <button class="dock-pill" id="dock-toggle-pressure" title="Toggle Mean Sea Level Pressure (MSLP), Isobar Contours & Extrema Centers">
-                <span><span class="dock-pill-icon">🔵</span> Pressure (MSLP)</span>
+                <span><i data-lucide="gauge"></i> Pressure (MSLP)</span>
                 <span class="dock-pill-status">OFF</span>
               </button>
               <button class="dock-pill" id="dock-toggle-radar" title="Toggle live RainViewer Doppler precipitation radar">
-                <span><span class="dock-pill-icon">📡</span> Rain Radar</span>
+                <span><i data-lucide="cloud-rain"></i> Rain Radar</span>
                 <span class="dock-pill-status">OFF</span>
               </button>
               <button class="dock-pill" id="dock-toggle-cone" title="Toggle 3-10 day cone of uncertainty">
-                <span><span class="dock-pill-icon">🌪️</span> Track &amp; Cone</span>
+                <span><i data-lucide="navigation"></i> Track &amp; Cone</span>
                 <span class="dock-pill-status">OFF</span>
               </button>
               <button class="dock-pill" id="dock-toggle-mesh" title="Toggle icosahedral geodesic mesh">
-                <span><span class="dock-pill-icon">🌐</span> GNN Mesh</span>
+                <span><i data-lucide="grid"></i> GNN Mesh</span>
                 <span class="dock-pill-status">OFF</span>
               </button>
               <button class="dock-pill" id="dock-toggle-districts" title="Toggle coastal district vulnerabilities">
-                <span><span class="dock-pill-icon">🗺️</span> Districts</span>
+                <span><i data-lucide="map-pin"></i> Districts</span>
                 <span class="dock-pill-status">OFF</span>
               </button>
 
-              <div class="dock-group-title" style="margin-top: 8px;">BASEMAP STYLE</div>
+              <div class="dock-group-title" style="margin-top: 8px;">Basemap Style</div>
               <div class="dock-basemap-row">
-                <button class="dock-basemap-btn active" data-bm="dark" title="Tactical dark (Esri Canvas)">🌑 Dark</button>
-                <button class="dock-basemap-btn" data-bm="satellite" title="Photorealistic satellite">🛰️ Sat</button>
-                <button class="dock-basemap-btn" data-bm="streets" title="OpenStreetMap streets">🗺️ Streets</button>
-                <button class="dock-basemap-btn" data-bm="topo" title="Topographic terrain">⛰️ Topo</button>
+                <button class="dock-basemap-btn active" data-bm="dark" title="Tactical dark (Esri Canvas)"><i data-lucide="moon"></i> Dark</button>
+                <button class="dock-basemap-btn" data-bm="satellite" title="Photorealistic satellite"><i data-lucide="satellite"></i> Sat</button>
+                <button class="dock-basemap-btn" data-bm="streets" title="OpenStreetMap streets"><i data-lucide="map"></i> Streets</button>
+                <button class="dock-basemap-btn" data-bm="topo" title="Topographic terrain"><i data-lucide="mountain"></i> Topo</button>
+              </div>
+
+              <div class="dock-group-title" style="margin-top: 8px;">Streamline Density</div>
+              <div class="dock-density-row">
+                <button class="dock-density-btn" data-density="low" title="Low particle density (60% count)">Low</button>
+                <button class="dock-density-btn active" data-density="med" title="Standard density (100% count)">Med</button>
+                <button class="dock-density-btn" data-density="high" title="High density (160% count)">High</button>
+              </div>
+
+              <div class="dock-group-title" style="margin-top: 8px;">Layer Opacity</div>
+              <div class="dock-opacity-row">
+                <input type="range" id="dock-layer-opacity-slider" class="dock-opacity-slider" min="20" max="100" value="85" title="Adjust dynamic overlays opacity">
+                <span id="dock-opacity-label" class="dock-opacity-val">85%</span>
               </div>
             </div>
           </div>
 
           <!-- Zoom Earth Calibrated Wind Speed Legend Bar -->
-          <div id="zoom-wind-legend" class="zoom-wind-legend font-mono">
+          <div id="zoom-wind-legend" class="zoom-wind-legend">
             <div class="legend-header">
               <div class="legend-title-row">
                 <span class="legend-dot"></span>
-                <span class="legend-label">SURFACE WIND SPEED</span>
-                <span class="legend-source" id="legend-source-tag">ECMWF / CORRDIFF 5km</span>
+                <span class="legend-label">Surface Wind Speed</span>
+                <span class="legend-source" id="legend-source-tag">ECMWF / CorrDiff 5km</span>
               </div>
               <div class="legend-controls-row">
                 <div class="legend-pace-toggle" title="Adjust wind streamline animation pace">
-                  <span class="pace-tag">FLOW:</span>
+                  <span class="pace-tag">Flow:</span>
                   <button class="btn-pace-toggle" data-pace="calm" title="Calm, serene drift">Calm</button>
                   <button class="btn-pace-toggle active" data-pace="normal" title="Realistic calibrated speed">Realistic</button>
                   <button class="btn-pace-toggle" data-pace="fast" title="Dynamic motion">Fast</button>
@@ -302,11 +318,11 @@
           </div>
 
           <!-- Zoom Earth Calibrated MSLP Pressure Legend Bar -->
-          <div id="zoom-pressure-legend" class="zoom-pressure-legend font-mono" style="display: none;">
+          <div id="zoom-pressure-legend" class="zoom-pressure-legend" style="display: none;">
             <div class="legend-header">
               <div class="legend-title-row">
                 <span class="legend-dot" style="background:#0ea5e9;"></span>
-                <span class="legend-label">PRESSURE (MSLP &amp; ISOBARS)</span>
+                <span class="legend-label">Pressure (MSLP &amp; Isobars)</span>
                 <span class="legend-source">ECMWF IFS / DWD ICON</span>
               </div>
             </div>
@@ -322,15 +338,15 @@
           </div>
 
           <!-- Ground-Truth Real-Time Verification Badge -->
-          <div id="live-ground-truth-badge" class="ground-truth-badge font-mono" title="Validated against ECMWF IFS &amp; Zoom Earth">
+          <div id="live-ground-truth-badge" class="ground-truth-badge" title="Validated against ECMWF IFS &amp; Zoom Earth">
             <div class="gt-header">
               <span class="pulse-dot green"></span>
-              <span class="gt-title">GROUND-TRUTH VERIFIED</span>
+              <span class="gt-title">Ground-Truth Verified</span>
             </div>
             <div class="gt-content">
-              <div class="gt-row"><span>Bay of Bengal:</span> <strong class="text-emerald">12–16 km/h (Calm)</strong></div>
-              <div class="gt-row"><span>Monsoon Low (UP):</span> <strong class="text-cyan">997.8 hPa (L)</strong></div>
-              <div class="gt-row"><span>Himalayan High:</span> <strong class="text-amber">1020+ hPa (H)</strong></div>
+              <div class="gt-row"><span>Bay of Bengal:</span> <strong class="text-emerald font-mono">12–16 km/h (Calm)</strong></div>
+              <div class="gt-row"><span>Monsoon Low (UP):</span> <strong class="font-mono text-white">997.8 hPa (L)</strong></div>
+              <div class="gt-row"><span>Himalayan High:</span> <strong class="text-amber font-mono">1020+ hPa (H)</strong></div>
               <div class="gt-source">ECMWF IFS &bull; Matches Zoom Earth 1:1</div>
             </div>
           </div>
@@ -354,39 +370,39 @@
           <div id="globe-3d-overlay" class="globe-3d-overlay" style="display: none;">
             <!-- Top Search Bar -->
             <div class="globe-top-bar">
-              <div class="globe-badge font-mono" id="globe-badge-title">
+              <div class="globe-badge" id="globe-badge-title">
                 <span class="pulse-dot green"></span> 3D Earth &bull; Live Monitor
               </div>
-              <div class="globe-search-box font-mono">
-                <input type="text" id="input-globe-search" class="input-globe-search" placeholder="🔍 Search any global city or coordinate..." autocomplete="off">
+              <div class="globe-search-box">
+                <input type="text" id="input-globe-search" class="input-globe-search" placeholder="Search any global city or coordinate..." autocomplete="off">
                 <div id="globe-search-dropdown" class="globe-search-dropdown hidden"></div>
               </div>
-              <div class="globe-style-picker font-mono">
-                <button class="btn-globe-style active" data-style="satellite" title="Photorealistic satellite imagery">🌍 Satellite</button>
-                <button class="btn-globe-style" data-style="night" title="NASA Black Marble night illumination">🌃 Night</button>
-                <button class="btn-globe-style" data-style="tactical" title="Tactical relief with GNN geodesic mesh">🛰️ Tactical</button>
+              <div class="globe-style-picker">
+                <button class="btn-globe-style active" data-style="satellite" title="Photorealistic satellite imagery"><i data-lucide="satellite"></i> Satellite</button>
+                <button class="btn-globe-style" data-style="night" title="NASA Black Marble night illumination"><i data-lucide="moon"></i> Night</button>
+                <button class="btn-globe-style" data-style="tactical" title="Tactical relief with GNN geodesic mesh"><i data-lucide="grid"></i> Tactical</button>
               </div>
             </div>
 
             <!-- Sleek Bottom Camera Dock -->
-            <div class="globe-quick-toolbar font-mono">
-              <button class="btn-globe-tool active-toggle" id="btn-globe-toggle-wind" title="Toggle dynamic 3D wind particle flow">💨 Wind: ON</button>
-              <button class="btn-globe-tool" id="btn-globe-toggle-radar" title="Toggle global Doppler radar overlay">📡 Radar: OFF</button>
-              <button class="btn-globe-tool" id="btn-globe-focus-eye" title="Center camera directly on storm core">🎯 Focus Storm</button>
-              <button class="btn-globe-tool" id="btn-globe-focus-bay" title="Center camera on Bay of Bengal">🇮🇳 Bay of Bengal</button>
-              <button class="btn-globe-tool active-toggle" id="btn-globe-dehaze" title="Dynamic distance-based de-hazing">✨ De-Haze: ON</button>
-              <button class="btn-globe-tool" id="btn-globe-toggle-clouds" title="Toggle dynamic atmospheric cloud layer">☁️ Clouds: ON</button>
-              <button class="btn-globe-tool" id="btn-globe-toggle-cities" title="Toggle landmark city labels">📍 Cities: ON</button>
-              <button class="btn-globe-tool" id="btn-globe-reset" title="Reset camera orbit position">🔄 Reset</button>
+            <div class="globe-quick-toolbar">
+              <button class="btn-globe-tool active-toggle" id="btn-globe-toggle-wind" title="Toggle dynamic 3D wind particle flow"><i data-lucide="wind"></i> Wind: ON</button>
+              <button class="btn-globe-tool" id="btn-globe-toggle-radar" title="Toggle global Doppler radar overlay"><i data-lucide="cloud-rain"></i> Radar: OFF</button>
+              <button class="btn-globe-tool" id="btn-globe-focus-eye" title="Center camera directly on storm core"><i data-lucide="crosshair"></i> Focus Storm</button>
+              <button class="btn-globe-tool" id="btn-globe-focus-bay" title="Center camera on Bay of Bengal"><i data-lucide="map-pin"></i> Bay of Bengal</button>
+              <button class="btn-globe-tool active-toggle" id="btn-globe-dehaze" title="Dynamic distance-based de-hazing"><i data-lucide="sparkles"></i> De-Haze: ON</button>
+              <button class="btn-globe-tool" id="btn-globe-toggle-clouds" title="Toggle dynamic atmospheric cloud layer"><i data-lucide="cloud"></i> Clouds: ON</button>
+              <button class="btn-globe-tool" id="btn-globe-toggle-cities" title="Toggle landmark city labels"><i data-lucide="map-pin"></i> Cities: ON</button>
+              <button class="btn-globe-tool" id="btn-globe-reset" title="Reset camera orbit position"><i data-lucide="refresh-cw"></i> Reset</button>
             </div>
 
             <!-- Ticker & Storms Bar (Hidden by default or compact) -->
             <div class="globe-hotspot-ticker font-mono" id="globe-hotspot-ticker" style="display: none;">
-              <span class="ticker-label">🔥 ANOMALIES:</span>
+              <span class="ticker-label"><i data-lucide="alert-triangle"></i> ANOMALIES:</span>
               <div class="ticker-items" id="ticker-items"></div>
             </div>
             <div class="globe-storms-bar font-mono" id="globe-storms-bar" style="display: none;">
-              <span class="storms-bar-label">🌀 STORMS:</span>
+              <span class="storms-bar-label"><i data-lucide="wind"></i> STORMS:</span>
               <div class="storms-pill-list" id="globe-storms-pills"></div>
             </div>
           </div>
@@ -396,10 +412,10 @@
             <div class="inspector-header">
               <div class="inspector-title-wrap">
                 <span class="pulse-dot green"></span>
-                <span class="inspector-title" id="inspector-loc-title">📍 Live Point Inspection</span>
+                <span class="inspector-title" id="inspector-loc-title"><i data-lucide="map-pin"></i> Live Point Inspection</span>
               </div>
               <div class="inspector-header-actions">
-                <button class="btn-toggle-forecast-expand font-mono" id="btn-toggle-forecast-expand" title="Expand / Compact Drawer Width">⛶</button>
+                <button class="btn-toggle-forecast-expand font-mono" id="btn-toggle-forecast-expand" title="Expand / Compact Drawer Width"><i data-lucide="maximize-2"></i></button>
                 <button class="btn-close-inspector" id="btn-close-inspector" title="Close inspector">&times;</button>
               </div>
             </div>
@@ -408,7 +424,7 @@
             <div class="inspector-hero-banner" id="insp-hero-banner">
               <div class="hero-left">
                 <div class="hero-temp-line">
-                  <span class="hero-weather-icon" id="insp-weather-icon">⛅</span>
+                  <span class="hero-weather-icon" id="insp-weather-icon"><i data-lucide="cloud-sun"></i></span>
                   <span class="hero-temp-val" id="insp-temp-val">--°C</span>
                 </div>
                 <div class="hero-condition" id="insp-weather-desc">Real-Time Forecast</div>
@@ -418,8 +434,8 @@
               </div>
               <div class="hero-right font-mono">
                 <div class="hero-chip-badge" id="insp-stream-badge">LIVE NWP</div>
-                <div class="hero-stat-row">💧 Rain: <strong id="insp-rain-val">0.0 mm</strong></div>
-                <div class="hero-stat-row">🧭 Press: <strong id="insp-hero-press">-- hPa</strong></div>
+                <div class="hero-stat-row">Rain: <strong id="insp-rain-val">0.0 mm</strong></div>
+                <div class="hero-stat-row">Press: <strong id="insp-hero-press">-- hPa</strong></div>
                 <div id="insp-pressure" style="display:none;"></div>
               </div>
             </div>
@@ -432,7 +448,7 @@
               </div>
               <div class="inspector-stat-box highlight-box">
                 <div class="inspector-stat-label">CORRDIFF 5km</div>
-                <div class="inspector-stat-val text-cyan" id="insp-resolved-wind">-- km/h</div>
+                <div class="inspector-stat-val" id="insp-resolved-wind">-- km/h</div>
               </div>
               <div class="inspector-stat-box">
                 <div class="inspector-stat-label">GUST (P90)</div>
@@ -446,8 +462,8 @@
 
             <!-- Segmented Forecast Navigation Tabs -->
             <div class="inspector-tabs-bar font-mono">
-              <button class="insp-tab-btn active" id="tab-insp-daily" data-target="daily">📅 7-Day Forecast</button>
-              <button class="insp-tab-btn" id="tab-insp-hourly" data-target="hourly">⏱️ 24h Hourly</button>
+              <button class="insp-tab-btn active" id="tab-insp-daily" data-target="daily"><i data-lucide="calendar"></i> 7-Day Forecast</button>
+              <button class="insp-tab-btn" id="tab-insp-hourly" data-target="hourly"><i data-lucide="clock"></i> 24h Hourly</button>
             </div>
 
             <div class="forecast-strip-container" id="container-insp-daily">
@@ -463,10 +479,10 @@
             <!-- Fast-Hop Station Presets -->
             <div class="bot-preset-bar font-mono" id="bot-preset-bar">
               <span class="bot-preset-label">QUICK PROBE:</span>
-              <button class="btn-bot-preset active" data-lat="21.626" data-lon="87.508" data-name="Digha Coast (West Bengal)">📍 Digha</button>
-              <button class="btn-bot-preset" data-lat="20.316" data-lon="86.611" data-name="Paradip Port (Odisha)">⚓ Paradip</button>
-              <button class="btn-bot-preset" data-lat="22.572" data-lon="88.364" data-name="Kolkata (West Bengal)">🏙️ Kolkata</button>
-              <button class="btn-bot-preset" data-lat="14.900" data-lon="87.500" data-name="Amphan Cyclone Eye">🌪️ Storm Eye</button>
+              <button class="btn-bot-preset active" data-lat="21.626" data-lon="87.508" data-name="Digha Coast (West Bengal)"><i data-lucide="map-pin"></i> Digha</button>
+              <button class="btn-bot-preset" data-lat="20.316" data-lon="86.611" data-name="Paradip Port (Odisha)"><i data-lucide="anchor"></i> Paradip</button>
+              <button class="btn-bot-preset" data-lat="22.572" data-lon="88.364" data-name="Kolkata (West Bengal)"><i data-lucide="building"></i> Kolkata</button>
+              <button class="btn-bot-preset" data-lat="14.900" data-lon="87.500" data-name="Amphan Cyclone Eye"><i data-lucide="crosshair"></i> Storm Eye</button>
             </div>
 
             <div class="inspector-footer-bar font-mono">
@@ -539,7 +555,7 @@
         <!-- Demographic Precision Card -->
         <div class="intel-card demographic-card">
           <div class="demographic-title">
-            <span>👥 Demographic Precision Gain</span>
+            <span><i data-lucide="users"></i> Demographic Precision Gain</span>
             <span class="census-tag">Census 2011 Projected Est.</span>
           </div>
           <p class="demographic-desc">
@@ -552,7 +568,7 @@
             </div>
             <div class="calc-row">
               <span>5 km Pinpoint Target:</span>
-              <strong class="text-cyan">~84,500 citizens</strong>
+              <strong>~84,500 citizens</strong>
             </div>
             <div class="calc-divider"></div>
             <div class="calc-row highlight">
@@ -577,36 +593,36 @@
           <span class="panel-subtitle">Audited against NOAA IBTrACS v04r01 best-track ground truth across all 13 lifecycle checkpoints</span>
         </div>
         <div class="layer-toggles-bar">
-          <div class="view-mode-toggle font-mono">
-            <button class="btn-mode-toggle active" id="btn-mode-2d-tl" data-mode="2d">🗺️ 2D Map</button>
-            <button class="btn-mode-toggle" id="btn-mode-3d-tl" data-mode="3d">🪐 3D Globe</button>
+          <div class="view-mode-toggle">
+            <button class="btn-mode-toggle active" id="btn-mode-2d-tl" data-mode="2d"><i data-lucide="map"></i> 2D Map</button>
+            <button class="btn-mode-toggle" id="btn-mode-3d-tl" data-mode="3d"><i data-lucide="globe"></i> 3D Globe</button>
           </div>
           <button class="btn-action" onclick="document.getElementById('tab-overview').click();">
-            <span class="icon">🌐</span> Open Interactive Map
+            <span class="icon"><i data-lucide="activity"></i></span> Open Interactive Map
           </button>
         </div>
       </div>
 
       <!-- KPI Summary Cards for Track Performance -->
-      <div class="kpi-ribbon font-mono">
+      <div class="kpi-ribbon">
         <div class="kpi-box">
-          <span class="kpi-tag">TOTAL STEPS</span>
+          <span class="kpi-tag">Total Steps</span>
           <div class="kpi-value">13 Steps</div>
           <div class="kpi-sub">Genesis to Landfall</div>
         </div>
         <div class="kpi-box">
-          <span class="kpi-tag">ALL-STEP MEAN ERROR</span>
+          <span class="kpi-tag">All-Step Mean Error</span>
           <div class="kpi-value text-amber">50.9 km</div>
           <div class="kpi-sub">Full 13-timestep lifecycle</div>
         </div>
         <div class="kpi-box">
-          <span class="kpi-tag">HELD-OUT MEAN ERROR</span>
+          <span class="kpi-tag">Held-out Mean Error</span>
           <div class="kpi-value text-green">22.65 km</div>
           <div class="kpi-sub">Baseline: 46.2 km (Passed)</div>
         </div>
         <div class="kpi-box">
-          <span class="kpi-tag">MESH AREA VARIANCE</span>
-          <div class="kpi-value text-cyan">0.439%</div>
+          <span class="kpi-tag">Mesh Area Variance</span>
+          <div class="kpi-value">0.439%</div>
           <div class="kpi-sub">Acceptance: &lt; 5.0% (Passed)</div>
         </div>
       </div>
@@ -615,7 +631,7 @@
       <div class="track-table-card">
         <div class="table-card-header">
           <div class="table-title">
-            <span>📊 Step-by-Step Haversine Validation against NOAA IBTrACS v04r01 (Agency: IMD New Delhi)</span>
+            <span><i data-lucide="bar-chart-2"></i> Step-by-Step Haversine Validation against NOAA IBTrACS v04r01 (Agency: IMD New Delhi)</span>
             <span class="mean-error-tag font-mono">Mean Track Error: <strong id="val-mean-track-error">50.9 km</strong></span>
           </div>
         </div>
@@ -650,8 +666,8 @@
           <h2>Physics-Constrained CorrDiff Downscaling Lab</h2>
           <span class="panel-subtitle">Overcoming deep learning spectral smoothing: drag the vertical divider to compare coarse NWP vs CorrDiff 5 km super-resolution</span>
         </div>
-        <div class="realization-mode-group font-mono">
-          <span class="mode-label">REALIZATION:</span>
+        <div class="realization-mode-group">
+          <span class="mode-label">Realization:</span>
           <button class="btn-realization active" id="btn-realization-mean">Ensemble Mean</button>
           <button class="btn-realization" id="btn-realization-p90">P90 High-Impact</button>
           <button class="btn-realization" id="btn-realization-spread">Diffusion Spread</button>
@@ -662,9 +678,9 @@
         <!-- Interactive Swipe Comparison Slider Frame -->
         <div class="swipe-comparison-card">
           <div class="swipe-header">
-            <span class="swipe-label-left">◀ COARSE NWP (12-25 km)</span>
-            <span class="swipe-instruction">DRAG DIVIDER TO COMPARE RESOLUTION</span>
-            <span class="swipe-label-right">CORRDIFF (5 km SUBGRID) ▶</span>
+            <span class="swipe-label-left">◀ Coarse NWP (12–25 km)</span>
+            <span class="swipe-instruction">Drag divider to compare resolution</span>
+            <span class="swipe-label-right">CorrDiff (5 km Subgrid) ▶</span>
           </div>
 
           <div class="swipe-container" id="swipe-container">
@@ -681,26 +697,26 @@
           </div>
 
           <!-- Colorbar and Live Canvas Inspection Readout (Cleanly Stacked to avoid overlap) -->
-          <div class="swipe-footer-bar font-mono">
+          <div class="swipe-footer-bar">
             <div class="colorbar-legend">
-              <span class="cb-label">WIND (km/h):</span>
+              <span class="cb-label">Wind (km/h):</span>
               <div class="colorbar-gradient"></div>
-              <div class="colorbar-ticks">
+              <div class="colorbar-ticks font-mono">
                 <span>0</span><span>35</span><span>65</span><span>95</span><span>135+</span>
               </div>
             </div>
             <div class="live-inspection-readout">
               <span id="stat-cd-label">CorrDiff Resolved Peak:</span>
-              <strong id="stat-corrdiff-wind" class="text-cyan">102.1 km/h</strong>
-              <span class="text-muted">(Coarse NWP: <span id="stat-coarse-wind">63.4 km/h</span>)</span>
+              <strong id="stat-corrdiff-wind" class="font-mono text-white">102.1 km/h</strong>
+              <span class="text-muted">(Coarse NWP: <span id="stat-coarse-wind" class="font-mono">63.4 km/h</span>)</span>
             </div>
           </div>
 
           <!-- 1D Transect Cross-Section Profiler -->
-          <div class="transect-card font-mono" id="transect-card">
+          <div class="transect-card" id="transect-card">
             <div class="transect-header">
               <div class="transect-title-group">
-                <span>📉 1D Cross-Section Transect</span>
+                <span><i data-lucide="trending-down"></i> 1D Cross-Section Transect</span>
                 <span class="transect-dist-badge" id="transect-dist-badge">288 km slice</span>
                 <span id="btn-toggle-transect-axis" style="display:none;"></span>
               </div>
@@ -719,24 +735,24 @@
           <!-- Operational NWP Data Products Export Center -->
           <div class="export-card font-mono" id="export-card">
             <div class="export-header">
-              <span class="export-title">📦 Operational NWP Data Exports (WMO / IMD Standard)</span>
+              <span class="export-title"><i data-lucide="download"></i> Operational NWP Data Exports (WMO / IMD Standard)</span>
               <span class="export-badge">CF-1.8 COMPLIANT</span>
             </div>
             <div class="export-buttons-grid">
               <a id="btn-export-nc" href="/api/export/netcdf" download="aerotrack_corrdiff_5km.nc" class="export-btn export-btn-nc">
-                <span class="export-icon">🌐</span>
+                <span class="export-icon"><i data-lucide="grid"></i></span>
                 <div class="export-meta"><strong>NetCDF (.nc)</strong><small>CF-1.8 Binary Grid</small></div>
               </a>
               <a id="btn-export-asc" href="/api/export/asc-grid" download="aerotrack_corrdiff_grid.asc" class="export-btn export-btn-asc">
-                <span class="export-icon">🗺️</span>
+                <span class="export-icon"><i data-lucide="map"></i></span>
                 <div class="export-meta"><strong>ESRI Grid (.asc)</strong><small>GIS Spatial Layer</small></div>
               </a>
               <a id="btn-export-geojson" href="/api/export/geojson" download="aerotrack_threat_polygon.geojson" class="export-btn export-btn-geojson">
-                <span class="export-icon">📍</span>
+                <span class="export-icon"><i data-lucide="map-pin"></i></span>
                 <div class="export-meta"><strong>GeoJSON 5km</strong><small>97.8% Alert Reduction</small></div>
               </a>
               <a id="btn-export-agri" href="/api/export/agri-csv" download="kvk_agri_advisory.csv" class="export-btn export-btn-agri">
-                <span class="export-icon">🌾</span>
+                <span class="export-icon"><i data-lucide="sprout"></i></span>
                 <div class="export-meta"><strong>KVK Agri (.csv)</strong><small>Block-Level Farm Protocols</small></div>
               </a>
             </div>
@@ -748,37 +764,37 @@
           <!-- Visual Two-Gap Breakdown Card -->
           <div class="evidence-card honesty-breakdown-card">
             <div class="card-headline">
-              <span>🔬 Decomposing the Two Error Gaps Honestly</span>
+              <span><i data-lucide="layers"></i> Decomposing the Two Error Gaps Honestly</span>
               <span class="peer-review-tag">Scientific Rigor</span>
             </div>
-            <div class="two-gaps-diagram font-mono">
+            <div class="two-gaps-diagram font-mono" id="two-gaps-diagram">
               <div class="gap-tier tier-coarse">
-                <div class="tier-label">Coarse NWP Input</div>
-                <div class="tier-bar" style="width: 28%;">63.4 km/h</div>
+                <div class="tier-label" id="tier-lbl-coarse">Coarse NWP Input</div>
+                <div class="tier-bar" id="tier-bar-coarse" style="width: 28%;">63.4 km/h</div>
               </div>
               <div class="gap-tier tier-unet">
-                <div class="tier-label">Standard U-Net (L2 Loss)</div>
-                <div class="tier-bar" style="width: 25%;">56.5 km/h <span class="tag-smoothed">-49.1% Loss</span></div>
+                <div class="tier-label" id="tier-lbl-unet">Standard U-Net (L2 Loss)</div>
+                <div class="tier-bar" id="tier-bar-unet" style="width: 25%;">56.5 km/h <span class="tag-smoothed">-49.1% Loss</span></div>
               </div>
               <div class="gap-callout gap-1-callout">
-                <span class="gap-badge">GAP 1: SPECTRAL SMOOTHING</span>
-                <span class="gap-expl">&rarr; CLOSED BY CORRDIFF (Recovers 102.1 km/h; P90: 108.4 km/h)</span>
+                <span class="gap-badge" id="gap-badge-1">GAP 1: SPECTRAL SMOOTHING</span>
+                <span class="gap-expl" id="gap-expl-1">&rarr; CLOSED BY CORRDIFF (Recovers 102.1 km/h; P90: 108.4 km/h)</span>
               </div>
               <div class="gap-tier tier-corrdiff">
-                <div class="tier-label">CorrDiff Diffusion (Ours)</div>
-                <div class="tier-bar" style="width: 46%;">102.1 km/h <span class="tag-preserved">Preserved Peak</span></div>
+                <div class="tier-label" id="tier-lbl-corrdiff">CorrDiff Diffusion (Ours)</div>
+                <div class="tier-bar" id="tier-bar-corrdiff" style="width: 46%;">102.1 km/h <span class="tag-preserved">Preserved Peak</span></div>
               </div>
               <div class="gap-tier tier-target">
-                <div class="tier-label">Native ERA5 Target</div>
-                <div class="tier-bar" style="width: 50%;">111.0 km/h (Reconstruction Baseline)</div>
+                <div class="tier-label" id="tier-lbl-target">Native ERA5 Target</div>
+                <div class="tier-bar" id="tier-bar-target" style="width: 50%;">111.0 km/h (Reconstruction Baseline)</div>
               </div>
               <div class="gap-callout gap-2-callout">
-                <span class="gap-badge">GAP 2: GLOBAL REANALYSIS RESOLUTION LIMIT</span>
-                <span class="gap-expl">&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.</span>
+                <span class="gap-badge" id="gap-badge-2">GAP 2: GLOBAL REANALYSIS RESOLUTION LIMIT</span>
+                <span class="gap-expl" id="gap-expl-2">&rarr; Known ERA5 25 km physical grid limit. To be closed by regional 12 km IMDAA training.</span>
               </div>
               <div class="gap-tier tier-groundtruth">
-                <div class="tier-label">NOAA IBTrACS Ground Truth</div>
-                <div class="tier-bar" style="width: 100%;">222.2 km/h (IBTrACS Best-Track Estimate)</div>
+                <div class="tier-label" id="tier-lbl-gt">NOAA IBTrACS Ground Truth</div>
+                <div class="tier-bar" id="tier-bar-gt" style="width: 100%;">222.2 km/h (IBTrACS Best-Track Estimate)</div>
               </div>
             </div>
           </div>
@@ -786,13 +802,13 @@
           <!-- Physics Telemetry Card -->
           <div class="evidence-card physics-telemetry-card">
             <div class="card-headline">
-              <span>⚖️ Physics Conservation Telemetry</span>
+              <span><i data-lucide="cpu"></i> Physics Conservation Telemetry</span>
               <span class="physics-tag">Fluid Dynamics Constraints</span>
             </div>
             <div class="physics-metrics-row font-mono">
               <div class="phys-metric">
                 <span class="p-label">2D Mass Divergence:</span>
-                <span class="p-val text-cyan" id="val-div">3.20 &times; 10<sup>-5</sup> s<sup>-1</sup></span>
+                <span class="p-val" id="val-div">3.20 &times; 10<sup>-5</sup> s<sup>-1</sup></span>
                 <span class="p-sub">&nabla; &bull; V &approx; 0 (Continuity)</span>
               </div>
               <div class="phys-metric">
@@ -802,7 +818,7 @@
               </div>
               <div class="phys-metric">
                 <span class="p-label">Diagnostic Conformity:</span>
-                <span class="p-val text-cyan" id="val-phys-score">-- / 100</span>
+                <span class="p-val" id="val-phys-score">-- / 100</span>
                 <span class="p-sub" title="Post-hoc audit measuring boundary layer MFC alignment & divergence in turbulent eyewall">Post-Hoc Eyewall Dynamics Audit</span>
               </div>
             </div>
@@ -811,7 +827,7 @@
           <!-- Kinetic Energy Spectrum Chart -->
           <div class="evidence-card chart-card">
             <div class="chart-header">
-              <span>📈 Kinetic Energy Spectrum E(k)</span>
+              <span><i data-lucide="trending-up"></i> Kinetic Energy Spectrum E(k)</span>
               <div class="chart-tabs font-mono">
                 <button class="btn-chart-tab active" id="tab-btn-amplitude">Peak Amplitudes</button>
                 <button class="btn-chart-tab" id="tab-btn-psd">Kolmogorov k<sup>-5/3</sup></button>
@@ -836,10 +852,10 @@
         </div>
         <div class="alert-actions-group">
           <button class="btn-action btn-download" id="btn-download-bulletin-view">
-            <span class="icon">📥</span> Download Bulletin (.html)
+            <span class="icon"><i data-lucide="download"></i></span> Download Bulletin (.html)
           </button>
           <button class="btn-action btn-copy" id="btn-copy-bulletin-view">
-            <span class="icon">📋</span> Copy Advisory Text
+            <span class="icon"><i data-lucide="copy"></i></span> Copy Advisory Text
           </button>
         </div>
       </div>
@@ -849,7 +865,7 @@
         <div class="alert-dispatch-column">
           <div class="intel-card">
             <div class="card-headline">
-              <span>📍 Select Coastal Node or Click Anywhere on Map</span>
+              <span><i data-lucide="map-pin"></i> Select Coastal Node or Click Anywhere on Map</span>
             </div>
             <div class="coastal-presets-row">
               <button class="btn-preset active" data-lat="21.626" data-lon="87.508" data-name="Digha Coast (West Bengal)">Digha Coast</button>
@@ -866,20 +882,20 @@
               <span class="font-mono text-muted" id="alert-loc-coords">21.63°N, 87.51°E &bull; 225 km from Eye</span>
             </div>
             <h3 class="alert-target-title" id="alert-loc-name">Digha Coast (West Bengal)</h3>
-            <div class="alert-metrics-banner font-mono">
-              <div class="banner-item">
+            <div class="alert-metrics-banner">
+              <div class="banner-item banner-item-primary">
                 <span class="b-lbl">Predicted Wind:</span>
-                <span class="b-val text-cyan" id="alert-wind">102.1 km/h</span>
+                <span class="b-val font-mono" id="alert-wind">102.1 km/h</span>
               </div>
               <div class="banner-item">
                 <span class="b-lbl">P90 Gusts:</span>
-                <span class="b-val text-amber" id="alert-gust">108.4 km/h</span>
+                <span class="b-val font-mono text-amber" id="alert-gust">108.4 km/h</span>
               </div>
               <div class="banner-item">
                 <span class="b-lbl">Rainfall Rate:</span>
-                <span class="b-val text-cyan" id="alert-rain">18.4 mm/h</span>
+                <span class="b-val font-mono" id="alert-rain">18.4 mm/h</span>
               </div>
-              <div class="banner-item">
+              <div class="banner-item banner-item-priority">
                 <span class="b-lbl">NDRF Priority:</span>
                 <span class="b-val text-red" id="alert-priority">IMMEDIATE</span>
               </div>
@@ -890,7 +906,7 @@
             </div>
 
             <div class="fatigue-banner" id="alert-fatigue-banner">
-              🎯 <strong>Spatial Warning Refinement:</strong> Targeting a pinpoint 5 km radius impact corridor (78.5 km²) instead of a broad coastal district (~3,500 km²) reduces false-alarm warning footprint by <strong>97.8%</strong>, eliminating public complacency while directing NDRF battalions with surgical precision.
+              <i data-lucide="crosshair"></i> <strong>Spatial Warning Refinement:</strong> Targeting a pinpoint 5 km radius impact corridor (78.5 km²) instead of a broad coastal district (~3,500 km²) reduces false-alarm warning footprint by <strong>97.8%</strong>, eliminating public complacency while directing NDRF battalions with surgical precision.
             </div>
           </div>
         </div>
@@ -898,9 +914,9 @@
         <!-- Right: Official MoES/IMD Cyclone Advisory Bulletin, OASIS CAP v1.2 XML & Agri-Shield -->
         <div class="bulletin-display-column">
           <div class="bulletin-tabs-bar font-mono">
-            <button class="btn-b-tab active" id="tab-btn-imd-text" data-btab="imd">📄 Official IMD Bulletin</button>
-            <button class="btn-b-tab" id="tab-btn-cap-xml" data-btab="cap">🌐 OASIS CAP v1.2 / NDMA SACHET</button>
-            <button class="btn-b-tab" id="tab-btn-agri-shield" data-btab="agri">🌾 Rural Agri-Shield</button>
+            <button class="btn-b-tab active" id="tab-btn-imd-text" data-btab="imd"><i data-lucide="file-text"></i> Official IMD Bulletin</button>
+            <button class="btn-b-tab" id="tab-btn-cap-xml" data-btab="cap"><i data-lucide="radio"></i> OASIS CAP v1.2 / NDMA SACHET</button>
+            <button class="btn-b-tab" id="tab-btn-agri-shield" data-btab="agri"><i data-lucide="sprout"></i> Rural Agri-Shield</button>
           </div>
 
           <div class="bulletin-paper-card" id="card-imd-bulletin">
@@ -915,7 +931,7 @@
           <div class="cap-xml-view hidden" id="card-cap-xml">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <span style="color: var(--accent-cyan); font-weight: 800;">OASIS CAP v1.2 XML / NDMA SACHET Cell-Broadcast Standard</span>
-              <button class="btn-action btn-download font-mono" id="btn-download-cap-xml" style="padding: 3px 8px; font-size: 0.68rem;">📥 Download CAP XML</button>
+              <button class="btn-action btn-download font-mono" id="btn-download-cap-xml" style="padding: 3px 8px; font-size: 0.68rem;"><i data-lucide="download"></i> Download CAP XML</button>
             </div>
             <pre id="cap-xml-content" class="font-mono">Loading OASIS CAP v1.2 XML feed...</pre>
           </div>
@@ -924,7 +940,7 @@
           <div class="agri-shield-card hidden" id="card-agri-shield">
             <div class="agri-card-header font-mono">
               <div>
-                <span class="agri-title">🌾 Hyper-Local 5 km Agricultural Protection Advisory</span>
+                <span class="agri-title"><i data-lucide="sprout"></i> Hyper-Local 5 km Agricultural Protection Advisory</span>
                 <div class="text-dim" style="font-size: 0.68rem;" id="agri-zone-name">Gangetic Coastal &amp; Littoral Belt (WB &amp; Odisha)</div>
               </div>
               <span class="agri-urgency-badge" id="agri-urgency-badge">CRITICAL / PRE-EMPTIVE HARVEST</span>
@@ -939,20 +955,20 @@
             <div class="font-mono text-dim" style="font-size: 0.72rem; margin-bottom: 6px;">3- TO 10-DAY STRUCTURAL FORESIGHT ACTIONS:</div>
             <div id="agri-protocols-list" class="font-mono">
               <div class="agri-protocol-item">
-                <span>⚡</span>
+                <span><i data-lucide="zap"></i></span>
                 <span>IMMEDIATE HARVEST: Reaped mature Boro paddy immediately if at 80-85% maturity to avoid 100% lodging loss.</span>
               </div>
               <div class="agri-protocol-item">
-                <span>🛡️</span>
+                <span><i data-lucide="shield"></i></span>
                 <span>BETEL BAROJ REINFORCEMENT: Dismantle top shade nets and install diagonal bamboo wind-bracing to relieve wind drag.</span>
               </div>
               <div class="agri-protocol-item">
-                <span>🌊</span>
+                <span><i data-lucide="droplet"></i></span>
                 <span>SALINITY BUND PROTECTION: Reinforce perimeter embankments around freshwater aquaculture ponds to block saline storm surge ingress.</span>
               </div>
             </div>
             <div class="agri-economic-box font-mono" id="agri-economic-box">
-              💰 Estimated Rs. 4.2 Lakh per 100 hectares crop loss prevented via 72h early harvest window.
+              <i data-lucide="shield-check"></i> Estimated Rs. 4.2 Lakh per 100 hectares crop loss prevented via 72h early harvest window.
             </div>
           </div>
         </div>
@@ -968,8 +984,8 @@
           <h2>Medium-Range (3- to 10-Day) Ensemble Outlook &amp; Atmospheric Chaos</h2>
           <span class="panel-subtitle">Multi-member trajectory dispersion (NCMRWF NEPS-G 12km) and probability-weighted landfall impact corridor</span>
         </div>
-        <div class="lead-time-filter-group font-mono">
-          <span class="filter-label">LEAD TIME:</span>
+        <div class="lead-time-filter-group">
+          <span class="filter-label">Lead Time:</span>
           <button class="btn-lead-filter active" data-filter="all">All Members (10)</button>
           <button class="btn-lead-filter" data-filter="early">T+24–72h (Genesis)</button>
           <button class="btn-lead-filter" data-filter="landfall">T+120h (Landfall)</button>
@@ -977,25 +993,25 @@
         </div>
       </div>
 
-      <div class="kpi-ribbon font-mono">
+      <div class="kpi-ribbon">
         <div class="kpi-box">
-          <span class="kpi-tag">ENSEMBLE SPREAD (DAY 5)</span>
-          <div class="kpi-value text-amber">310 km</div>
+          <span class="kpi-tag">Ensemble Spread (Day 5)</span>
+          <div class="kpi-value text-amber font-mono">310 km</div>
           <div class="kpi-sub">Day 1: 60 km &bull; Day 10: 680 km</div>
         </div>
         <div class="kpi-box">
-          <span class="kpi-tag">PRIMARY STRIKE THREAT</span>
-          <div class="kpi-value text-red">65.0%</div>
+          <span class="kpi-tag">Primary Strike Threat</span>
+          <div class="kpi-value text-red font-mono">65.0%</div>
           <div class="kpi-sub">West Bengal Littoral (Digha-Sagar)</div>
         </div>
         <div class="kpi-box">
-          <span class="kpi-tag">SECONDARY STRIKE THREAT</span>
-          <div class="kpi-value text-amber">25.0%</div>
+          <span class="kpi-tag">Secondary Strike Threat</span>
+          <div class="kpi-value text-amber font-mono">25.0%</div>
           <div class="kpi-sub">North Odisha (Balasore/Bhadrak)</div>
         </div>
         <div class="kpi-box">
-          <span class="kpi-tag">CHAOS GROWTH LAW</span>
-          <div class="kpi-value text-cyan">&sigma;(t) ~ t<sup>1.2</sup></div>
+          <span class="kpi-tag">Chaos Growth Law</span>
+          <div class="kpi-value font-mono">&sigma;(t) ~ t<sup>1.2</sup></div>
           <div class="kpi-sub">Bounded on 269-node Mesh</div>
         </div>
       </div>
@@ -1004,7 +1020,7 @@
         <div class="ensemble-map-card">
           <div class="ensemble-controls-bar">
             <div class="header-left">
-              <span class="section-icon">🌪️</span>
+              <span class="section-icon"><i data-lucide="wind"></i></span>
               <span class="section-title">10-Member Ensemble Trajectory Fan &amp; Cone of Uncertainty</span>
             </div>
             <div class="font-mono text-dim" style="font-size: 0.72rem;">
@@ -1020,7 +1036,7 @@
           <!-- Strike Probability Card -->
           <div class="intel-card">
             <div class="intel-card-header">
-              <span class="section-title" style="font-size: 0.85rem;">🎯 Strike Probability Corridor</span>
+              <span class="section-title" style="font-size: 0.85rem;"><i data-lucide="target"></i> Strike Probability Corridor</span>
               <span class="census-tag">Bay of Bengal</span>
             </div>
             <div class="sector-prob-list" style="margin-top: 10px;">
@@ -1045,10 +1061,10 @@
               <div class="sector-prob-item">
                 <div class="sector-prob-header font-mono">
                   <span>Bangladesh Sunderbans Delta</span>
-                  <strong class="text-cyan">10.0%</strong>
+                  <strong class="text-green">10.0%</strong>
                 </div>
                 <div class="sector-prob-bar-bg">
-                  <div class="sector-prob-bar-fill" style="width: 10%; background: #00d4e5;"></div>
+                  <div class="sector-prob-bar-fill" style="width: 10%; background: #10b981;"></div>
                 </div>
               </div>
             </div>
@@ -1057,7 +1073,7 @@
           <!-- 10-Member Ensemble Roster -->
           <div class="intel-card">
             <div class="intel-card-header">
-              <span class="section-title" style="font-size: 0.85rem;">📋 10-Member EPS Roster</span>
+              <span class="section-title" style="font-size: 0.85rem;"><i data-lucide="users"></i> 10-Member EPS Roster</span>
               <span class="font-mono text-dim" style="font-size: 0.7rem;">NEPS-G Runs</span>
             </div>
             <div class="member-roster-scroll">
@@ -1095,10 +1111,10 @@
         <!-- PS Alignment Card -->
         <div class="method-card ps-alignment-card">
           <div class="card-headline">
-            <span>🏛️ MoES / NCMRWF Problem Statement ID 26078 Alignment</span>
+            <span><i data-lucide="landmark"></i> MoES / NCMRWF Problem Statement ID 26078 Alignment</span>
             <span class="ps-badge font-mono">Theme: Smart Automation</span>
           </div>
-          <div class="ps-alignment-body font-mono" style="font-size: 0.78rem; line-height: 1.6; margin-top: 10px;">
+          <div class="ps-alignment-body" style="font-size: 0.82rem; line-height: 1.6; margin-top: 10px;">
             <p style="margin-bottom: 6px;"><strong>Problem Statement Title:</strong> AI-Driven Spatio-Temporal Tracking of Extreme Weather Anomalies in Medium-Range Forecasts</p>
             <p style="margin-bottom: 12px; color: var(--text-dim);"><strong>Core Bottlenecks Solved:</strong> (1) Atmospheric chaos in 3–10 day medium-range forecasts causing single-run deterministic drift; (2) Deep learning <em>spectral smoothing</em> (standard CNNs/U-Nets average out extreme peak winds/rainfall); (3) Broad district alerts causing severe alert fatigue for the NDRF and public.</p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px;">
@@ -1125,7 +1141,7 @@
         <!-- Deliverables Checklist Table -->
         <div class="method-card rubric-checklist-card">
           <div class="card-headline">
-            <span>📋 Official PS Deliverables Compliance Rubric</span>
+            <span><i data-lucide="file-check"></i> Official PS Deliverables Compliance Rubric</span>
             <span class="verified-tag">All 10 Items Verified</span>
           </div>
           <table class="rubric-table font-mono">
@@ -1205,7 +1221,7 @@
         <!-- MetPy Physics Audit Card -->
         <div class="method-card physics-metpy-card">
           <div class="card-headline">
-            <span>⚖️ Live Atmospheric Fluid Dynamics &amp; Kolmogorov Audit</span>
+            <span><i data-lucide="cpu"></i> Live Atmospheric Fluid Dynamics &amp; Kolmogorov Audit</span>
             <span class="verified-tag">Physics Verified</span>
           </div>
           <p class="font-mono text-dim" style="font-size: 0.74rem; margin-top: 6px;">
@@ -1214,12 +1230,12 @@
           <div class="metpy-audit-grid" id="metpy-audit-grid">
             <div class="metpy-stat-box">
               <span class="metpy-stat-label">Coriolis Parameter (f)</span>
-              <span class="metpy-stat-val text-cyan" id="audit-coriolis">4.63 &times; 10<sup>-5</sup> s<sup>-1</sup></span>
+              <span class="metpy-stat-val" id="audit-coriolis">4.63 &times; 10<sup>-5</sup> s<sup>-1</sup></span>
               <span class="metpy-stat-sub">f = 2&Omega; sin(&phi;) at 18.5&deg;N</span>
             </div>
             <div class="metpy-stat-box">
               <span class="metpy-stat-label">Rossby Deformation Radius (R_D)</span>
-              <span class="metpy-stat-val text-cyan" id="audit-rossby-radius">6,198 km</span>
+              <span class="metpy-stat-val" id="audit-rossby-radius">6,198 km</span>
               <span class="metpy-stat-sub">R_D = &radic;(gH) / f</span>
             </div>
             <div class="metpy-stat-box">
@@ -1234,7 +1250,7 @@
             </div>
             <div class="metpy-stat-box">
               <span class="metpy-stat-label">1000-500 hPa Thickness</span>
-              <span class="metpy-stat-val text-cyan" id="audit-thickness">5,845 m</span>
+              <span class="metpy-stat-val" id="audit-thickness">5,845 m</span>
               <span class="metpy-stat-sub">&Delta;&Phi; = -(R T_mean / g) ln(p2/p1)</span>
             </div>
             <div class="metpy-stat-box">
@@ -1248,7 +1264,7 @@
         <!-- Plain-English Concepts for Reviewers -->
         <div class="method-card glossary-card">
           <div class="card-headline">
-            <span>📖 Plain-English Concepts for Reviewers</span>
+            <span><i data-lucide="book-open"></i> Plain-English Concepts for Reviewers</span>
           </div>
           <div class="glossary-items">
             <div class="glossary-item">
@@ -1315,7 +1331,7 @@
       <div class="proof-body">
         <!-- ERA5 vs IBTrACS explanation -->
         <div class="proof-section" style="background: rgba(245,158,11,0.07); border-color: rgba(245,158,11,0.35);">
-          <h3 class="section-title" style="color: #f59e0b;">⚠️ Why ERA5 (110.5 km/h) ≠ IBTrACS (222 km/h)?</h3>
+          <h3 class="section-title" style="color: #f59e0b;"><i data-lucide="alert-triangle"></i> Why ERA5 (110.5 km/h) ≠ IBTrACS (222 km/h)?</h3>
           <p class="section-desc">
             This is an honest and expected discrepancy — not a model failure. ERA5 is a 25 km global reanalysis grid. It
             <strong>physically cannot resolve the 15 km-wide cyclone eyewall</strong> where true peak winds occur. ERA5 smooths
@@ -1329,7 +1345,7 @@
         <!-- 4 Core Measured Metrics -->
         <div class="proof-kpi-grid font-mono">
           <div class="proof-kpi-card">
-            <span class="kpi-num text-cyan">83.9%</span>
+            <span class="kpi-num text-white">83.9%</span>
             <span class="kpi-title">Amplitude Recovery</span>
             <span class="kpi-detail">+43.6 km/h gain over U-Net</span>
           </div>
@@ -1339,7 +1355,7 @@
             <span class="kpi-detail">8.7 km error at Landfall (Step 10)</span>
           </div>
           <div class="proof-kpi-card">
-            <span class="kpi-num text-cyan">7.26 km/h</span>
+            <span class="kpi-num text-white">7.26 km/h</span>
             <span class="kpi-title">CRPS Calibration</span>
             <span class="kpi-detail">Probabilistic diffusion spread</span>
           </div>
@@ -1376,7 +1392,7 @@
               <div class="amp-bar-track">
                 <div class="amp-bar-fill fill-cyan" style="width: 83.9%;"></div>
               </div>
-              <span class="amp-bar-val text-cyan font-bold">92.6 km/h (83.9% Recovered &bull; +43.6 km/h)</span>
+              <span class="amp-bar-val font-bold text-white">92.6 km/h (83.9% Recovered &bull; +43.6 km/h)</span>
             </div>
             <div class="amp-bar-row">
               <span class="amp-bar-label">ERA5 Ground Target</span>
@@ -1413,7 +1429,7 @@
                   <td>Super Cyclone (Cat 5)</td>
                   <td>110.5 km/h</td>
                   <td>63.4 km/h</td>
-                  <td class="text-cyan font-bold">83.9% (92.6 km/h)</td>
+                  <td class="font-bold text-white">83.9% (92.6 km/h)</td>
                   <td>7.26 km/h</td>
                   <td><span class="tag-status tag-train">Training Benchmark</span></td>
                 </tr>
@@ -1422,7 +1438,7 @@
                   <td>Extremely Severe (Cat 5)</td>
                   <td>111.1 km/h</td>
                   <td>64.9 km/h</td>
-                  <td class="text-cyan font-bold">76.6% (85.1 km/h)</td>
+                  <td class="font-bold text-white">76.6% (85.1 km/h)</td>
                   <td>8.17 km/h</td>
                   <td><span class="tag-status tag-unseen">Unseen &bull; Zero-Shot</span></td>
                 </tr>
@@ -1431,7 +1447,7 @@
                   <td>Very Severe (Cat 3)</td>
                   <td>92.3 km/h</td>
                   <td>53.0 km/h</td>
-                  <td class="text-cyan font-bold">85.9% (79.3 km/h)</td>
+                  <td class="font-bold text-white">85.9% (79.3 km/h)</td>
                   <td>6.55 km/h</td>
                   <td><span class="tag-status tag-unseen">Unseen &bull; Zero-Shot</span></td>
                 </tr>
@@ -1442,7 +1458,7 @@
 
         <!-- Reproducibility Command Box -->
         <div class="proof-section proof-reproduce">
-          <h4 class="reproduce-title font-mono">⚡ 1-Line Test Command for Technical Evaluators</h4>
+          <h4 class="reproduce-title font-mono"><i data-lucide="terminal"></i> 1-Line Test Command for Technical Evaluators</h4>
           <div class="code-box font-mono">
             <code>python -m pytest tests/test_a_gat_attention.py tests/test_b_corrdiff_recovery.py tests/test_c_efi_approximation.py tests/test_d_multistorm.py</code>
           </div>
@@ -1461,6 +1477,6 @@
   </footer>
 
   <!-- Main JavaScript Application Logic -->
-  <script src="./app.js?v=proof_modal_v1"></script>
+  <script src="/static/app.js?v=aerotrack_v6_step5"></script>
 </body>
 </html>

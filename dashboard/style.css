@@ -1031,12 +1031,78 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
   color: #38bdf8;
 }
 
+.dock-density-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px;
+}
+
+.dock-density-btn {
+  padding: 4px 2px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: #94a3b8;
+  font-size: 0.62rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.dock-density-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dock-density-btn.active {
+  background: rgba(0, 212, 229, 0.18);
+  border-color: #00d4e5;
+  color: #00d4e5;
+  font-weight: 700;
+}
+
+.dock-opacity-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.dock-opacity-slider {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.dock-opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #00d4e5;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(0, 212, 229, 0.8);
+}
+
+.dock-opacity-val {
+  font-size: 0.62rem;
+  font-family: var(--font-mono);
+  color: #cbd5e1;
+  min-width: 26px;
+  text-align: right;
+}
+
 /* Calibrated Wind Speed Legend Bar */
 .zoom-wind-legend {
   position: absolute;
   bottom: 16px;
-  right: 16px;
-  left: auto;
+  left: 16px;
+  right: auto;
   z-index: 520;
   width: 310px;
   background: rgba(10, 16, 26, 0.88);
@@ -1047,7 +1113,7 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
   padding: 8px 12px;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
   pointer-events: auto;
-  transition: right 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .legend-header {
@@ -1207,6 +1273,100 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
 .cat-extreme {
   color: #fda4af;
   font-weight: 700;
+}
+
+/* Calibrated MSLP Pressure Legend Bar */
+.zoom-pressure-legend {
+  position: absolute;
+  bottom: 84px;
+  left: 16px;
+  right: auto;
+  z-index: 520;
+  width: 310px;
+  background: rgba(10, 16, 26, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.pressure-scale-bar {
+  width: 100%;
+  height: 9px;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  margin-bottom: 4px;
+  background: linear-gradient(
+    to right,
+    #0284c7 0%,
+    #38bdf8 25%,
+    #64748b 50%,
+    #facc15 75%,
+    #f43f5e 100%
+  );
+}
+
+/* Ground-Truth Real-Time Verification Badge */
+.ground-truth-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 510;
+  width: 230px;
+  background: rgba(10, 16, 26, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 8px 12px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+  pointer-events: auto;
+  font-size: 0.68rem;
+}
+
+.gt-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gt-title {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #f1f5f9;
+}
+
+.gt-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.gt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.64rem;
+  color: #94a3b8;
+}
+
+.gt-source {
+  margin-top: 4px;
+  font-size: 0.56rem;
+  color: #64748b;
+  text-align: right;
+  border-top: 1px dashed rgba(255, 255, 255, 0.06);
+  padding-top: 3px;
 }
 
 /* Zoom Earth Animated Spinning Cyclone Swirl */
