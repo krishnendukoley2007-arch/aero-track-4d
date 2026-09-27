@@ -1562,6 +1562,17 @@ function switchBasemap(key) {
       layer.bringToBack();
     }
   });
+
+  const basemapBtns = document.querySelectorAll(".dock-basemap-btn");
+  basemapBtns.forEach(b => {
+    b.classList.toggle("active", b.dataset.bm === key);
+  });
+
+  const canvas = document.getElementById("canvas-wind-streamlines");
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
 }
 
 // ============================================================
@@ -3651,8 +3662,18 @@ function animateWindParticles() {
   // Exact Web Mercator degrees per pixel at current zoom
   const degPerPixel = 1.40625 * Math.pow(2, -currentZoom);
 
-  // 6 Speed-calibrated color buckets: small delicate trails for calm air, long bold ribbons for storms
-  const buckets = [
+  // Adaptive contrast: On light basemaps (Topo & Streets), use dark sleek streamlines.
+  // On dark/satellite basemaps, use luminous cyan/blue/gold/crimson streamlines.
+  const isLightBasemap = (activeBasemapKey === "topo" || activeBasemapKey === "streets");
+
+  const buckets = isLightBasemap ? [
+    { color: "rgba(15, 23, 42, 0.62)",  width: 1.15, lines: [] }, // Calm (< 20 km/h): Deep charcoal / slate
+    { color: "rgba(30, 41, 59, 0.82)",  width: 1.55, lines: [] }, // Light/Moderate Breeze (20-45 km/h): Midnight slate
+    { color: "rgba(2, 132, 199, 0.92)", width: 1.95, lines: [] }, // Fresh/Strong Breeze (45-75 km/h): Deep cobalt navy
+    { color: "rgba(180, 83, 9, 0.96)",  width: 2.35, lines: [] }, // Gale (75-105 km/h): Deep burnt amber
+    { color: "rgba(190, 18, 60, 0.98)", width: 2.85, lines: [] }, // Storm (105-135 km/h): Deep rich crimson
+    { color: "rgba(136, 19, 55, 1.00)", width: 3.40, lines: [] }  // Eyewall / Cyclone (> 135 km/h): Intense dark violet-crimson
+  ] : [
     { color: "rgba(220, 240, 255, 0.38)", width: 0.95, lines: [] }, // Calm (< 20 km/h): Delicate, small compact trails
     { color: "rgba(125, 211, 252, 0.65)", width: 1.30, lines: [] }, // Light/Moderate Breeze (20-45 km/h): Luminous cyan
     { color: "rgba(56, 189, 248, 0.82)",  width: 1.70, lines: [] }, // Fresh/Strong Breeze (45-75 km/h): Electric blue
