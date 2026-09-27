@@ -1398,6 +1398,23 @@ def api_export_agri_csv(hazard_id: str = "amphan_2020"):
     )
 
 
+@app.get("/api/climate/perturbation")
+def api_climate_perturbation(
+    hazard_id: str = "amphan_2020",
+    delta_sst: float = 0.0,
+    delta_vws: float = 0.0
+):
+    """
+    Evaluates physical atmospheric impact of climate warming and shear perturbation:
+    - Kerry Emanuel Maximum Potential Intensity (MPI)
+    - Kaplan-DeMaria SHIPS Rapid Intensification (RI) Probability
+    - SLOSH quadratic storm surge amplification
+    - Humanitarian coastal population risk exposure
+    """
+    from src.climate_sandbox import evaluate_perturbation
+    return evaluate_perturbation(hazard_id=hazard_id, delta_sst=delta_sst, delta_vws=delta_vws)
+
+
 DASHBOARD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard")
 if os.path.exists(DASHBOARD_DIR):
     app.mount("/static", StaticFiles(directory=DASHBOARD_DIR), name="static")

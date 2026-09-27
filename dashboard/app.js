@@ -7068,11 +7068,178 @@ function renderSoundingTable(levels) {
   });
 }
 
+// ---------------- Climate Perturbation Sandbox & Rapid Intensification Engine ----------------
+function initClimateSandboxModal() {
+  const modal = document.getElementById("modal-climate-sandbox");
+  const btnOpen = document.getElementById("btn-climate-sandbox");
+  const chipOpen = document.getElementById("chip-ri-status");
+  const btnClose = document.getElementById("btn-close-climate-sandbox");
+  const btnCloseFooter = document.getElementById("btn-close-climate-footer");
+
+  const sliderSst = document.getElementById("slider-climate-sst");
+  const sliderVws = document.getElementById("slider-climate-vws");
+  const valSst = document.getElementById("val-slider-sst");
+  const valVws = document.getElementById("val-slider-vws");
+  const presetBtns = document.querySelectorAll(".btn-climate-preset");
+
+  if (!modal) return;
+
+  const openSandbox = () => {
+    modal.classList.remove("hidden");
+    refreshIcons();
+    triggerClimateCalculation();
+  };
+
+  if (btnOpen) btnOpen.addEventListener("click", openSandbox);
+  if (chipOpen) chipOpen.addEventListener("click", openSandbox);
+
+  const closeSandbox = () => modal.classList.add("hidden");
+  if (btnClose) btnClose.addEventListener("click", closeSandbox);
+  if (btnCloseFooter) btnCloseFooter.addEventListener("click", closeSandbox);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeSandbox();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+      closeSandbox();
+    }
+  });
+
+  let debounceTimer = null;
+  const triggerClimateCalculation = () => {
+    const dsst = parseFloat(sliderSst ? sliderSst.value : 0.0);
+    const dvws = parseFloat(sliderVws ? sliderVws.value : 0.0);
+
+    if (valSst) valSst.textContent = `${dsst >= 0 ? "+" : ""}${dsst.toFixed(1)} °C`;
+    if (valVws) valVws.textContent = `${dvws >= 0 ? "+" : ""}${dvws.toFixed(1)} kt`;
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      loadClimatePerturbation(dsst, dvws);
+    }, 60);
+  };
+
+  if (sliderSst) sliderSst.addEventListener("input", triggerClimateCalculation);
+  if (sliderVws) sliderVws.addEventListener("input", triggerClimateCalculation);
+
+  presetBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      presetBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const dsst = parseFloat(btn.dataset.dsst || 0.0);
+      const dvws = parseFloat(btn.dataset.dvws || 0.0);
+      if (sliderSst) sliderSst.value = dsst;
+      if (sliderVws) sliderVws.value = dvws;
+      triggerClimateCalculation();
+    });
+  });
+
+  // Initial load for baseline ribbon badge
+  loadClimatePerturbation(0.0, 0.0, true);
+}
+
+async function loadClimatePerturbation(deltaSst, deltaVws, updateRibbonOnly = false) {
+  try {
+    const hazard = state.currentHazard || "amphan_2020";
+    const res = await fetch(`/api/climate/perturbation?hazard_id=${hazard}&delta_sst=${deltaSst}&delta_vws=${deltaVws}`);
+    if (!res.ok) throw new Error("Climate API error");
+    const data = await res.json();
+
+    // 1. Update Ribbon RI Badge
+    const ribbonVal = document.getElementById("val-ri-prob");
+    if (ribbonVal && data.baseline_ri) {
+      const activeRi = (deltaSst === 0 && deltaVws === 0) ? data.baseline_ri : data.perturbed_ri;
+      ribbonVal.textContent = `${activeRi.prob_ri_percent}% [${activeRi.threat_level.replace(" RI RISK", "")}]`;
+      ribbonVal.style.color = activeRi.badge_color;
+    }
+
+    if (updateRibbonOnly) return;
+
+    // 2. Emanuel MPI Card
+    const mpi = data.perturbed_mpi;
+    const elVmax = document.getElementById("res-mpi-vmax");
+    const elDeltaV = document.getElementById("res-mpi-delta-v");
+    const elPmin = document.getElementById("res-mpi-pmin");
+    const elDeltaP = document.getElementById("res-mpi-delta-p");
+    const elCarnot = document.getElementById("res-mpi-carnot");
+    const elEnthalpy = document.getElementById("res-mpi-enthalpy");
+
+    if (elVmax) elVmax.textContent = mpi.v_max_kmh.toFixed(1);
+    if (elDeltaV) {
+      const dV = data.delta_mpi_vmax_kmh;
+      elDeltaV.textContent = `${dV >= 0 ? "+" : ""}${dV.toFixed(1)} km/h`;
+      elDeltaV.className = `delta-pill font-mono ${dV === 0 ? "neutral" : ""}`;
+    }
+    if (elPmin) elPmin.textContent = `${mpi.p_min_hpa.toFixed(1)} hPa`;
+    if (elDeltaP) {
+      const dP = data.delta_mpi_pmin_hpa;
+      elDeltaP.textContent = `${dP >= 0 ? "+" : ""}${dP.toFixed(1)} hPa`;
+    }
+    if (elCarnot) elCarnot.textContent = `${(mpi.carnot_efficiency * 100).toFixed(1)}%`;
+    if (elEnthalpy) elEnthalpy.textContent = `${Math.round(mpi.enthalpy_disequilibrium_j_kg).toLocaleString()} J/kg`;
+
+    // 3. Kaplan-DeMaria Rapid Intensification Card
+    const ri = data.perturbed_ri;
+    const elRiProb = document.getElementById("res-ri-prob");
+    const elRiBadge = document.getElementById("res-ri-badge");
+    const elRiProgress = document.getElementById("res-ri-progress");
+    const elRiAdv = document.getElementById("res-ri-advisory");
+
+    if (elRiProb) elRiProb.textContent = `${ri.prob_ri_percent.toFixed(1)}%`;
+    if (elRiBadge) {
+      elRiBadge.textContent = ri.threat_level;
+      elRiBadge.style.background = ri.badge_color;
+    }
+    if (elRiProgress) {
+      elRiProgress.style.width = `${Math.min(100, Math.max(5, ri.prob_ri_percent))}%`;
+    }
+    if (elRiAdv) elRiAdv.textContent = ri.advisory;
+
+    // 4. Storm Surge & Humanitarian Exposure Card
+    const surge = data.surge;
+    const pop = data.humanitarian_impact;
+    const elSurgeVal = document.getElementById("res-surge-val");
+    const elSurgeDelta = document.getElementById("res-surge-delta");
+    const elPopTotal = document.getElementById("res-pop-total");
+    const elPopDelta = document.getElementById("res-pop-delta");
+    const elEvac = document.getElementById("res-evac-mandate");
+
+    if (elSurgeVal) elSurgeVal.textContent = surge.perturbed_surge_m.toFixed(2);
+    if (elSurgeDelta) {
+      const dS = surge.delta_surge_m;
+      elSurgeDelta.textContent = `${dS >= 0 ? "+" : ""}${dS.toFixed(2)} m`;
+      elSurgeDelta.className = `delta-pill font-mono ${dS === 0 ? "neutral" : ""}`;
+    }
+    if (elPopTotal) elPopTotal.textContent = `${(pop.perturbed_population_at_risk / 1e6).toFixed(2)} Million`;
+    if (elPopDelta) {
+      const dPop = pop.delta_population;
+      elPopDelta.textContent = `${dPop >= 0 ? "+" : ""}${dPop.toLocaleString()} people`;
+    }
+    if (elEvac) {
+      if (surge.perturbed_surge_m >= 5.0) {
+        elEvac.textContent = "Catastrophic (Sector 1-5 Total Evacuation)";
+        elEvac.style.color = "#ef4444";
+      } else if (surge.perturbed_surge_m >= 4.0) {
+        elEvac.textContent = "Red Alert (Sector 1 to 4 Evacuation)";
+        elEvac.style.color = "#f59e0b";
+      } else {
+        elEvac.textContent = "Orange Watch (Sector 1-2 Coastal Alert)";
+        elEvac.style.color = "#3b82f6";
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to load climate perturbation data:", err);
+  }
+}
+
 // ---------------- Event Listeners ----------------
 function initEventListeners() {
   initGuidedTour();
   initScientificProofModal();
   initAtmosphericSoundingModal();
+  initClimateSandboxModal();
 
   // Basemap Selectors
   const selectBmOv = document.getElementById("select-basemap-ov");

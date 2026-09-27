@@ -50,6 +50,7 @@ ENDPOINTS = [
     ("GET", "/api/atmospheric/sounding?lat=21.62&lon=87.51&step_index=5", ["levels", "bulk_vertical_shear_850_200_ms"]),
     ("GET", "/api/radar/dwr-metadata", ["station", "reflectivity_scale_dbz"]),
     ("GET", "/api/radar/nowcast-frames?step_index=5", ["status", "frames", "advection_method"]),
+    ("GET", "/api/climate/perturbation?delta_sst=1.5&delta_vws=-2.0", ["hazard_name", "perturbed_mpi", "perturbed_ri", "surge"]),
 ]
 
 
