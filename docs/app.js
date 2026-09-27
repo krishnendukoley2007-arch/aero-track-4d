@@ -1568,6 +1568,17 @@ function switchBasemap(key) {
     b.classList.toggle("active", b.dataset.bm === key);
   });
 
+  const select = document.getElementById("select-basemap-ov");
+  if (select && select.value !== key) {
+    select.value = key;
+  }
+
+  const mapWrapper = document.getElementById("map-viewport-wrapper");
+  if (mapWrapper) {
+    mapWrapper.setAttribute("data-basemap", key);
+  }
+  document.body.setAttribute("data-basemap", key);
+
   const canvas = document.getElementById("canvas-wind-streamlines");
   if (canvas) {
     const ctx = canvas.getContext("2d");
@@ -3662,17 +3673,18 @@ function animateWindParticles() {
   // Exact Web Mercator degrees per pixel at current zoom
   const degPerPixel = 1.40625 * Math.pow(2, -currentZoom);
 
-  // Adaptive contrast: On light basemaps (Topo & Streets), use dark sleek streamlines.
+  // Adaptive contrast: On light basemaps (Topo & Streets), use high-contrast dark ink / carbon streamlines across all wind velocities.
   // On dark/satellite basemaps, use luminous cyan/blue/gold/crimson streamlines.
-  const isLightBasemap = (activeBasemapKey === "topo" || activeBasemapKey === "streets");
+  const keyLower = String(activeBasemapKey || "").toLowerCase();
+  const isLightBasemap = (keyLower === "topo" || keyLower === "streets");
 
   const buckets = isLightBasemap ? [
-    { color: "rgba(15, 23, 42, 0.62)",  width: 1.15, lines: [] }, // Calm (< 20 km/h): Deep charcoal / slate
-    { color: "rgba(30, 41, 59, 0.82)",  width: 1.55, lines: [] }, // Light/Moderate Breeze (20-45 km/h): Midnight slate
-    { color: "rgba(2, 132, 199, 0.92)", width: 1.95, lines: [] }, // Fresh/Strong Breeze (45-75 km/h): Deep cobalt navy
-    { color: "rgba(180, 83, 9, 0.96)",  width: 2.35, lines: [] }, // Gale (75-105 km/h): Deep burnt amber
-    { color: "rgba(190, 18, 60, 0.98)", width: 2.85, lines: [] }, // Storm (105-135 km/h): Deep rich crimson
-    { color: "rgba(136, 19, 55, 1.00)", width: 3.40, lines: [] }  // Eyewall / Cyclone (> 135 km/h): Intense dark violet-crimson
+    { color: "rgba(30, 41, 59, 0.78)",  width: 1.25, lines: [] }, // Calm (< 20 km/h): Crisp slate charcoal
+    { color: "rgba(15, 23, 42, 0.88)",  width: 1.65, lines: [] }, // Light/Moderate Breeze (20-45 km/h): Deep midnight carbon
+    { color: "rgba(10, 15, 30, 0.94)",  width: 2.10, lines: [] }, // Fresh/Strong Breeze (45-75 km/h): Deep obsidian slate
+    { color: "rgba(6, 10, 20, 0.97)",   width: 2.65, lines: [] }, // Gale (75-105 km/h): Pitch dark carbon
+    { color: "rgba(2, 6, 14, 0.99)",    width: 3.15, lines: [] }, // Storm (105-135 km/h): Dense jet carbon
+    { color: "rgba(0, 0, 0, 1.00)",     width: 3.75, lines: [] }  // Eyewall / Cyclone (> 135 km/h): Solid jet black
   ] : [
     { color: "rgba(220, 240, 255, 0.38)", width: 0.95, lines: [] }, // Calm (< 20 km/h): Delicate, small compact trails
     { color: "rgba(125, 211, 252, 0.65)", width: 1.30, lines: [] }, // Light/Moderate Breeze (20-45 km/h): Luminous cyan
@@ -4446,6 +4458,8 @@ const DwrRadarOverlay = {
       if (st) st.textContent = this.umbrellaActive ? "ON" : "OFF";
     }
 
+    this.updateStationMarkers();
+
     if (this.umbrellaActive && !this.active) {
       this.canvas.classList.add("active");
       this.canvas.style.display = "block";
@@ -4465,6 +4479,8 @@ const DwrRadarOverlay = {
     if (enable === undefined) enable = !this.active;
     this.active = !!enable;
     state.showDwrSweepLayer = this.active;
+
+    this.updateStationMarkers();
 
     if (this.canvas) {
       this.canvas.classList.toggle("active", this.active || this.umbrellaActive);
@@ -4494,6 +4510,76 @@ const DwrRadarOverlay = {
     } else {
       if (!this.umbrellaActive) {
         this.stopLoop();
+      }
+    }
+  },
+
+  stationMarkers: [],
+
+  updateStationMarkers() {
+    if (!state.map) return;
+    this.clearStationMarkers();
+    if (!this.umbrellaActive && !this.active) return;
+
+    Object.values(this.stations).forEach(st => {
+      const html = `
+        <div class="radar-station-beacon" style="position:relative; width:18px; height:18px; cursor:pointer;" title="${st.name}">
+          <div style="position:absolute; width:100%; height:100%; border-radius:50%; background:${st.color}; opacity:0.9; border:2px solid #ffffff; box-shadow:0 0 12px ${st.color};"></div>
+          <div style="position:absolute; inset:-4px; border-radius:50%; border:1.5px dashed ${st.color};"></div>
+        </div>
+      `;
+      const icon = L.divIcon({
+        className: "custom-radar-station-marker",
+        html: html,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+      const marker = L.marker([st.lat, st.lon], { icon }).addTo(state.map);
+      const popupHtml = `
+        <div class="radar-station-popup font-mono" style="padding:6px; min-width:240px; color:#f8fafc; font-family:'JetBrains Mono', monospace;">
+          <div style="font-weight:800; font-size:0.86rem; color:#38bdf8; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:${st.color};"></span>
+            ${st.name}
+          </div>
+          <div style="font-size:0.72rem; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:5px; margin-bottom:6px;">
+            Station Code: <strong style="color:#ffffff;">${st.code}</strong> &bull; Range: <strong style="color:#00ffa3;">${st.range_km} km</strong>
+          </div>
+          <div style="font-size:0.72rem; line-height:1.6; color:#cbd5e1;">
+            <div>&bull; Frequency Band: <strong style="color:#ffffff;">${st.band}</strong></div>
+            <div>&bull; Peak RF Power: <strong style="color:#ffffff;">${st.power}</strong></div>
+            <div>&bull; Operational Range: <strong style="color:#00ffa3;">${st.range_km} km Doppler Radius</strong></div>
+            <div>&bull; Scan Mode: <strong style="color:#ffffff;">VCP-21 (0.5° to 19.5° Elevation Cuts)</strong></div>
+            <div>&bull; Coordinates: <strong style="color:#ffffff;">${st.lat.toFixed(3)}°N, ${st.lon.toFixed(3)}°E</strong></div>
+          </div>
+          <div style="margin-top:8px;">
+            <button onclick="window.DwrRadarOverlay.focusStation('${st.code}')" style="width:100%; background:rgba(56, 189, 248, 0.22); border:1px solid #38bdf8; color:#ffffff; padding:5px 8px; border-radius:4px; font-size:0.72rem; font-weight:700; cursor:pointer; transition:all 0.2s;">
+              Focus Radar Sweep Here
+            </button>
+          </div>
+        </div>
+      `;
+      marker.bindPopup(popupHtml, { className: "custom-leaflet-popup" });
+      this.stationMarkers.push(marker);
+    });
+  },
+
+  clearStationMarkers() {
+    if (this.stationMarkers && state.map) {
+      this.stationMarkers.forEach(m => state.map.removeLayer(m));
+      this.stationMarkers = [];
+    }
+  },
+
+  focusStation(stId) {
+    if (this.stations[stId]) {
+      this.setStation(stId);
+      if (!this.active) {
+        this.toggle(true);
+      }
+      const st = this.stations[stId];
+      if (state.map) {
+        state.map.panTo([st.lat, st.lon], { animate: true, duration: 0.8 });
+        state.map.closePopup();
       }
     }
   },
@@ -4753,6 +4839,246 @@ const DwrRadarOverlay = {
 };
 window.DwrRadarOverlay = DwrRadarOverlay;
 
+// ---------------- INSAT-3DR Geostationary Thermal IR & Dvorak Layer ----------------
+const InsatSatelliteOverlay = {
+  canvas: null,
+  ctx: null,
+  badge: null,
+  active: false,
+  data: null,
+  animAngle: 0,
+  animId: null,
+
+  init() {
+    this.canvas = document.getElementById("canvas-insat3dr-satellite");
+    this.badge = document.getElementById("insat3dr-dvorak-badge");
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext("2d");
+    this.resize();
+    window.addEventListener("resize", () => this.resize());
+    if (state.map) {
+      state.map.on("move zoom resize", () => {
+        if (this.active) this.render();
+      });
+    }
+  },
+
+  resize() {
+    if (!this.canvas || !state.map) return;
+    const size = state.map.getSize();
+    this.canvas.width = size.x;
+    this.canvas.height = size.y;
+  },
+
+  async toggle(enable) {
+    if (!this.canvas) this.init();
+    if (enable === undefined) enable = !this.active;
+    this.active = !!enable;
+
+    const dockBtn = document.getElementById("dock-toggle-insat3dr");
+    if (dockBtn) {
+      dockBtn.classList.toggle("active", this.active);
+      const st = dockBtn.querySelector(".dock-pill-status");
+      if (st) st.textContent = this.active ? "ON" : "OFF";
+    }
+
+    if (this.canvas) {
+      this.canvas.classList.toggle("active", this.active);
+      this.canvas.style.display = this.active ? "block" : "none";
+    }
+
+    if (this.badge) {
+      this.badge.style.display = this.active ? "block" : "none";
+    }
+
+    if (this.active) {
+      await this.loadData();
+      this.resize();
+      this.startLoop();
+    } else {
+      this.stopLoop();
+      if (this.ctx && this.canvas) {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
+    }
+  },
+
+  async loadData() {
+    try {
+      const step = state.currentStep !== undefined ? state.currentStep : 5;
+      const hazard = state.currentHazard || "amphan_2020";
+      const res = await fetch(`/api/satellite/insat3dr-thermal-ir?step_index=${step}&hazard_id=${hazard}`);
+      if (!res.ok) throw new Error("INSAT-3DR API error");
+      const d = await res.json();
+      this.data = d;
+      this.updateBadgeUI(d);
+      if (this.active) this.render();
+    } catch (err) {
+      console.warn("Failed to load INSAT-3DR data:", err);
+    }
+  },
+
+  updateBadgeUI(d) {
+    if (!d || !d.dvorak) return;
+    const dv = d.dvorak;
+    const elTnum = document.getElementById("insat-tnum-val");
+    const elEye = document.getElementById("insat-eye-temp");
+    const elCdo = document.getElementById("insat-cdo-temp");
+    const elDelta = document.getElementById("insat-delta-t");
+    const elWind = document.getElementById("insat-derived-wind");
+
+    if (elTnum) elTnum.textContent = `ADT: T${dv.t_number.toFixed(1)} [${dv.classification}]`;
+    if (elEye) elEye.textContent = `${dv.eye_temp_c >= 0 ? "+" : ""}${dv.eye_temp_c.toFixed(1)}°C`;
+    if (elCdo) elCdo.textContent = `${dv.cdo_cold_ring_temp_c.toFixed(1)}°C`;
+    if (elDelta) elDelta.textContent = `${dv.eye_surround_contrast_c.toFixed(1)}°C Anomaly`;
+    if (elWind) elWind.textContent = `${Math.round(dv.derived_wind_kmh)} km/h • ${dv.derived_mslp_hpa} hPa`;
+  },
+
+  startLoop() {
+    if (this.animId) cancelAnimationFrame(this.animId);
+    const loop = () => {
+      if (!this.active) return;
+      this.animAngle = (this.animAngle + 0.3) % 360;
+      this.render();
+      this.animId = requestAnimationFrame(loop);
+    };
+    this.animId = requestAnimationFrame(loop);
+  },
+
+  stopLoop() {
+    if (this.animId) {
+      cancelAnimationFrame(this.animId);
+      this.animId = null;
+    }
+  },
+
+  render() {
+    if (!this.active || !this.ctx || !this.canvas || !state.map) return;
+    const ctx = this.ctx;
+    const map = state.map;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    let centerLat = 18.8;
+    let centerLon = 87.2;
+    if (this.data) {
+      centerLat = this.data.center_lat;
+      centerLon = this.data.center_lon;
+    } else if (state.activeDownscale) {
+      centerLat = state.activeDownscale.target_lat;
+      centerLon = state.activeDownscale.target_lon;
+    }
+
+    const cPt = map.latLngToContainerPoint([centerLat, centerLon]);
+    const cx = cPt.x;
+    const cy = cPt.y;
+
+    // Convert 100km to pixels at current map zoom
+    const edgePt = map.latLngToContainerPoint([centerLat, centerLon + (100 / (111.13 * Math.cos(centerLat * Math.PI / 180)))]);
+    const pxPer100Km = Math.max(10, Math.abs(edgePt.x - cx));
+    const scale = pxPer100Km / 100.0;
+
+    ctx.save();
+
+    // 1. Broad Cirrus Outflow Canopy (450km radius, -18C to -30C diffuse slate-blue)
+    const rOutflow = 450 * scale;
+    const gradOutflow = ctx.createRadialGradient(cx, cy, 120 * scale, cx, cy, rOutflow);
+    gradOutflow.addColorStop(0, "rgba(51, 65, 85, 0.45)");
+    gradOutflow.addColorStop(0.6, "rgba(71, 85, 105, 0.28)");
+    gradOutflow.addColorStop(1, "rgba(30, 41, 59, 0.0)");
+    ctx.beginPath();
+    ctx.arc(cx, cy, rOutflow, 0, Math.PI * 2);
+    ctx.fillStyle = gradOutflow;
+    ctx.fill();
+
+    // 2. Convective Feeder Rainband Spirals (BD Enhancement: Green/Cyan/Blue)
+    const spiralArms = [
+      { startAngle: 0, length: 2.2, color: "rgba(34, 197, 94, 0.55)", width: 28 * scale },
+      { startAngle: Math.PI * 0.7, length: 2.4, color: "rgba(6, 182, 212, 0.65)", width: 24 * scale },
+      { startAngle: Math.PI * 1.35, length: 2.6, color: "rgba(59, 130, 246, 0.75)", width: 22 * scale },
+      { startAngle: Math.PI * 0.3, length: 1.8, color: "rgba(234, 179, 8, 0.82)", width: 18 * scale }
+    ];
+
+    const rotRad = (this.animAngle * Math.PI) / 180;
+    spiralArms.forEach(arm => {
+      ctx.beginPath();
+      const numPts = 32;
+      for (let i = 0; i <= numPts; i++) {
+        const theta = arm.startAngle + rotRad + (i / numPts) * arm.length * Math.PI;
+        const r = (35 + (i / numPts) * 320) * scale;
+        const x = cx + Math.cos(theta) * r;
+        const y = cy + Math.sin(theta) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = arm.color;
+      ctx.lineWidth = arm.width;
+      ctx.lineCap = "round";
+      ctx.stroke();
+    });
+
+    // 3. Central Dense Overcast (CDO) Cold Core (85km radius, -70C to -76C Yellow/Red)
+    const rCdo = 85 * scale;
+    const gradCdo = ctx.createRadialGradient(cx, cy, 38 * scale, cx, cy, rCdo);
+    gradCdo.addColorStop(0, "rgba(239, 68, 68, 0.95)");
+    gradCdo.addColorStop(0.55, "rgba(234, 179, 8, 0.88)");
+    gradCdo.addColorStop(1, "rgba(59, 130, 246, 0.75)");
+    ctx.beginPath();
+    ctx.arc(cx, cy, rCdo, 0, Math.PI * 2);
+    ctx.fillStyle = gradCdo;
+    ctx.fill();
+
+    // 4. CDO Eyewall Cold Ring: Overshooting Convective Tops (< -80C Deep Violet / Magenta)
+    const rColdRingInner = 18 * scale;
+    const rColdRingOuter = 44 * scale;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rColdRingOuter, 0, Math.PI * 2);
+    ctx.arc(cx, cy, rColdRingInner, 0, Math.PI * 2, true);
+    const gradColdRing = ctx.createRadialGradient(cx, cy, rColdRingInner, cx, cy, rColdRingOuter);
+    gradColdRing.addColorStop(0, "rgba(168, 85, 247, 1.0)");
+    gradColdRing.addColorStop(0.5, "rgba(126, 34, 206, 0.98)");
+    gradColdRing.addColorStop(1, "rgba(239, 68, 68, 0.92)");
+    ctx.fillStyle = gradColdRing;
+    ctx.fill();
+
+    // 5. Warm Eye Core Subsidence Inversion (+14.2C Amber / Gold)
+    const rEye = 16 * scale;
+    const gradEye = ctx.createRadialGradient(cx, cy, 0, cx, cy, rEye);
+    gradEye.addColorStop(0, "rgba(251, 191, 36, 0.95)");
+    gradEye.addColorStop(0.8, "rgba(245, 158, 11, 0.8)");
+    gradEye.addColorStop(1, "rgba(168, 85, 247, 0.4)");
+    ctx.beginPath();
+    ctx.arc(cx, cy, rEye, 0, Math.PI * 2);
+    ctx.fillStyle = gradEye;
+    ctx.fill();
+
+    // Eye outline
+    ctx.beginPath();
+    ctx.arc(cx, cy, rEye, 0, Math.PI * 2);
+    ctx.strokeStyle = "#fbbf24";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Eyewall radius indicator
+    ctx.beginPath();
+    ctx.arc(cx, cy, rColdRingOuter, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(168, 85, 247, 0.8)";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Eyewall annotation
+    ctx.font = "bold 9px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("CDO COLD RING: -82.4°C", cx + rColdRingOuter + 6, cy - 6);
+    ctx.fillStyle = "#fbbf24";
+    ctx.fillText("WARM EYE: +14.2°C", cx + rColdRingOuter + 6, cy + 8);
+
+    ctx.restore();
+  }
+};
+window.InsatSatelliteOverlay = InsatSatelliteOverlay;
+
 // ---------------- Zoom Earth Floating Overlays Dock & Speed Legend Controller ----------------
 function initZoomEarthOverlays() {
   // 1. Collapse / Expand Dock
@@ -4856,6 +5182,14 @@ function initZoomEarthOverlays() {
     });
   });
 
+  // 3d. INSAT-3DR Geostationary Thermal IR & Dvorak Layer Toggle
+  const dockBtnInsat = document.getElementById("dock-toggle-insat3dr");
+  if (dockBtnInsat) {
+    dockBtnInsat.addEventListener("click", () => {
+      InsatSatelliteOverlay.toggle();
+    });
+  }
+
   // 4. Track & Cone Toggle
   const dockBtnCone = document.getElementById("dock-toggle-cone");
   if (dockBtnCone) {
@@ -4881,6 +5215,9 @@ function initZoomEarthOverlays() {
       renderSphericalMesh();
       const pill = document.getElementById("toggle-layer-mesh");
       if (pill) pill.classList.toggle("active", state.showMeshLayer);
+      if (typeof toggleGnnAttentionInspector === "function") {
+        toggleGnnAttentionInspector(state.showMeshLayer);
+      }
     });
   }
 
@@ -4902,13 +5239,9 @@ function initZoomEarthOverlays() {
   const basemapBtns = document.querySelectorAll(".dock-basemap-btn");
   basemapBtns.forEach(btn => {
     btn.addEventListener("click", () => {
-      basemapBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
       const bm = btn.dataset.bm;
-      const select = document.getElementById("select-basemap-ov");
-      if (select) {
-        select.value = bm;
-        select.dispatchEvent(new Event("change"));
+      if (bm) {
+        switchBasemap(bm);
       }
     });
   });
@@ -5168,6 +5501,12 @@ async function updateStep(stepIdx) {
   triggerNDRFAlert(state.selectedLocation.lat, state.selectedLocation.lon, state.selectedLocation.name);
   if (typeof ThreeGlobeViewer !== "undefined" && ThreeGlobeViewer.initialized) {
     ThreeGlobeViewer.updateStep(stepIdx, stepInfo);
+  }
+  if (typeof InsatSatelliteOverlay !== "undefined" && InsatSatelliteOverlay.active) {
+    InsatSatelliteOverlay.loadData();
+  }
+  if (typeof DwrRadarOverlay !== "undefined" && DwrRadarOverlay.active) {
+    DwrRadarOverlay.loadNowcast();
   }
 }
 
@@ -7234,12 +7573,440 @@ async function loadClimatePerturbation(deltaSst, deltaVws, updateRibbonOnly = fa
   }
 }
 
+// ==============================================================
+// PHASE 3: EMERGENCY SIREN & SPKEN VOICE CELL-BROADCAST ENGINE
+// ==============================================================
+let sirenAudioCtx = null;
+let sirenOsc1 = null;
+let sirenOsc2 = null;
+let sirenGain = null;
+let sirenInterval = null;
+let isSirenSounding = false;
+let activeBroadcastLang = "en";
+let cellBroadcastData = null;
+
+function initCellBroadcastModal() {
+  const modal = document.getElementById("modal-cell-broadcast");
+  const btnOpen = document.getElementById("btn-cell-broadcast");
+  const btnClose = document.getElementById("btn-close-cell-broadcast");
+
+  if (!modal) return;
+
+  const openModal = async () => {
+    modal.classList.remove("hidden");
+    await fetchCellBroadcastPayload();
+  };
+
+  const closeModal = () => {
+    modal.classList.add("hidden");
+    stopEmergencySiren();
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+  };
+
+  if (btnOpen) btnOpen.addEventListener("click", openModal);
+  if (btnClose) btnClose.addEventListener("click", closeModal);
+
+  // Siren toggle button
+  const btnSiren = document.getElementById("btn-toggle-siren");
+  if (btnSiren) {
+    btnSiren.addEventListener("click", () => {
+      if (isSirenSounding) {
+        stopEmergencySiren();
+      } else {
+        startEmergencySiren();
+      }
+    });
+  }
+
+  // Voice language tabs
+  const langTabs = document.querySelectorAll("#voice-lang-tabs .voice-tab");
+  langTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      langTabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      activeBroadcastLang = tab.dataset.lang || "en";
+      updateVoiceScriptPreview();
+    });
+  });
+
+  // Voice Speak button
+  const btnSpeak = document.getElementById("btn-speak-voice");
+  if (btnSpeak) {
+    btnSpeak.addEventListener("click", () => {
+      const scriptBox = document.getElementById("voice-script-text");
+      const text = scriptBox ? scriptBox.textContent.trim() : "";
+      const voiceCodes = { en: "en-IN", hi: "hi-IN", bn: "bn-IN", or: "en-IN" };
+      if (text) {
+        speakVoiceBroadcast(text, voiceCodes[activeBroadcastLang] || "en-IN");
+      }
+    });
+  }
+
+  // Voice Stop button
+  const btnStopVoice = document.getElementById("btn-stop-voice");
+  if (btnStopVoice) {
+    btnStopVoice.addEventListener("click", () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    });
+  }
+
+  // Dispatch to BTS Towers button
+  const btnDispatch = document.getElementById("btn-dispatch-towers");
+  if (btnDispatch) {
+    btnDispatch.addEventListener("click", () => {
+      simulateBtsTransmission();
+    });
+  }
+
+  // Copy CAP XML button
+  const btnCopyCap = document.getElementById("btn-copy-cap");
+  if (btnCopyCap) {
+    btnCopyCap.addEventListener("click", () => {
+      const pre = document.getElementById("cb-cap-xml-preview");
+      if (pre && navigator.clipboard) {
+        navigator.clipboard.writeText(pre.textContent);
+        btnCopyCap.textContent = "Copied!";
+        setTimeout(() => { btnCopyCap.innerHTML = '<i data-lucide="copy"></i> Copy XML'; refreshIcons(); }, 1800);
+      }
+    });
+  }
+}
+
+async function fetchCellBroadcastPayload() {
+  try {
+    const lat = (state.activeDownscale && state.activeDownscale.target_lat) || 21.62;
+    const lon = (state.activeDownscale && state.activeDownscale.target_lon) || 87.51;
+    const hazard = state.currentHazard || "amphan_2020";
+    const res = await fetch(`/api/alert/cell-broadcast?lat=${lat}&lon=${lon}&hazard_id=${hazard}&lang=${activeBroadcastLang}`);
+    if (res.ok) {
+      cellBroadcastData = await res.json();
+      updateCellBroadcastUI(cellBroadcastData);
+    }
+  } catch (err) {
+    console.warn("Could not fetch cell broadcast payload:", err);
+  }
+}
+
+function updateCellBroadcastUI(data) {
+  if (!data) return;
+  const elTowers = document.getElementById("cb-towers-count");
+  const elPop = document.getElementById("cb-pop-count");
+  const elAck = document.getElementById("cb-ack-pct");
+  const elSec = document.getElementById("cb-target-sec");
+  const elCap = document.getElementById("cb-cap-xml-preview");
+
+  if (elTowers) elTowers.textContent = data.active_bts_towers ? data.active_bts_towers.toLocaleString() : "4,820";
+  if (elPop) elPop.textContent = `${data.population_at_risk_millions}M`;
+  if (elAck) elAck.textContent = `${data.bts_acknowledgment_pct}%`;
+  if (elSec) elSec.textContent = data.target_sector;
+  if (elCap) elCap.textContent = data.cap_xml;
+
+  updateVoiceScriptPreview();
+}
+
+function updateVoiceScriptPreview() {
+  const scriptBox = document.getElementById("voice-script-text");
+  if (!scriptBox) return;
+  if (cellBroadcastData && cellBroadcastData.all_scripts && cellBroadcastData.all_scripts[activeBroadcastLang]) {
+    scriptBox.textContent = cellBroadcastData.all_scripts[activeBroadcastLang].spoken_text;
+  }
+}
+
+function startEmergencySiren() {
+  if (!sirenAudioCtx) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    sirenAudioCtx = new AudioCtx();
+  }
+  if (sirenAudioCtx.state === "suspended") {
+    sirenAudioCtx.resume();
+  }
+
+  sirenGain = sirenAudioCtx.createGain();
+  sirenGain.gain.setValueAtTime(0.18, sirenAudioCtx.currentTime);
+  sirenGain.connect(sirenAudioCtx.destination);
+
+  sirenOsc1 = sirenAudioCtx.createOscillator();
+  sirenOsc1.type = "sine";
+  sirenOsc1.frequency.setValueAtTime(853, sirenAudioCtx.currentTime);
+  sirenOsc1.connect(sirenGain);
+  sirenOsc1.start();
+
+  sirenOsc2 = sirenAudioCtx.createOscillator();
+  sirenOsc2.type = "sine";
+  sirenOsc2.frequency.setValueAtTime(960, sirenAudioCtx.currentTime);
+  sirenOsc2.connect(sirenGain);
+  sirenOsc2.start();
+
+  let high = false;
+  sirenInterval = setInterval(() => {
+    if (!sirenOsc1 || !sirenAudioCtx) return;
+    high = !high;
+    const now = sirenAudioCtx.currentTime;
+    sirenOsc1.frequency.linearRampToValueAtTime(high ? 960 : 853, now + 0.12);
+    sirenOsc2.frequency.linearRampToValueAtTime(high ? 1040 : 960, now + 0.12);
+  }, 250);
+
+  isSirenSounding = true;
+  updateSirenUI(true);
+}
+
+function stopEmergencySiren() {
+  if (sirenInterval) {
+    clearInterval(sirenInterval);
+    sirenInterval = null;
+  }
+  if (sirenOsc1) {
+    try { sirenOsc1.stop(); sirenOsc1.disconnect(); } catch (e) {}
+    sirenOsc1 = null;
+  }
+  if (sirenOsc2) {
+    try { sirenOsc2.stop(); sirenOsc2.disconnect(); } catch (e) {}
+    sirenOsc2 = null;
+  }
+  if (sirenGain) {
+    try { sirenGain.disconnect(); } catch (e) {}
+    sirenGain = null;
+  }
+  isSirenSounding = false;
+  updateSirenUI(false);
+}
+
+function updateSirenUI(active) {
+  const btn = document.getElementById("btn-toggle-siren");
+  const beacon = document.getElementById("siren-beacon");
+  const waveform = document.getElementById("siren-waveform");
+
+  if (btn) {
+    btn.classList.toggle("sounding", active);
+    btn.innerHTML = active ? '<i data-lucide="square"></i> Silence Siren Alarm' : '<i data-lucide="volume-2"></i> Sound Emergency Siren';
+    refreshIcons();
+  }
+  if (beacon) beacon.classList.toggle("active", active);
+  if (waveform) waveform.classList.toggle("active", active);
+}
+
+function speakVoiceBroadcast(text, langCode) {
+  if (!("speechSynthesis" in window)) {
+    alert("Speech synthesis is not supported in this browser.");
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = langCode || "en-IN";
+  utterance.rate = 0.95;
+  utterance.pitch = 1.0;
+  window.speechSynthesis.speak(utterance);
+}
+
+function simulateBtsTransmission() {
+  const progressWrap = document.getElementById("cb-progress-wrap");
+  const progressFill = document.getElementById("cb-progress-fill");
+  const resultBanner = document.getElementById("cb-result-banner");
+  const btn = document.getElementById("btn-dispatch-towers");
+
+  if (progressWrap) progressWrap.style.display = "block";
+  if (resultBanner) resultBanner.style.display = "none";
+  if (btn) btn.disabled = true;
+
+  if (progressFill) {
+    progressFill.style.width = "0%";
+    setTimeout(() => { progressFill.style.width = "100%"; }, 50);
+  }
+
+  setTimeout(() => {
+    if (progressWrap) progressWrap.style.display = "none";
+    if (resultBanner) resultBanner.style.display = "flex";
+    if (btn) btn.disabled = false;
+    refreshIcons();
+  }, 1400);
+}
+
+// ==============================================================
+// PHASE 4: DIFFUSION DENOISING SCRUBBER & GNN ATTENTION
+// ==============================================================
+let diffusionTrajectoryData = null;
+let currentDiffIndex = 5;
+let isDiffPlaying = false;
+let diffPlayInterval = null;
+
+async function initDiffusionScrubber() {
+  const card = document.getElementById("diffusion-scrubber-card");
+  if (!card) return;
+
+  try {
+    const res = await fetch("/api/downscale/diffusion-trajectory");
+    if (res.ok) {
+      diffusionTrajectoryData = await res.json();
+    }
+  } catch (e) {
+    console.warn("Could not load diffusion trajectory:", e);
+  }
+
+  const slider = document.getElementById("slider-diff-t");
+  if (slider) {
+    slider.addEventListener("input", (e) => {
+      const val = parseInt(e.target.value, 10);
+      setDiffusionStep(val);
+    });
+  }
+
+  const pills = document.querySelectorAll(".diff-step-pills .diff-pill");
+  pills.forEach((pill, idx) => {
+    pill.addEventListener("click", () => {
+      setDiffusionStep(idx);
+    });
+  });
+
+  const playBtn = document.getElementById("btn-diff-play");
+  if (playBtn) {
+    playBtn.addEventListener("click", toggleDiffusionPlay);
+  }
+}
+
+function setDiffusionStep(frameIdx) {
+  if (!diffusionTrajectoryData || !diffusionTrajectoryData.frames) return;
+  const frame = diffusionTrajectoryData.frames[frameIdx];
+  if (!frame) return;
+
+  currentDiffIndex = frameIdx;
+
+  const slider = document.getElementById("slider-diff-t");
+  if (slider) slider.value = frameIdx;
+
+  const pills = document.querySelectorAll(".diff-step-pills .diff-pill");
+  pills.forEach((p, i) => p.classList.toggle("active", i === frameIdx));
+
+  const badge = document.getElementById("diff-step-badge");
+  const sigma = document.getElementById("diff-m-sigma");
+  const peak = document.getElementById("diff-m-peak");
+  const slope = document.getElementById("diff-m-slope");
+  const fidelity = document.getElementById("diff-m-fidelity");
+  const desc = document.getElementById("diff-m-desc");
+
+  if (badge) badge.textContent = frame.label;
+  if (sigma) sigma.textContent = `${frame.noise_level_sigma.toFixed(3)} (${frame.noise_level_sigma === 0 ? "Clean" : "Residual"})`;
+  if (peak) peak.textContent = `${frame.peak_wind_kmh.toFixed(1)} km/h`;
+  if (slope) slope.textContent = `k^${frame.kolmogorov_slope.toFixed(2)}`;
+  if (fidelity) fidelity.textContent = `${frame.kolmogorov_fidelity_pct.toFixed(1)}%`;
+  if (desc) desc.textContent = frame.physical_description;
+
+  renderDiffusionCanvas(frame);
+}
+
+function getWindColor(spd) {
+  if (typeof COLORMAPS !== "undefined" && COLORMAPS.wind) {
+    const rgba = COLORMAPS.wind(spd, 0, 135);
+    return `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3] / 255})`;
+  }
+  if (spd < 35) return "#00d4e5";
+  if (spd < 65) return "#38bdf8";
+  if (spd < 95) return "#eab308";
+  if (spd < 135) return "#f97316";
+  return "#ef4444";
+}
+
+function renderDiffusionCanvas(frame) {
+  const canvas = document.getElementById("canvas-corrdiff");
+  if (!canvas || !frame.grid_2d) return;
+  const ctx = canvas.getContext("2d");
+  const size = frame.grid_2d.length;
+  const cellW = canvas.width / size;
+  const cellH = canvas.height / size;
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const val = frame.grid_2d[r][c];
+      ctx.fillStyle = getWindColor(val);
+      ctx.fillRect(c * cellW, r * cellH, cellW + 1, cellH + 1);
+    }
+  }
+}
+
+function toggleDiffusionPlay() {
+  isDiffPlaying = !isDiffPlaying;
+  const btn = document.getElementById("btn-diff-play");
+  if (btn) {
+    btn.innerHTML = isDiffPlaying ? '<i data-lucide="pause"></i> Pause' : '<i data-lucide="play"></i> Play Denoising';
+    refreshIcons();
+  }
+
+  if (isDiffPlaying) {
+    if (diffPlayInterval) clearInterval(diffPlayInterval);
+    diffPlayInterval = setInterval(() => {
+      const nextIdx = (currentDiffIndex + 1) % 6;
+      setDiffusionStep(nextIdx);
+    }, 950);
+  } else {
+    if (diffPlayInterval) {
+      clearInterval(diffPlayInterval);
+      diffPlayInterval = null;
+    }
+  }
+}
+
+// ---------------- GNN Attention Inspector Drawer ----------------
+async function initGnnAttentionInspector() {
+  const inspector = document.getElementById("gnn-attention-inspector");
+  const btnClose = document.getElementById("btn-close-gnn-insp");
+  if (!inspector) return;
+
+  if (btnClose) {
+    btnClose.addEventListener("click", () => {
+      inspector.style.display = "none";
+    });
+  }
+
+  try {
+    const res = await fetch("/api/gnn-mesh-state?step_index=5");
+    if (res.ok) {
+      const data = await res.json();
+      renderGnnAttentionEdges(data);
+    }
+  } catch (e) {
+    console.warn("Could not load GNN attention state:", e);
+  }
+}
+
+function renderGnnAttentionEdges(data) {
+  const listEl = document.getElementById("gnn-edges-list");
+  if (!listEl || !data || !data.explainability_overlay) return;
+
+  const topScores = data.explainability_overlay.top_weighted_attention_scores || [];
+  listEl.innerHTML = topScores.slice(0, 5).map(e => `
+    <div class="gnn-edge-item" title="${e.meteorological_driver}">
+      <span><strong>Edge #${e.rank}:</strong> Node ${e.source_node} &rarr; ${e.target_node}</span>
+      <strong style="color: #00d4e5;">&alpha; = ${e.attention_weight.toFixed(3)}</strong>
+    </div>
+  `).join("");
+
+  const descEl = document.getElementById("gnn-steering-desc");
+  if (descEl && data.explainability_overlay.dynamical_steering_summary) {
+    descEl.textContent = data.explainability_overlay.dynamical_steering_summary;
+  }
+}
+
+function toggleGnnAttentionInspector(show) {
+  const inspector = document.getElementById("gnn-attention-inspector");
+  if (inspector) {
+    inspector.style.display = show ? "flex" : "none";
+    if (show) initGnnAttentionInspector();
+  }
+}
+window.toggleGnnAttentionInspector = toggleGnnAttentionInspector;
+
 // ---------------- Event Listeners ----------------
 function initEventListeners() {
   initGuidedTour();
   initScientificProofModal();
   initAtmosphericSoundingModal();
   initClimateSandboxModal();
+  initCellBroadcastModal();
+  initDiffusionScrubber();
+  initGnnAttentionInspector();
 
   // Basemap Selectors
   const selectBmOv = document.getElementById("select-basemap-ov");
@@ -7371,6 +8138,9 @@ function initEventListeners() {
         if (status) status.textContent = state.showMeshLayer ? "ON" : "OFF";
       }
       renderSphericalMesh();
+      if (typeof toggleGnnAttentionInspector === "function") {
+        toggleGnnAttentionInspector(state.showMeshLayer);
+      }
     });
   }
 

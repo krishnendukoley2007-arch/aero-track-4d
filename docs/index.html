@@ -99,6 +99,9 @@
         <button id="btn-climate-sandbox" class="btn-action btn-climate" title="Interactive Climate Perturbation Sandbox & Rapid Intensification Engine">
           <span class="icon"><i data-lucide="flame"></i></span> Climate Sandbox
         </button>
+        <button id="btn-cell-broadcast" class="btn-action btn-siren" title="Emergency Siren & Spoken Voice Cell-Broadcast Dispatcher (NDMA SACHET / CAP v1.2)">
+          <span class="icon"><i data-lucide="radio"></i></span> Cell Broadcast
+        </button>
         <button id="btn-4d-sounding" class="btn-action btn-sounding" title="Open 4D Atmospheric Vertical Level Profiler (1000-200 hPa)">
           <span class="icon"><i data-lucide="layers"></i></span> 4D Sounding
         </button>
@@ -230,6 +233,75 @@
           <canvas id="canvas-pressure-overlay" class="pressure-overlay-canvas"></canvas>
           <canvas id="canvas-wind-streamlines" class="wind-streamline-canvas"></canvas>
           <canvas id="canvas-dwr-sweep" class="dwr-sweep-canvas"></canvas>
+          <canvas id="canvas-insat3dr-satellite" class="insat3dr-satellite-canvas"></canvas>
+
+          <!-- Floating INSAT-3DR Dvorak Cloud-Top HUD Badge -->
+          <div id="insat3dr-dvorak-badge" class="insat3dr-dvorak-badge" style="display: none;">
+            <div class="insat-badge-header">
+              <span class="pulse-dot magenta"></span>
+              <span class="insat-title font-mono">INSAT-3DR TIR-1 (10.8 µm)</span>
+              <span class="insat-tnum-pill font-mono" id="insat-tnum-val">ADT: T6.5</span>
+            </div>
+            <div class="insat-badge-metrics font-mono text-xs">
+              <div class="insat-m-row">
+                <span>Eye Temp (T<sub>eye</sub>):</span> <strong class="text-amber" id="insat-eye-temp">+14.2°C</strong>
+              </div>
+              <div class="insat-m-row">
+                <span>CDO Cold Ring:</span> <strong style="color: #c084fc;" id="insat-cdo-temp">-82.4°C</strong>
+              </div>
+              <div class="insat-m-row">
+                <span>Eye-Surround &Delta;T:</span> <strong class="text-cyan" id="insat-delta-t">96.6°C Anomaly</strong>
+              </div>
+              <div class="insat-m-row">
+                <span>Derived V<sub>max</sub> / P<sub>min</sub>:</span> <strong class="text-emerald" id="insat-derived-wind">269 km/h &bull; 918 hPa</strong>
+              </div>
+              <div class="insat-m-row">
+                <span>IMD BD Enhancement:</span> <span class="text-muted">Dvorak EIR Standard</span>
+              </div>
+            </div>
+            <div class="insat-bd-scale">
+              <div class="bd-gradient-bar"></div>
+              <div class="bd-scale-labels font-mono text-xs">
+                <span>-30°C</span>
+                <span>-54°C</span>
+                <span>-70°C</span>
+                <span>&lt;-80°C</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- GNN Edge Attention & Dynamical Steering Inspector -->
+          <div id="gnn-attention-inspector" class="gnn-attention-inspector font-mono" style="display: none;">
+            <div class="gnn-insp-header">
+              <div class="gnn-insp-title"><i data-lucide="network"></i> GNN Edge Attention &amp; Steering Inspector</div>
+              <button class="btn-close-gnn-insp" id="btn-close-gnn-insp">&times;</button>
+            </div>
+            <div class="gnn-insp-body">
+              <div class="gnn-stat-row">
+                <span>Mesh Vertices:</span> <strong class="text-cyan">269 Geodesic Vertices (Level-4 Icosahedron)</strong>
+              </div>
+              <div class="gnn-stat-row">
+                <span>Directed Edges:</span> <strong class="text-emerald">801 Spherical Geodesic Edges</strong>
+              </div>
+              <div class="gnn-stat-row">
+                <span>Mechanism:</span> <strong class="text-amber">Multi-Head Graph Attention (GAT)</strong>
+              </div>
+              <div class="gnn-edges-list-title">Top Attention Edges (&alpha;<sub>ij</sub>) Driving Advection:</div>
+              <div class="gnn-edges-scroll" id="gnn-edges-list">
+                <!-- Dynamically populated from /api/gnn-mesh-state -->
+              </div>
+              <div class="gnn-attr-title">Feature Attribution Breakdown:</div>
+              <div class="gnn-feat-bars">
+                <div class="feat-bar-row"><span>V-Wind (Meridional):</span><div class="bar-track"><div class="bar-fill" style="width: 31.2%; background:#00d4e5;"></div></div><span>31.2%</span></div>
+                <div class="feat-bar-row"><span>U-Wind (Zonal):</span><div class="bar-track"><div class="bar-fill" style="width: 28.4%; background:#38bdf8;"></div></div><span>28.4%</span></div>
+                <div class="feat-bar-row"><span>MSLP (Barometric):</span><div class="bar-track"><div class="bar-fill" style="width: 26.1%; background:#eab308;"></div></div><span>26.1%</span></div>
+                <div class="feat-bar-row"><span>SST / T2m (Thermal):</span><div class="bar-track"><div class="bar-fill" style="width: 14.3%; background:#ef4444;"></div></div><span>14.3%</span></div>
+              </div>
+              <div class="gnn-steering-box" id="gnn-steering-desc">
+                Multi-head GAT attention weights isolate the northeastern eyewall quadrant as the dominant steering driver directing translation towards the Bengal coast.
+              </div>
+            </div>
+          </div>
 
           <!-- Zoom Earth Style Floating Radar Legend & Interactive Probe -->
           <div id="radar-colormap-legend" class="radar-colormap-legend" style="display: none;">
@@ -305,6 +377,10 @@
                 <button class="dock-dwr-btn" data-dwr="DWR_MACHILIPATNAM" title="IMD Machilipatnam Radar (S-Band, 250km)">Machili</button>
                 <button class="dock-dwr-btn" data-dwr="DWR_CHENNAI" title="IMD Chennai Radar (S-Band, 250km)">Chennai</button>
               </div>
+              <button class="dock-pill" id="dock-toggle-insat3dr" title="Toggle INSAT-3DR Geostationary Thermal IR (10.8 µm) & Dvorak Cloud-Top BD Enhancement">
+                <span><i data-lucide="satellite"></i> INSAT-3DR Thermal IR</span>
+                <span class="dock-pill-status">OFF</span>
+              </button>
               <button class="dock-pill" id="dock-toggle-cone" title="Toggle 3-10 day cone of uncertainty">
                 <span><i data-lucide="navigation"></i> Track &amp; Cone</span>
                 <span class="dock-pill-status">OFF</span>
@@ -786,6 +862,59 @@
               <span id="stat-cd-label">CorrDiff Resolved Peak:</span>
               <strong id="stat-corrdiff-wind" class="font-mono text-white">102.1 km/h</strong>
               <span class="text-muted">(Coarse NWP: <span id="stat-coarse-wind" class="font-mono">63.4 km/h</span>)</span>
+            </div>
+          <!-- CorrDiff Generative Reverse Diffusion Scrubber Card -->
+          <div class="diffusion-scrubber-card font-mono" id="diffusion-scrubber-card">
+            <div class="diff-scrubber-header">
+              <div class="diff-title-group">
+                <span><i data-lucide="sparkles"></i> CorrDiff Reverse Diffusion Denoising Scrubber</span>
+                <span class="diff-badge font-mono" id="diff-step-badge">t = 0 (Converged)</span>
+              </div>
+              <div class="diff-actions">
+                <button class="diff-play-btn" id="btn-diff-play" title="Auto-play reverse diffusion trajectory from noise to clean">
+                  <i data-lucide="play" id="icon-diff-play"></i> Play Denoising
+                </button>
+              </div>
+            </div>
+
+            <div class="diff-scrubber-body">
+              <div class="diff-slider-row">
+                <span class="diff-mark-tag">t=10 (Noise)</span>
+                <input type="range" id="slider-diff-t" min="0" max="5" step="1" value="5" class="diff-range-slider" />
+                <span class="diff-mark-tag">t=0 (Clean)</span>
+              </div>
+              <div class="diff-step-pills">
+                <button class="diff-pill" data-step="10">t=10</button>
+                <button class="diff-pill" data-step="8">t=8</button>
+                <button class="diff-pill" data-step="6">t=6</button>
+                <button class="diff-pill" data-step="4">t=4</button>
+                <button class="diff-pill" data-step="2">t=2</button>
+                <button class="diff-pill active" data-step="0">t=0</button>
+              </div>
+
+              <!-- Live Intermediate Metrics HUD -->
+              <div class="diff-metrics-hud">
+                <div class="diff-m-box">
+                  <span class="diff-m-lbl">Noise Level &sigma;<sub>t</sub>:</span>
+                  <strong class="diff-m-val text-white" id="diff-m-sigma">0.000 (Clean)</strong>
+                </div>
+                <div class="diff-m-box">
+                  <span class="diff-m-lbl">Resolved Peak:</span>
+                  <strong class="diff-m-val text-cyan" id="diff-m-peak">102.1 km/h</strong>
+                </div>
+                <div class="diff-m-box">
+                  <span class="diff-m-lbl">Kolmogorov Slope:</span>
+                  <strong class="diff-m-val text-amber" id="diff-m-slope">k^-1.67 (-5/3 Target)</strong>
+                </div>
+                <div class="diff-m-box">
+                  <span class="diff-m-lbl">Turbulence Fidelity:</span>
+                  <strong class="diff-m-val text-emerald" id="diff-m-fidelity">99.8%</strong>
+                </div>
+              </div>
+
+              <div class="diff-desc-box" id="diff-m-desc">
+                Score-based reverse diffusion complete. Authentic -5/3 Kolmogorov turbulence spectrum and true 102.1 km/h peak restored.
+              </div>
             </div>
           </div>
 
@@ -1927,6 +2056,144 @@
           MoES / NCMRWF Operational Sandbox &bull; Verified against NOAA IBTrACS &bull; 100% Offline Physical Execution
         </div>
         <button class="btn-action btn-close-footer" id="btn-close-climate-footer">Close Sandbox</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Siren & Spoken Voice Cell Broadcast Dispatcher Modal -->
+  <div class="modal-overlay hidden" id="modal-cell-broadcast">
+    <div class="modal-dialog broadcast-dialog">
+      <div class="broadcast-header">
+        <div class="broadcast-title-wrap">
+          <span class="broadcast-tag font-mono">NDMA SACHET GATEWAY &bull; 3GPP TS 23.041 CELL BROADCAST SERVICE</span>
+          <h2 class="broadcast-title"><i data-lucide="radio"></i> Emergency Siren &amp; Spoken Voice Cell Broadcast Dispatcher</h2>
+          <div class="broadcast-sub-info font-mono">
+            Direct Telecom BTS Tower Injection &bull; Sector D-4 (Bengal/Odisha Littoral) &bull; Zero Delay Push
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btn-close-cell-broadcast">&times;</button>
+      </div>
+
+      <div class="broadcast-body">
+        <!-- Top Status Banner -->
+        <div class="broadcast-status-card">
+          <div class="bts-metric">
+            <span class="bts-num font-mono text-cyan" id="cb-towers-count">4,820</span>
+            <span class="bts-lbl">Target BTS Towers</span>
+          </div>
+          <div class="bts-divider"></div>
+          <div class="bts-metric">
+            <span class="bts-num font-mono text-amber" id="cb-pop-count">4.28M</span>
+            <span class="bts-lbl">Population in Envelope</span>
+          </div>
+          <div class="bts-divider"></div>
+          <div class="bts-metric">
+            <span class="bts-num font-mono text-emerald" id="cb-ack-pct">98.6%</span>
+            <span class="bts-lbl">BTS Handshake Rate</span>
+          </div>
+          <div class="bts-divider"></div>
+          <div class="bts-metric">
+            <span class="bts-num font-mono text-rose" id="cb-latency-val">340ms</span>
+            <span class="bts-lbl">Propagation Latency</span>
+          </div>
+        </div>
+
+        <div class="broadcast-columns-grid">
+          <!-- Left Column: Siren & Voice Speech Engine -->
+          <div class="broadcast-card audio-dispatch-card">
+            <div class="card-headline font-mono">
+              <span><i data-lucide="volume-2"></i> Acoustic Alarm &amp; Voice Dispatch</span>
+              <span class="status-indicator-dot green"></span>
+            </div>
+
+            <!-- Siren Synthesizer -->
+            <div class="siren-synthesizer-box">
+              <div class="siren-visual-header">
+                <div class="siren-beacon-icon" id="siren-beacon">
+                  <i data-lucide="bell-ring"></i>
+                </div>
+                <div class="siren-meta">
+                  <div class="siren-title">Civil Defence / EAS Emergency Siren</div>
+                  <div class="siren-specs font-mono text-xs text-muted">853 Hz + 960 Hz Dual-Tone FSK Warble &bull; Web Audio API</div>
+                </div>
+              </div>
+              <div class="siren-waveform-display" id="siren-waveform">
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+              </div>
+              <div class="siren-controls-row">
+                <button class="btn-siren-toggle" id="btn-toggle-siren">
+                  <i data-lucide="volume-2" id="icon-siren-sound"></i> Sound Emergency Siren
+                </button>
+              </div>
+            </div>
+
+            <!-- Spoken Voice Dispatcher (Web Speech API) -->
+            <div class="voice-dispatcher-box">
+              <div class="voice-header-row">
+                <span class="font-mono text-xs font-bold text-muted">MULTILINGUAL SPEECH SYNTHESIS</span>
+                <div class="voice-lang-tabs font-mono" id="voice-lang-tabs">
+                  <button class="voice-tab active" data-lang="en">EN</button>
+                  <button class="voice-tab" data-lang="hi">HI</button>
+                  <button class="voice-tab" data-lang="bn">BN</button>
+                  <button class="voice-tab" data-lang="or">OR</button>
+                </div>
+              </div>
+
+              <div class="voice-script-box font-mono" id="voice-script-text">
+                Emergency weather broadcast from National Disaster Response Force and NCMRWF. Extreme cyclonic eyewall impact imminent within forty-eight hours. Immediate evacuation order in effect for all low-lying coastal sectors. Move to certified cyclone relief shelters now.
+              </div>
+
+              <div class="voice-controls-row">
+                <button class="btn-voice-speak" id="btn-speak-voice">
+                  <i data-lucide="mic"></i> Speak Voice Broadcast
+                </button>
+                <button class="btn-voice-stop" id="btn-stop-voice" title="Stop speech synthesis">
+                  <i data-lucide="square"></i> Stop
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Telecom Cell Broadcast & CAP Payload -->
+          <div class="broadcast-card telecom-dispatch-card">
+            <div class="card-headline font-mono">
+              <span><i data-lucide="send"></i> Cellular BTS Transmission Gateway</span>
+              <span class="badge-sachet font-mono">NDMA SACHET</span>
+            </div>
+
+            <div class="telecom-target-info font-mono text-xs">
+              <div class="t-row"><span>Target Sector:</span> <strong class="text-white" id="cb-target-sec">Bay of Bengal Coastal Sector D-4</strong></div>
+              <div class="t-row"><span>Active Districts:</span> <strong class="text-cyan">Kendrapara, Jagatsinghpur, Bhadrak, Balasore, East Midnapore</strong></div>
+              <div class="t-row"><span>Telecom Carriers:</span> <strong class="text-emerald">Airtel, Jio 5G, BSNL, Vi</strong></div>
+            </div>
+
+            <div class="broadcast-action-box">
+              <button class="btn-dispatch-towers" id="btn-dispatch-towers">
+                <i data-lucide="zap"></i> Dispatch Cell Broadcast to 4,820 Towers
+              </button>
+              <div class="broadcast-progress-bar" id="cb-progress-wrap" style="display: none;">
+                <div class="cb-progress-fill" id="cb-progress-fill"></div>
+              </div>
+              <div class="dispatch-result-banner font-mono text-xs" id="cb-result-banner" style="display: none;">
+                <i data-lucide="check-circle"></i> Cell Broadcast Transmitted to 4,820 Towers &bull; 98.6% Handshake Confirmed
+              </div>
+            </div>
+
+            <!-- CAP v1.2 XML / JSON Payload Viewer -->
+            <div class="cap-payload-viewer">
+              <div class="cap-viewer-header font-mono">
+                <span>OASIS CAP v1.2 Standard Payload</span>
+                <button class="btn-copy-cap" id="btn-copy-cap" title="Copy CAP payload to clipboard">
+                  <i data-lucide="copy"></i> Copy XML
+                </button>
+              </div>
+              <pre class="cap-pre font-mono" id="cb-cap-xml-preview">&lt;!-- Loading OASIS CAP v1.2 XML --&gt;</pre>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

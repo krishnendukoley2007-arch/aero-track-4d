@@ -51,6 +51,9 @@ ENDPOINTS = [
     ("GET", "/api/radar/dwr-metadata", ["station", "reflectivity_scale_dbz"]),
     ("GET", "/api/radar/nowcast-frames?step_index=5", ["status", "frames", "advection_method"]),
     ("GET", "/api/climate/perturbation?delta_sst=1.5&delta_vws=-2.0", ["hazard_name", "perturbed_mpi", "perturbed_ri", "surge"]),
+    ("GET", "/api/satellite/insat3dr-thermal-ir?step_index=5", ["satellite", "dvorak", "enhancement_curve", "radial_cloud_bands"]),
+    ("GET", "/api/alert/cell-broadcast?lat=21.62&lon=87.51&lang=en", ["broadcast_id", "target_sector", "active_bts_towers", "script", "cap_xml"]),
+    ("GET", "/api/downscale/diffusion-trajectory", ["model_architecture", "total_diffusion_timesteps", "frames"]),
 ]
 
 

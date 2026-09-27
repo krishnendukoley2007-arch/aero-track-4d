@@ -1415,6 +1415,41 @@ def api_climate_perturbation(
     return evaluate_perturbation(hazard_id=hazard_id, delta_sst=delta_sst, delta_vws=delta_vws)
 
 
+@app.get("/api/satellite/insat3dr-thermal-ir")
+def api_insat3dr_thermal_ir(hazard_id: str = "amphan_2020", step_index: int = 5):
+    """
+    Returns INSAT-3DR Geostationary Thermal IR (10.8 um) Cloud-Top Brightness Temperature field,
+    IMD BD Enhancement Curve, and Objective Automated Dvorak Technique (ADT) T-number metrics.
+    """
+    from src.insat3dr_satellite import evaluate_insat3dr_dvorak
+    return evaluate_insat3dr_dvorak(hazard_id=hazard_id, step_index=step_index)
+
+
+@app.get("/api/alert/cell-broadcast")
+def api_cell_broadcast(
+    lat: float = Query(21.62),
+    lon: float = Query(87.51),
+    hazard_id: str = Query("amphan_2020"),
+    lang: str = Query("en", description="Language code: en, hi, bn, or")
+):
+    """
+    Simulates cellular cell-broadcast transmission across regional BTS towers
+    with multi-lingual text-to-speech scripts and OASIS CAP v1.2 XML payload.
+    """
+    from src.cell_broadcast import CellBroadcastEngine
+    return CellBroadcastEngine.dispatch_broadcast(lat=lat, lon=lon, hazard_id=hazard_id, lang=lang)
+
+
+@app.get("/api/downscale/diffusion-trajectory")
+def api_diffusion_trajectory():
+    """
+    Returns step-by-step reverse diffusion trajectory (t=10 to t=0)
+    demonstrating the generative restoration of Kolmogorov turbulence.
+    """
+    from src.diffusion_trajectory import DiffusionTrajectoryEngine
+    return DiffusionTrajectoryEngine.get_full_trajectory()
+
+
 DASHBOARD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard")
 if os.path.exists(DASHBOARD_DIR):
     app.mount("/static", StaticFiles(directory=DASHBOARD_DIR), name="static")
