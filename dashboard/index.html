@@ -227,6 +227,44 @@
           <canvas id="canvas-wind-streamlines" class="wind-streamline-canvas"></canvas>
           <canvas id="canvas-dwr-sweep" class="dwr-sweep-canvas"></canvas>
 
+          <!-- Zoom Earth Style Floating Radar Legend & Interactive Probe -->
+          <div id="radar-colormap-legend" class="radar-colormap-legend" style="display: none;">
+            <div class="radar-legend-header font-mono">
+              <span class="legend-title"><i data-lucide="radio"></i> IMD RADAR REFLECTIVITY (Max-Z)</span>
+              <span class="legend-units">dBZ &bull; mm/h</span>
+            </div>
+            <div class="radar-gradient-bar"></div>
+            <div class="radar-gradient-ticks font-mono">
+              <span>10 dBZ<br>0.1mm</span>
+              <span>20 dBZ<br>1.0mm</span>
+              <span>35 dBZ<br>10mm</span>
+              <span>50 dBZ<br>50mm</span>
+              <span>65 dBZ<br>&gt;100mm</span>
+            </div>
+            <div id="radar-probe-readout" class="radar-probe-readout font-mono">
+              <span class="probe-dot"></span>
+              <span id="radar-probe-text">Hover on radar echoes for live probe</span>
+            </div>
+          </div>
+
+          <!-- Zoom Earth Style Doppler Radar AI Nowcast Loop Bar -->
+          <div id="radar-nowcast-bar" class="radar-nowcast-bar" style="display: none;">
+            <button id="btn-radar-nowcast-play" class="btn-nowcast-play" title="Play / Pause Radar Nowcast Animation">
+              <i data-lucide="play" id="icon-nowcast-play"></i>
+            </button>
+            <div class="nowcast-frames-track font-mono" id="nowcast-frames-track">
+              <button class="nowcast-frame-pill" data-frame="-60">T -60m</button>
+              <button class="nowcast-frame-pill" data-frame="-30">T -30m</button>
+              <button class="nowcast-frame-pill active" data-frame="0">LIVE</button>
+              <button class="nowcast-frame-pill" data-frame="30">+30m AI</button>
+              <button class="nowcast-frame-pill" data-frame="60">+60m AI</button>
+            </div>
+            <div class="nowcast-meta-tag font-mono">
+              <span class="nowcast-pulse-indicator"></span>
+              <span id="nowcast-status-label">ADVECTION NOWCAST</span>
+            </div>
+          </div>
+
           <!-- Zoom Earth Floating Overlays Dock -->
           <div id="zoom-overlay-dock" class="zoom-overlay-dock">
             <div class="dock-header">
@@ -251,10 +289,17 @@
                 <span><i data-lucide="radio"></i> DWR Max-Z Sweep</span>
                 <span class="dock-pill-status">OFF</span>
               </button>
+              <button class="dock-pill" id="dock-toggle-dwr-umbrella" title="Toggle full coastal radar coverage shield (all 6 IMD DWR station umbrellas)">
+                <span><i data-lucide="shield"></i> Coverage Umbrellas</span>
+                <span class="dock-pill-status">OFF</span>
+              </button>
               <div class="dock-dwr-station-row" id="dwr-station-selector" style="display: none;">
                 <button class="dock-dwr-btn active" data-dwr="DWR_KOLKATA" title="IMD Kolkata Radar (S-Band, 250km)">Kolkata</button>
                 <button class="dock-dwr-btn" data-dwr="DWR_PARADIP" title="IMD Paradip Radar (C-Band, 250km)">Paradip</button>
+                <button class="dock-dwr-btn" data-dwr="DWR_GOPALPUR" title="IMD Gopalpur Radar (S-Band, 250km)">Gopalpur</button>
                 <button class="dock-dwr-btn" data-dwr="DWR_VISAKHAPATNAM" title="IMD Vizag Radar (S-Band, 250km)">Vizag</button>
+                <button class="dock-dwr-btn" data-dwr="DWR_MACHILIPATNAM" title="IMD Machilipatnam Radar (S-Band, 250km)">Machili</button>
+                <button class="dock-dwr-btn" data-dwr="DWR_CHENNAI" title="IMD Chennai Radar (S-Band, 250km)">Chennai</button>
               </div>
               <button class="dock-pill" id="dock-toggle-cone" title="Toggle 3-10 day cone of uncertainty">
                 <span><i data-lucide="navigation"></i> Track &amp; Cone</span>

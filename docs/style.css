@@ -6165,3 +6165,190 @@ input:focus-visible,
   box-shadow: 0 0 8px rgba(0, 212, 229, 0.3);
 }
 
+/* ============================================================
+   ZOOM EARTH STYLE RADAR COLORMAP LEGEND & POINT PROBE
+   ============================================================ */
+.radar-colormap-legend {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(9, 14, 23, 0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 212, 229, 0.4);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  z-index: 480;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.75), 0 0 15px rgba(0, 212, 229, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 260px;
+  pointer-events: auto;
+}
+
+.radar-legend-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.radar-legend-header .legend-title {
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.radar-gradient-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #00bcd4 0%, #22c55e 20%, #eab308 45%, #f97316 70%, #ef4444 85%, #ec4899 100%);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.radar-gradient-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  color: #cbd5e1;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.radar-probe-readout {
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.probe-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00ffa3;
+  box-shadow: 0 0 6px #00ffa3;
+  display: inline-block;
+  animation: pulseBeacon 1.5s infinite;
+}
+
+/* ============================================================
+   ZOOM EARTH STYLE DOPPLER RADAR AI NOWCAST TIME LOOP BAR
+   ============================================================ */
+.radar-nowcast-bar {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(9, 14, 23, 0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 212, 229, 0.45);
+  border-radius: 30px;
+  padding: 6px 16px;
+  z-index: 480;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 212, 229, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.btn-nowcast-play {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  border: none;
+  color: #070b12;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 0 10px rgba(0, 212, 229, 0.5);
+}
+
+.btn-nowcast-play:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(0, 212, 229, 0.8);
+}
+
+.nowcast-frames-track {
+  display: flex;
+  gap: 6px;
+}
+
+.nowcast-frame-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nowcast-frame-pill:hover {
+  background: rgba(0, 212, 229, 0.15);
+  color: #fff;
+  border-color: rgba(0, 212, 229, 0.4);
+}
+
+.nowcast-frame-pill.active {
+  background: rgba(0, 212, 229, 0.28);
+  color: #00d4e5;
+  border-color: #00d4e5;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(0, 212, 229, 0.4);
+}
+
+.nowcast-meta-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  color: #cbd5e1;
+  letter-spacing: 0.5px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+  padding-left: 10px;
+  white-space: nowrap;
+}
+
+.nowcast-pulse-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: pulseBeacon 1.2s infinite;
+}
+
+@keyframes pulseBeacon {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.6; }
+}
+
+@media (max-width: 900px) {
+  .radar-nowcast-bar {
+    bottom: 80px;
+    flex-wrap: wrap;
+    border-radius: var(--radius-md);
+  }
+  .radar-colormap-legend {
+    bottom: 14px;
+    right: 14px;
+  }
+}
+
