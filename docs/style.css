@@ -56,6 +56,29 @@
   padding: 0;
 }
 
+/* Universal Sleek Dark-Glass Scrollbars (SIH 26078 Technical Console) */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: rgba(6, 10, 18, 0.7);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 229, 0.5);
+  box-shadow: 0 0 8px rgba(0, 212, 229, 0.5);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) rgba(6, 10, 18, 0.7);
+}
+
 body {
   background-color: var(--bg-app);
   color: var(--text-main);
@@ -269,6 +292,20 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
   color: #fff;
 }
 
+.btn-sounding {
+  background: rgba(0, 212, 229, 0.15);
+  border-color: rgba(0, 212, 229, 0.5);
+  color: #00d4e5;
+  font-weight: 700;
+}
+
+.btn-sounding:hover {
+  background: rgba(0, 212, 229, 0.28);
+  border-color: #00d4e5;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(0, 212, 229, 0.4);
+}
+
 /* ---------------- Persistent 5-View Navigation Bar ---------------- */
 .view-nav-bar {
   display: flex;
@@ -435,8 +472,15 @@ h1, h2, h3, .main-title, .summary-headline, .view-title, .panel-title-text h2, .
 /* Primary Stat Card: Dominant Resolved Threat Metric */
 .kpi-box-primary {
   background: linear-gradient(180deg, #131f32 0%, #0c1522 100%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 212, 229, 0.35);
+  box-shadow: 0 0 22px rgba(0, 212, 229, 0.16), inset 0 0 16px rgba(0, 212, 229, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.kpi-box-primary:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 212, 229, 0.65);
+  box-shadow: 0 0 32px rgba(0, 212, 229, 0.32), inset 0 0 24px rgba(0, 212, 229, 0.09);
 }
 
 .kpi-box-primary .kpi-tag {
@@ -5796,5 +5840,328 @@ input:focus-visible,
   height: 13px;
   color: var(--accent-cyan);
   vertical-align: -2px;
+}
+
+/* ============================================================
+   CINEMATIC POLISH: LASER SWIPE DIVIDER
+   ============================================================ */
+.laser-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #00d4e5 50%, transparent 100%);
+  animation: laserSweep 3.5s infinite ease-in-out;
+  margin: 14px 0;
+  width: 100%;
+}
+
+@keyframes laserSweep {
+  0%, 100% {
+    opacity: 0.35;
+    filter: drop-shadow(0 0 3px #00d4e5);
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px #00d4e5) drop-shadow(0 0 20px rgba(0, 212, 229, 0.6));
+  }
+}
+
+/* ============================================================
+   4D SPATIO-TEMPORAL ATMOSPHERIC SOUNDING PROFILER MODAL
+   ============================================================ */
+.sounding-dialog {
+  background: #090e17;
+  border: 1px solid rgba(0, 212, 229, 0.35);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px;
+  max-width: 1020px;
+  width: 95%;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 212, 229, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  backdrop-filter: blur(18px);
+}
+
+.sounding-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 14px;
+}
+
+.sounding-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.sounding-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 3px 0 5px 0;
+}
+
+.sounding-sub-info {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.sounding-sub-info span {
+  color: #f1f5f9;
+  font-weight: 600;
+}
+
+.sounding-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.sounding-kpi-card {
+  background: #0f1724;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sounding-kpi-card:hover {
+  border-color: rgba(0, 212, 229, 0.4);
+  box-shadow: 0 0 16px rgba(0, 212, 229, 0.12);
+}
+
+.skpi-label {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.skpi-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.skpi-desc {
+  font-size: 0.66rem;
+  color: var(--text-dim);
+}
+
+.sounding-main-layout {
+  display: grid;
+  grid-template-columns: 560px 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .sounding-main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sounding-canvas-card,
+.sounding-table-card {
+  background: #0c1420;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sounding-canvas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sounding-legend-pills {
+  display: flex;
+  gap: 12px;
+  font-size: 0.7rem;
+}
+
+.legend-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-pill .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.sounding-canvas-wrap {
+  width: 100%;
+  background: #060a10;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.sounding-canvas-wrap canvas {
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  display: block;
+}
+
+.sounding-table-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+
+.sounding-table-wrap {
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.sounding-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+  text-align: left;
+}
+
+.sounding-table th {
+  background: #09101a;
+  color: #cbd5e1;
+  padding: 6px 8px;
+  position: sticky;
+  top: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sounding-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+  white-space: nowrap;
+}
+
+.sounding-table tr:hover td {
+  background: rgba(0, 212, 229, 0.06);
+}
+
+.sounding-table tr.highlight-warmcore td {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  font-weight: 700;
+}
+
+.sounding-table tr.highlight-llj td {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fde68a;
+  font-weight: 700;
+}
+
+.sounding-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-close-footer {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #cbd5e1;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.btn-close-footer:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ============================================================
+   IMD DOPPLER WEATHER RADAR (DWR) SWEEP LAYER
+   ============================================================ */
+.dwr-sweep-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 450;
+  display: none;
+}
+
+.dwr-sweep-canvas.active {
+  display: block;
+}
+
+.dock-dwr-station-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: var(--radius-sm);
+}
+
+.dock-dwr-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 3px 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.dock-dwr-btn:hover {
+  background: rgba(0, 212, 229, 0.12);
+  color: #fff;
+  border-color: rgba(0, 212, 229, 0.3);
+}
+
+.dock-dwr-btn.active {
+  background: rgba(0, 212, 229, 0.25);
+  border-color: #00d4e5;
+  color: #00d4e5;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(0, 212, 229, 0.3);
 }
 

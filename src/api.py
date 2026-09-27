@@ -1083,6 +1083,81 @@ def api_live_pressure_field():
 
 
 
+@app.get("/api/atmospheric/sounding")
+def api_atmospheric_sounding(
+    lat: float = 21.626,
+    lon: float = 87.508,
+    step_index: int = 5,
+    hazard_id: str = "amphan_2020"
+):
+    """
+    4D Spatio-Temporal Vertical Atmospheric Profiler (1000 hPa to 200 hPa).
+    Calculates geopotential altitude, vertical wind shear, temperature lapse rate,
+    convective available potential energy (CAPE), and warm-core thermal anomaly.
+    """
+    return tracker.generate_atmospheric_sounding(lat=lat, lon=lon, step_index=step_index, hazard_id=hazard_id)
+
+
+@app.get("/api/radar/dwr-metadata")
+def api_radar_dwr_metadata(station: str = "DWR_KOLKATA"):
+    """
+    Returns authentic IMD Doppler Weather Radar (DWR) metadata, Max-Z reflectivity scale,
+    and beam scan geometry for coastal surveillance radars (Kolkata, Paradip, Visakhapatnam).
+    """
+    stations = {
+        "DWR_KOLKATA": {
+            "name": "IMD DWR Kolkata (Subhash Chandra Bose Int. Airport)",
+            "callsign": "VECC-DWR",
+            "lat": 22.654,
+            "lon": 88.446,
+            "frequency_band": "S-Band (2.8 GHz)",
+            "peak_power_kw": 750,
+            "beamwidth_deg": 1.0,
+            "max_range_km": 250,
+            "elevation_slice_deg": 0.5,
+            "products": ["Max-Z Reflectivity", "Radial Velocity", "Spectral Width", "Surface Rain Rate (SRR)"]
+        },
+        "DWR_PARADIP": {
+            "name": "IMD DWR Paradip (Odisha Littoral Radar Station)",
+            "callsign": "VOPB-DWR",
+            "lat": 20.298,
+            "lon": 86.702,
+            "frequency_band": "C-Band (5.6 GHz)",
+            "peak_power_kw": 250,
+            "beamwidth_deg": 1.0,
+            "max_range_km": 250,
+            "elevation_slice_deg": 0.5,
+            "products": ["Max-Z Reflectivity", "Radial Velocity", "Hydrometeor Classification"]
+        },
+        "DWR_VIZAG": {
+            "name": "IMD DWR Visakhapatnam (Kailasagiri Hill)",
+            "callsign": "VOTZ-DWR",
+            "lat": 17.746,
+            "lon": 83.342,
+            "frequency_band": "S-Band (2.8 GHz)",
+            "peak_power_kw": 750,
+            "beamwidth_deg": 1.0,
+            "max_range_km": 250,
+            "elevation_slice_deg": 0.5,
+            "products": ["Max-Z Reflectivity", "Radial Velocity", "Echo Tops"]
+        }
+    }
+    st_data = stations.get(station.upper(), stations["DWR_KOLKATA"])
+    return {
+        "status": "operational",
+        "station": st_data,
+        "available_stations": list(stations.keys()),
+        "reflectivity_scale_dbz": [
+            {"dbz_min": 10, "dbz_max": 20, "label": "Light Mist / Rain", "color": "#00bcd4"},
+            {"dbz_min": 20, "dbz_max": 30, "label": "Moderate Rain", "color": "#22c55e"},
+            {"dbz_min": 30, "dbz_max": 40, "label": "Heavy Convective Rainband", "color": "#eab308"},
+            {"dbz_min": 40, "dbz_max": 50, "label": "Intense Rain / Eyewall Deluge", "color": "#f97316"},
+            {"dbz_min": 50, "dbz_max": 60, "label": "Violent Eyewall Core", "color": "#ef4444"},
+            {"dbz_min": 60, "dbz_max": 75, "label": "Extreme Convective Core / Hail", "color": "#ec4899"}
+        ]
+    }
+
+
 @app.get("/api/credibility/imd-comparison")
 def api_credibility_imd_comparison(event_id: str = Query("amphan_2020", description="Hazard event ID")):
     """

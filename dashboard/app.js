@@ -140,6 +140,8 @@ const state = {
   capXmlData: null,
   agriAdvisoryData: null,
   metpyAuditData: null,
+  showDwrSweepLayer: false,
+  selectedDwrStation: "DWR_KOLKATA",
 };
 
 // ---------------- 3D Earth WebGL Three.js Monitor (Photorealistic NASA Engine) ----------------
@@ -4174,6 +4176,264 @@ const PressureOverlay = {
 };
 window.PressureOverlay = PressureOverlay;
 
+// ---------------- Coastal IMD Doppler Weather Radar (DWR) Max-Z Sweep System ----------------
+const DwrRadarOverlay = {
+  canvas: null,
+  ctx: null,
+  active: false,
+  animId: null,
+  sweepAngle: 0,
+  selectedStation: "DWR_KOLKATA",
+  metadata: null,
+  stations: {
+    DWR_KOLKATA: {
+      name: "IMD Kolkata (Subhas Chandra Bose)",
+      code: "DWR_KOLKATA",
+      lat: 22.5726,
+      lon: 88.3639,
+      band: "S-Band (2.8 GHz)",
+      power: "750 kW",
+      range_km: 250,
+      color: "#00d4e5"
+    },
+    DWR_PARADIP: {
+      name: "IMD Paradip Port",
+      code: "DWR_PARADIP",
+      lat: 20.3165,
+      lon: 86.6115,
+      band: "C-Band (5.6 GHz)",
+      power: "250 kW",
+      range_km: 250,
+      color: "#10b981"
+    },
+    DWR_VISAKHAPATNAM: {
+      name: "IMD Visakhapatnam (Kailasagiri)",
+      code: "DWR_VISAKHAPATNAM",
+      lat: 17.6868,
+      lon: 83.2185,
+      band: "S-Band (2.8 GHz)",
+      power: "750 kW",
+      range_km: 250,
+      color: "#38bdf8"
+    }
+  },
+
+  init() {
+    this.canvas = document.getElementById("canvas-dwr-sweep");
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext("2d");
+    this.resize();
+    window.addEventListener("resize", () => this.resize());
+    if (state.map) {
+      state.map.on("move zoom resize", () => {
+        if (this.active) this.render();
+      });
+    }
+  },
+
+  resize() {
+    if (!this.canvas || !state.map) return;
+    const size = state.map.getSize();
+    this.canvas.width = size.x;
+    this.canvas.height = size.y;
+  },
+
+  async setStation(stId) {
+    if (this.stations[stId]) {
+      this.selectedStation = stId;
+      state.selectedDwrStation = stId;
+      try {
+        const res = await fetch(`/api/radar/dwr-metadata?station=${stId}`);
+        if (res.ok) this.metadata = await res.json();
+      } catch (e) {
+        console.warn("Could not fetch DWR metadata:", e);
+      }
+      if (this.active) this.render();
+    }
+  },
+
+  toggle(enable) {
+    if (!this.canvas) this.init();
+    if (enable === undefined) enable = !this.active;
+    this.active = !!enable;
+    state.showDwrSweepLayer = this.active;
+
+    if (this.canvas) {
+      this.canvas.classList.toggle("active", this.active);
+      this.canvas.style.display = this.active ? "block" : "none";
+    }
+
+    const stSelector = document.getElementById("dwr-station-selector");
+    if (stSelector) stSelector.style.display = this.active ? "flex" : "none";
+
+    const dockBtn = document.getElementById("dock-toggle-dwr-sweep");
+    if (dockBtn) {
+      dockBtn.classList.toggle("active", this.active);
+      const st = dockBtn.querySelector(".dock-pill-status");
+      if (st) st.textContent = this.active ? "ON" : "OFF";
+    }
+
+    if (this.active) {
+      this.resize();
+      this.startLoop();
+    } else {
+      this.stopLoop();
+    }
+  },
+
+  startLoop() {
+    if (this.animId) cancelAnimationFrame(this.animId);
+    const loop = () => {
+      if (!this.active) return;
+      this.sweepAngle = (this.sweepAngle + 2.4) % 360;
+      this.render();
+      this.animId = requestAnimationFrame(loop);
+    };
+    this.animId = requestAnimationFrame(loop);
+  },
+
+  stopLoop() {
+    if (this.animId) {
+      cancelAnimationFrame(this.animId);
+      this.animId = null;
+    }
+    if (this.ctx && this.canvas) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  },
+
+  render() {
+    if (!this.active || !this.ctx || !this.canvas || !state.map) return;
+    const ctx = this.ctx;
+    const map = state.map;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    const st = this.stations[this.selectedStation] || this.stations.DWR_KOLKATA;
+    const centerPoint = map.latLngToContainerPoint([st.lat, st.lon]);
+    const cx = centerPoint.x;
+    const cy = centerPoint.y;
+
+    // Calculate pixel radius for 250km (range)
+    const edgePoint = map.latLngToContainerPoint([st.lat, st.lon + (250 / (111.13 * Math.cos(st.lat * Math.PI / 180)))]);
+    const r250 = Math.abs(edgePoint.x - cx);
+    if (r250 < 10) return;
+
+    ctx.save();
+
+    // Range rings
+    const rings = [50, 100, 150, 200, 250];
+    rings.forEach((rKm) => {
+      const rad = (rKm / 250) * r250;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.strokeStyle = rKm === 250 ? "rgba(0, 212, 229, 0.45)" : "rgba(0, 212, 229, 0.18)";
+      ctx.lineWidth = rKm === 250 ? 1.5 : 1;
+      ctx.stroke();
+
+      ctx.font = "9px 'JetBrains Mono', monospace";
+      ctx.fillStyle = "rgba(0, 212, 229, 0.75)";
+      ctx.fillText(`${rKm}km`, cx + 4, cy - rad + 10);
+    });
+
+    // Azimuth Crosshairs
+    ctx.beginPath();
+    ctx.moveTo(cx - r250, cy); ctx.lineTo(cx + r250, cy);
+    ctx.moveTo(cx, cy - r250); ctx.lineTo(cx, cy + r250);
+    ctx.strokeStyle = "rgba(0, 212, 229, 0.15)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Cyclone rainband echoes
+    const stormLat = (state.activeDownscale && state.activeDownscale.target_lat) || 21.62;
+    const stormLon = (state.activeDownscale && state.activeDownscale.target_lon) || 87.51;
+    const stormPt = map.latLngToContainerPoint([stormLat, stormLon]);
+    const sDist = Math.hypot(stormPt.x - cx, stormPt.y - cy);
+
+    if (sDist < r250 * 1.8) {
+      const bands = [
+        { r: 20, dbz: 62, color: "rgba(126, 0, 35, 0.75)", width: 14 },
+        { r: 40, dbz: 52, color: "rgba(153, 0, 76, 0.65)", width: 18 },
+        { r: 75, dbz: 42, color: "rgba(255, 0, 0, 0.55)", width: 22 },
+        { r: 115, dbz: 32, color: "rgba(255, 126, 0, 0.45)", width: 28 },
+        { r: 165, dbz: 22, color: "rgba(255, 255, 0, 0.35)", width: 34 },
+        { r: 215, dbz: 15, color: "rgba(0, 228, 0, 0.25)", width: 40 },
+      ];
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r250, 0, Math.PI * 2);
+      ctx.clip();
+
+      bands.forEach(b => {
+        const radPixels = (b.r / 250) * r250;
+        ctx.beginPath();
+        ctx.arc(stormPt.x, stormPt.y, radPixels, 0, Math.PI * 1.75);
+        ctx.strokeStyle = b.color;
+        ctx.lineWidth = b.width;
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+
+    // Rotating Radar Beam with Phosphor Persistence Arc (38 deg trailing)
+    const sweepRad = (this.sweepAngle * Math.PI) / 180;
+    const trailAngle = 38;
+    const trailRad = (trailAngle * Math.PI) / 180;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r250, sweepRad - trailRad, sweepRad, false);
+    ctx.closePath();
+
+    const beamGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r250);
+    beamGrad.addColorStop(0, "rgba(0, 255, 163, 0.28)");
+    beamGrad.addColorStop(0.8, "rgba(0, 212, 229, 0.16)");
+    beamGrad.addColorStop(1, "rgba(0, 212, 229, 0.0)");
+    ctx.fillStyle = beamGrad;
+    ctx.fill();
+
+    // Leading sweep line
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(sweepRad) * r250, cy + Math.sin(sweepRad) * r250);
+    ctx.strokeStyle = "#00ffa3";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "#00ffa3";
+    ctx.shadowBlur = 8;
+    ctx.stroke();
+    ctx.restore();
+
+    // Station Mast Icon
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "#00ffa3";
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Tactical Radar HUD Tag
+    ctx.fillStyle = "rgba(10, 14, 20, 0.88)";
+    ctx.strokeStyle = "rgba(0, 212, 229, 0.4)";
+    ctx.lineWidth = 1;
+    ctx.fillRect(16, 16, 290, 50);
+    ctx.strokeRect(16, 16, 290, 50);
+
+    ctx.font = "bold 11px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "#00ffa3";
+    ctx.fillText(`IMD DWR // ${st.code}`, 26, 32);
+
+    ctx.font = "9.5px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText(`${st.name} • ${st.band}`, 26, 46);
+    ctx.fillText(`RANGE: 250km • PRF: 600Hz • PEAK: 62 dBZ`, 26, 59);
+
+    ctx.restore();
+  }
+};
+window.DwrRadarOverlay = DwrRadarOverlay;
+
 // ---------------- Zoom Earth Floating Overlays Dock & Speed Legend Controller ----------------
 function initZoomEarthOverlays() {
   // 1. Collapse / Expand Dock
@@ -4250,6 +4510,24 @@ function initZoomEarthOverlays() {
       }
     });
   }
+
+  // 3b. IMD Doppler Weather Radar (DWR) Max-Z Sweep Toggle & Station Selector
+  const dockBtnDwr = document.getElementById("dock-toggle-dwr-sweep");
+  if (dockBtnDwr) {
+    dockBtnDwr.addEventListener("click", () => {
+      DwrRadarOverlay.toggle();
+    });
+  }
+
+  const dwrStationBtns = document.querySelectorAll(".dock-dwr-btn");
+  dwrStationBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      dwrStationBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const stId = btn.getAttribute("data-dwr");
+      DwrRadarOverlay.setStation(stId);
+    });
+  });
 
   // 4. Track & Cone Toggle
   const dockBtnCone = document.getElementById("dock-toggle-cone");
@@ -6154,10 +6432,320 @@ function initScientificProofModal() {
   });
 }
 
+// ---------------- 4D Atmospheric Vertical Level Profiler (1000-200 hPa) ----------------
+function initAtmosphericSoundingModal() {
+  const modal = document.getElementById("modal-atmospheric-sounding");
+  const btnOpenHeader = document.getElementById("btn-4d-sounding");
+  const btnOpenQuick = document.getElementById("btn-quick-sounding");
+  const btnClose = document.getElementById("btn-close-sounding");
+  const btnCloseFooter = document.getElementById("btn-close-sounding-footer");
+
+  if (!modal) return;
+
+  const openSounding = () => {
+    modal.classList.remove("hidden");
+    refreshIcons();
+    const loc = state.activeDownscale ? { lat: state.activeDownscale.target_lat, lon: state.activeDownscale.target_lon } : { lat: 21.62, lon: 87.51 };
+    loadAtmosphericSounding(loc.lat, loc.lon);
+  };
+
+  if (btnOpenHeader) btnOpenHeader.addEventListener("click", openSounding);
+  if (btnOpenQuick) btnOpenQuick.addEventListener("click", openSounding);
+
+  const closeSounding = () => modal.classList.add("hidden");
+  if (btnClose) btnClose.addEventListener("click", closeSounding);
+  if (btnCloseFooter) btnCloseFooter.addEventListener("click", closeSounding);
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeSounding();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) {
+      closeSounding();
+    }
+  });
+}
+
+async function loadAtmosphericSounding(lat, lon) {
+  if (!lat || !lon) {
+    lat = 21.62;
+    lon = 87.51;
+  }
+  const step = state.currentStep !== undefined ? state.currentStep : 5;
+  const hazard = state.currentHazard || "amphan_2020";
+
+  // Update header info immediately
+  const metaCoords = document.getElementById("snd-target-coords");
+  if (metaCoords) metaCoords.textContent = `${Number(lat).toFixed(2)}°N, ${Number(lon).toFixed(2)}°E`;
+  const metaStep = document.getElementById("snd-target-step");
+  if (metaStep) metaStep.textContent = `${step}`;
+  const metaHazard = document.getElementById("snd-target-hazard");
+  if (metaHazard) metaHazard.textContent = `${hazard.toUpperCase().replace(/_/g, " ")}`;
+
+  try {
+    const res = await fetch(`/api/atmospheric/sounding?lat=${lat}&lon=${lon}&step_index=${step}&hazard_id=${hazard}`);
+    if (!res.ok) throw new Error("Atmospheric sounding API returned HTTP " + res.status);
+    const data = await res.json();
+
+    // Populate KPI cards
+    const vws = data.bulk_vertical_shear_850_200_ms ?? 8.1;
+    const vwsVal = document.getElementById("snd-vws-val");
+    if (vwsVal) vwsVal.textContent = `${Number(vws).toFixed(1)} m/s`;
+    const vwsCat = document.getElementById("snd-vws-cat");
+    if (vwsCat) vwsCat.textContent = data.bulk_vertical_shear_category || "Favorable (< 10 m/s)";
+
+    const warmCore = data.warm_core_anomaly_300hpa_c ?? 6.8;
+    const wcVal = document.getElementById("snd-warmcore-val");
+    if (wcVal) wcVal.textContent = `+${Number(warmCore).toFixed(1)} °C`;
+
+    const cape = data.cape_j_kg ?? 2840;
+    const capeVal = document.getElementById("snd-cape-val");
+    if (capeVal) capeVal.textContent = `${Math.round(cape).toLocaleString()} J/kg`;
+
+    const freez = data.freezing_level_m ?? 4920;
+    const lcl = data.lifting_condensation_level_hpa ?? 942;
+    const levVal = document.getElementById("snd-levels-val");
+    if (levVal) levVal.textContent = `${freez} m • ${lcl} hPa`;
+
+    const safeLevels = (data.levels || []).map(lvl => ({
+      pressure_hpa: lvl.pressure_hpa,
+      altitude_m: lvl.altitude_m,
+      altitude_ft: lvl.altitude_ft || Math.round(lvl.altitude_m * 3.28084),
+      temperature_c: lvl.temperature_c,
+      dewpoint_c: lvl.dewpoint_c,
+      relative_humidity_pct: lvl.relative_humidity_pct,
+      wind_speed_kmh: lvl.wind_speed_kmh,
+      wind_speed_knots: lvl.wind_speed_knots || (lvl.wind_speed_kmh / 1.852),
+      wind_direction_deg: lvl.wind_direction_deg || 260,
+      level_desc: lvl.level_desc || "Isobaric Level"
+    }));
+
+    // Render Canvas Skew-T / Log-P
+    renderSkewTProfile({ levels: safeLevels });
+
+    // Render Table
+    renderSoundingTable(safeLevels);
+  } catch (err) {
+    console.error("Failed to load atmospheric sounding:", err);
+  }
+}
+
+function renderSkewTProfile(data) {
+  const canvas = document.getElementById("canvas-sounding");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  // Background
+  ctx.fillStyle = "#070b12";
+  ctx.fillRect(0, 0, w, h);
+
+  const padLeft = 52;
+  const padRight = 68;
+  const padTop = 24;
+  const padBottom = 32;
+  const gw = w - padLeft - padRight;
+  const gh = h - padTop - padBottom;
+
+  const pMin = 180;
+  const pMax = 1050;
+  const tMin = -70;
+  const tMax = 35;
+
+  const yFromP = (p) => {
+    const logP = Math.log(p);
+    const logMin = Math.log(pMin);
+    const logMax = Math.log(pMax);
+    return padTop + gh * (1 - (logP - logMin) / (logMax - logMin));
+  };
+
+  const xFromT = (t) => {
+    return padLeft + gw * ((t - tMin) / (tMax - tMin));
+  };
+
+  // Draw isobars
+  const isobars = [1000, 925, 850, 700, 500, 400, 300, 250, 200];
+  ctx.font = "9.5px 'JetBrains Mono', monospace";
+  isobars.forEach(p => {
+    const y = yFromP(p);
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(padLeft + gw, y);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = "#64748b";
+    ctx.textAlign = "right";
+    ctx.fillText(`${p}`, padLeft - 6, y + 3);
+  });
+
+  // Draw isotherms (-60, -40, -20, 0, 20°C)
+  const isotherms = [-60, -40, -20, 0, 20];
+  isotherms.forEach(t => {
+    const x = xFromT(t);
+    ctx.beginPath();
+    ctx.moveTo(x, padTop);
+    ctx.lineTo(x, padTop + gh);
+    ctx.strokeStyle = t === 0 ? "rgba(0, 212, 229, 0.45)" : "rgba(255, 255, 255, 0.06)";
+    ctx.setLineDash(t === 0 ? [4, 4] : []);
+    ctx.lineWidth = t === 0 ? 1.5 : 1;
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = t === 0 ? "#00d4e5" : "#64748b";
+    ctx.textAlign = "center";
+    ctx.fillText(`${t}°`, x, padTop + gh + 14);
+  });
+
+  // Axis Labels
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "9px 'JetBrains Mono', monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("hPa", 10, padTop - 8);
+  ctx.textAlign = "center";
+  ctx.fillText("Temperature (°C)", padLeft + gw / 2, h - 6);
+
+  if (!data.levels || !data.levels.length) return;
+
+  // Saturated moisture polygon between Td and T
+  ctx.beginPath();
+  const sorted = [...data.levels].sort((a, b) => b.pressure_hpa - a.pressure_hpa);
+  sorted.forEach((lvl, i) => {
+    const x = xFromT(lvl.dewpoint_c);
+    const y = yFromP(lvl.pressure_hpa);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    const lvl = sorted[i];
+    const x = xFromT(lvl.temperature_c);
+    const y = yFromP(lvl.pressure_hpa);
+    ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = "rgba(0, 212, 229, 0.12)";
+  ctx.fill();
+
+  // Dewpoint Curve Td (Cyan)
+  ctx.beginPath();
+  sorted.forEach((lvl, i) => {
+    const x = xFromT(lvl.dewpoint_c);
+    const y = yFromP(lvl.pressure_hpa);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = "#00d4e5";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Temperature Curve T (Red)
+  ctx.beginPath();
+  sorted.forEach((lvl, i) => {
+    const x = xFromT(lvl.temperature_c);
+    const y = yFromP(lvl.pressure_hpa);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = "#ef4444";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Points & Wind Barbs on Right Margin
+  const barbX = padLeft + gw + 36;
+  ctx.textAlign = "left";
+  ctx.font = "9px 'JetBrains Mono', monospace";
+
+  sorted.forEach(lvl => {
+    const y = yFromP(lvl.pressure_hpa);
+    const xt = xFromT(lvl.temperature_c);
+    const xd = xFromT(lvl.dewpoint_c);
+
+    // Points
+    ctx.beginPath();
+    ctx.arc(xt, y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = "#ef4444";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(xd, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = "#00d4e5";
+    ctx.fill();
+
+    // Wind barb staff
+    const kts = lvl.wind_speed_knots;
+    ctx.beginPath();
+    ctx.moveTo(barbX - 16, y);
+    ctx.lineTo(barbX + 8, y);
+    ctx.strokeStyle = "#f59e0b";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Pennants (50kt) or barbs (10kt)
+    let remKts = kts;
+    let barbPos = barbX + 8;
+    while (remKts >= 50) {
+      ctx.beginPath();
+      ctx.moveTo(barbPos, y);
+      ctx.lineTo(barbPos - 6, y - 8);
+      ctx.lineTo(barbPos - 6, y);
+      ctx.closePath();
+      ctx.fillStyle = "#f59e0b";
+      ctx.fill();
+      remKts -= 50;
+      barbPos -= 7;
+    }
+    while (remKts >= 10) {
+      ctx.beginPath();
+      ctx.moveTo(barbPos, y);
+      ctx.lineTo(barbPos - 4, y - 7);
+      ctx.stroke();
+      remKts -= 10;
+      barbPos -= 4;
+    }
+    if (remKts >= 5) {
+      ctx.beginPath();
+      ctx.moveTo(barbPos, y);
+      ctx.lineTo(barbPos - 2, y - 4);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = "#fbbf24";
+    ctx.fillText(`${Math.round(kts)}kt`, barbX + 12, y + 3);
+  });
+}
+
+function renderSoundingTable(levels) {
+  const tbody = document.getElementById("tbody-sounding-levels");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  levels.forEach(lvl => {
+    const tr = document.createElement("tr");
+    if (lvl.pressure_hpa === 300) tr.className = "highlight-warmcore";
+    if (lvl.pressure_hpa === 850) tr.className = "highlight-llj";
+
+    tr.innerHTML = `
+      <td><strong>${lvl.pressure_hpa} hPa</strong></td>
+      <td>${lvl.altitude_m} m <span class="text-dim">(${lvl.altitude_ft} ft)</span></td>
+      <td class="${lvl.temperature_c > 0 ? 'text-amber' : 'text-cyan'} font-bold">${lvl.temperature_c > 0 ? '+' : ''}${lvl.temperature_c.toFixed(1)}°C</td>
+      <td>${lvl.dewpoint_c > 0 ? '+' : ''}${lvl.dewpoint_c.toFixed(1)}°C</td>
+      <td>${lvl.wind_speed_kmh.toFixed(1)} km/h <span class="text-dim">(${lvl.wind_speed_knots.toFixed(0)} kt)</span></td>
+      <td>${lvl.wind_direction_deg}°</td>
+      <td><span class="text-xs ${lvl.pressure_hpa === 300 ? 'text-red font-bold' : lvl.pressure_hpa === 850 ? 'text-amber font-bold' : 'text-muted'}">${lvl.level_desc}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 // ---------------- Event Listeners ----------------
 function initEventListeners() {
   initGuidedTour();
   initScientificProofModal();
+  initAtmosphericSoundingModal();
 
   // Basemap Selectors
   const selectBmOv = document.getElementById("select-basemap-ov");

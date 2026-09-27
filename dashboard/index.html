@@ -96,6 +96,9 @@
         <button id="btn-proof-modal" class="btn-action btn-proof" title="Official Model Verification & Science Proof (SIH 26078)">
           <span class="icon"><i data-lucide="shield-check"></i></span> Proof
         </button>
+        <button id="btn-4d-sounding" class="btn-action btn-sounding" title="Open 4D Atmospheric Vertical Level Profiler (1000-200 hPa)">
+          <span class="icon"><i data-lucide="layers"></i></span> 4D Sounding
+        </button>
         <button id="btn-guided-tour" class="btn-action btn-tour" title="Guided tour for reviewers">
           <span class="icon"><i data-lucide="compass"></i></span> Tour
         </button>
@@ -195,6 +198,10 @@
           </div>
 
           <div class="header-right-controls">
+            <!-- 4D Sounding Trigger -->
+            <button class="btn-inspector-toggle" id="btn-quick-sounding" title="Open 4D Atmospheric Vertical Level Profiler (1000-200 hPa)">
+              <i data-lucide="layers"></i> 4D Sounding
+            </button>
             <!-- Weather Inspector Drawer Toggle -->
             <button class="btn-inspector-toggle" id="btn-toggle-inspector" title="Toggle real-time weather inspector drawer">
               <i data-lucide="crosshair"></i> Weather Inspector
@@ -218,6 +225,7 @@
           <div id="leaflet-map" class="leaflet-map-canvas"></div>
           <canvas id="canvas-pressure-overlay" class="pressure-overlay-canvas"></canvas>
           <canvas id="canvas-wind-streamlines" class="wind-streamline-canvas"></canvas>
+          <canvas id="canvas-dwr-sweep" class="dwr-sweep-canvas"></canvas>
 
           <!-- Zoom Earth Floating Overlays Dock -->
           <div id="zoom-overlay-dock" class="zoom-overlay-dock">
@@ -239,6 +247,15 @@
                 <span><i data-lucide="cloud-rain"></i> Rain Radar</span>
                 <span class="dock-pill-status">OFF</span>
               </button>
+              <button class="dock-pill" id="dock-toggle-dwr-sweep" title="Toggle Coastal IMD Doppler Weather Radar (DWR) Max-Z Reflectivity Sweep">
+                <span><i data-lucide="radio"></i> DWR Max-Z Sweep</span>
+                <span class="dock-pill-status">OFF</span>
+              </button>
+              <div class="dock-dwr-station-row" id="dwr-station-selector" style="display: none;">
+                <button class="dock-dwr-btn active" data-dwr="DWR_KOLKATA" title="IMD Kolkata Radar (S-Band, 250km)">Kolkata</button>
+                <button class="dock-dwr-btn" data-dwr="DWR_PARADIP" title="IMD Paradip Radar (C-Band, 250km)">Paradip</button>
+                <button class="dock-dwr-btn" data-dwr="DWR_VISAKHAPATNAM" title="IMD Vizag Radar (S-Band, 250km)">Vizag</button>
+              </div>
               <button class="dock-pill" id="dock-toggle-cone" title="Toggle 3-10 day cone of uncertainty">
                 <span><i data-lucide="navigation"></i> Track &amp; Cone</span>
                 <span class="dock-pill-status">OFF</span>
@@ -1624,6 +1641,96 @@
       <span>Status: ONLINE (Port 8000) &bull; Verified Offline Local Data &bull; CC-BY-NC-SA-4.0</span>
     </div>
   </footer>
+
+  <!-- 4D Atmospheric Vertical Level Profiler Modal -->
+  <div class="modal-overlay hidden" id="modal-atmospheric-sounding">
+    <div class="modal-dialog sounding-dialog">
+      <div class="sounding-header">
+        <div class="sounding-title-wrap">
+          <span class="sounding-tag font-mono">MOES / NCMRWF &bull; 4D HYDROSTATIC VERTICAL SOUNDING</span>
+          <h2 class="sounding-title">Atmospheric Vertical Level Profiler (1000 &ndash; 200 hPa)</h2>
+          <div class="sounding-sub-info font-mono" id="sounding-meta-info">
+            Target: <span id="snd-target-coords">21.62°N, 87.51°E</span> &bull; Step: <span id="snd-target-step">5</span> &bull; Hazard: <span id="snd-target-hazard">Amphan 2020</span>
+          </div>
+        </div>
+        <button class="btn-close-modal" id="btn-close-sounding">&times;</button>
+      </div>
+
+      <div class="sounding-body">
+        <!-- Diagnostic Metric Cards -->
+        <div class="sounding-kpi-grid font-mono">
+          <div class="sounding-kpi-card">
+            <span class="skpi-label">Bulk Wind Shear (VWS 850–200)</span>
+            <span class="skpi-val text-green" id="snd-vws-val">8.1 m/s</span>
+            <span class="skpi-desc" id="snd-vws-cat">Favorable (&lt;10 m/s, minimal storm tilt)</span>
+          </div>
+          <div class="sounding-kpi-card">
+            <span class="skpi-label">Warm-Core Anomaly (300 hPa)</span>
+            <span class="skpi-val text-red" id="snd-warmcore-val">+6.8 °C</span>
+            <span class="skpi-desc">Latent Heat Eye Core Perturbation</span>
+          </div>
+          <div class="sounding-kpi-card">
+            <span class="skpi-label">Surface-Based CAPE</span>
+            <span class="skpi-val text-amber" id="snd-cape-val">2,840 J/kg</span>
+            <span class="skpi-desc">Extreme Convective Instability</span>
+          </div>
+          <div class="sounding-kpi-card">
+            <span class="skpi-label">Freezing Level &bull; LCL</span>
+            <span class="skpi-val text-cyan" id="snd-levels-val">4,920 m &bull; 942 hPa</span>
+            <span class="skpi-desc">Zero Isotherm &amp; Condensation Base</span>
+          </div>
+        </div>
+
+        <!-- Main Visual Section: Profile Canvas + Data Table -->
+        <div class="sounding-main-layout">
+          <div class="sounding-canvas-card">
+            <div class="sounding-canvas-header">
+              <span class="font-mono text-cyan"><i data-lucide="activity"></i> Thermodynamic Profile (Log-P / Skew-T)</span>
+              <div class="sounding-legend-pills font-mono">
+                <span class="legend-pill" style="color: #ef4444;"><span class="dot" style="background:#ef4444;"></span> Temp T(p)</span>
+                <span class="legend-pill" style="color: #00d4e5;"><span class="dot" style="background:#00d4e5;"></span> Dewpoint Td(p)</span>
+                <span class="legend-pill" style="color: #f59e0b;"><span class="dot" style="background:#f59e0b;"></span> Wind Barb</span>
+              </div>
+            </div>
+            <div class="sounding-canvas-wrap">
+              <canvas id="canvas-sounding" width="560" height="420"></canvas>
+            </div>
+          </div>
+
+          <div class="sounding-table-card">
+            <div class="sounding-table-header font-mono">
+              <span>Standard Isobaric Pressure Levels (WMO Standard)</span>
+            </div>
+            <div class="sounding-table-wrap">
+              <table class="sounding-table font-mono" id="table-sounding-levels">
+                <thead>
+                  <tr>
+                    <th>Level</th>
+                    <th>Altitude</th>
+                    <th>T (°C)</th>
+                    <th>Td (°C)</th>
+                    <th>Wind</th>
+                    <th>Dir</th>
+                    <th>Layer Dynamics</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-sounding-levels">
+                  <!-- Populated dynamically via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sounding-footer">
+        <div class="font-mono text-muted text-xs">
+          Physical Derivation: 3D Hypsometric Equation &bull; Hydrostatic Equilibrium &bull; Cyclonic Inflow to Divergent Anticyclonic Canopy
+        </div>
+        <button class="btn-action btn-close-footer" id="btn-close-sounding-footer">Close Profiler</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Main JavaScript Application Logic -->
   <script src="/static/app.js?v=aerotrack_v6_step5"></script>

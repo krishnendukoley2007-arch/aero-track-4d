@@ -47,6 +47,8 @@ ENDPOINTS = [
     ("GET", "/api/export/geojson", ["type", "features", "metadata"]),
     ("GET", "/api/export/agri-csv", None),
     ("GET", "/api/live/pressure-field", ["status", "grid", "cities", "centers"]),
+    ("GET", "/api/atmospheric/sounding?lat=21.62&lon=87.51&step_index=5", ["levels", "bulk_vertical_shear_850_200_ms"]),
+    ("GET", "/api/radar/dwr-metadata", ["station", "reflectivity_scale_dbz"]),
 ]
 
 
