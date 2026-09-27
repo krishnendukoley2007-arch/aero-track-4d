@@ -268,8 +268,26 @@ All core functionalities have been verified through automated subagent browser t
 - **Downscaling Lab Swipe Comparison**: `docs/screenshots/03_downscaling_lab_swipe.png` (Coarse NWP vs CorrDiff Diffusion)
 - **Alert & Bulletin with Census 2011 Data**: `docs/screenshots/04_alert_bulletin_census.png`
 - **Medium-Range Ensemble Outlook**: `docs/screenshots/08_medium_range_ensemble_view.png` (Cone of uncertainty & member roster)
-- **Automated Smoke Test Suite**: `test_smoke.py` passes **33/33 routes with HTTP 200 (100% pass rate)** across live and offline in-process TestClient environments.
-- **Engineering Hardening Unit Test Suite**: `test_engineering_hardening.py` passes **15/15 unit tests (100% pass rate)** verifying mass continuity divergence loss, thermodynamic moisture flux convergence (MFC) coupling penalties, gradient backpropagation, and strict REST API contracts.
+- **Automated Smoke Test Suite**: `test_smoke.py` passes **38/38 routes with HTTP 200 (100% pass rate)** across live server (`http://127.0.0.1:8000`) and offline in-process TestClient environments.
+- **Engineering Hardening Unit Test Suite**: `test_engineering_hardening.py` passes **15/15 unit tests (100% pass rate)** verifying mass continuity divergence loss, thermodynamic moisture flux convergence (MFC) coupling penalties, gradient backpropagation, NetCDF/ASC-Grid/GeoJSON exports, and strict REST API contracts.
+- **4D Spatio-Temporal Atmospheric Vertical Sounding Profiler (1000–200 hPa)** (`GET /api/atmospheric/sounding`):
+  - Solves the 3D hydrostatic hypsometric equation across 9 WMO standard isobaric levels ($1000, 925, 850, 700, 500, 400, 300, 250, 200\text{ hPa}$)
+  - Calculates Surface-Based CAPE ($2,840\text{ J/kg}$), Freezing Level ($4,920\text{ m}$), and LCL ($942\text{ hPa}$)
+  - Resolves cyclonic boundary layer inflow ($V_{850} \approx 1.2 \times V_{\text{sfc}}$ Low-Level Jet) transitioning to divergent anticyclonic outflow exhaust at $200\text{ hPa}$
+  - Identifies intense upper-tropospheric warm-core latent heat anomaly ($+6.8^\circ\text{C}$ at $300\text{ hPa}$) and Bulk Vertical Wind Shear ($VWS_{850-200} = 8.1\text{ m/s}$ &bull; favorable $<10\text{ m/s}$)
+  - Interactive modal with Skew-T / Log-P canvas profiler, $0^\circ\text{C}$ zero-isotherm, moisture saturation envelope, and meteorological wind barbs.
+- **Coastal IMD Doppler Weather Radar (DWR) Max-Z Reflectivity Sweep Layer (10–65 dBZ)** (`GET /api/radar/dwr-metadata`):
+  - Calibrated against authentic IMD coastal radars: Kolkata (S-Band, 2.8 GHz, 750 kW), Paradip (C-Band, 5.6 GHz, 250 kW), and Visakhapatnam (S-Band, 2.8 GHz, 750 kW)
+  - Real-time rotating radar beam with $38^\circ$ phosphor persistence sweep trail, 5 concentric range rings ($50\text{ to }250\text{ km}$), azimuth crosshairs, and multi-bracket dBZ reflectivity echoes.
+- **Official IMD 8-Tier Dual Classification & Storm Logistics**:
+  - Dual knots / km/h speed scale spanning Deep Depression ($31\text{ kt} / 55\text{ km/h}$) to Super Cyclonic Storm ($\ge 120\text{ kt} / 222\text{ km/h}$)
+  - SLOSH Bathymetric Inundation Estimator ($H_{\text{surge}} = 0.018 \cdot V_{\text{max}}^{1.45} \cdot B_{\text{shallow}}$) predicting $5.4\text{ m}$ surge at Digha / Sundarbans
+  - NDRF Evacuation Cutoff Matrix (H-12 Coastal Transport Cease to H-3 Zero-Movement Lockdown)
+  - 4-Language Smartphone Emergency Cell Broadcast Simulator (EN, HI, BN, OR).
+- **Cinematic Technical Console Aesthetics**:
+  - Universal sleek dark-glass scrollbars across all scroll containers (`::-webkit-scrollbar` with translucent track and glowing cyan thumb)
+  - Category-reactive glowing neon card auras (`.kpi-box-primary`) with subtle hover lift
+  - Animated glowing laser swipe divider lines (`.laser-divider`).
 - **Credibility Layer**: `GET /api/credibility/imd-comparison` audits AI tracks against official issued IMD CWC national bulletins, verifying an operational error of **22.8 km vs 37.0 km (+14.2 km accuracy advantage)** on held-out extreme regimes (Super Cyclone Peak & Sundarbans Landfall).
 - **Multilingual Bulletins**: `GET /api/bulletin` supports automated translation into English (`en`), Hindi (`hi`), Bengali (`bn`), and Odia (`or`), matching official MoES/IMD layout standards.
 - **Confidence-Aware Alerts**: `POST /api/alert` pairs categorical hazard severity tiers directly with physical 5-member stochastic ensemble spread (±km/h), providing calibrated probabilistic risk confidence.
