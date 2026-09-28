@@ -928,11 +928,11 @@ def get_active_global_storms() -> Dict[str, Any]:
                 "uncertainty_radius_km": uncertainty_r_km,
                 "pinpoint_corridor_area_km2": 78.5,
                 "standard_district_area_km2": 3500.0,
-                "false_alarm_reduction_pct": 97.8,
+                "false_alarm_reduction_pct": round((1.0 - 78.54 / 3500.0) * 100.0, 2),
                 "action_directive": (
                     f"NDRF Operational Directive: Immediate pinpoint 5 km coastal readiness for {storm['region']}. "
                     f"CorrDiff resolves {corrdiff_resolved_wind} km/h peak eyewall speed (+61.5% recovered vs {raw_wind:.1f} km/h coarse NWP). "
-                    f"Surface pressure: {raw_press:.1f} hPa. False-alarm footprint reduced by 97.8%."
+                    f"Surface pressure: {raw_press:.1f} hPa. False-alarm footprint reduced geometrically (78.5 km² corridor vs 3,500 km² district)."
                 )
             })
 

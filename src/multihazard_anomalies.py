@@ -34,7 +34,7 @@ class MultiHazardRegistry:
             "efi_variable": "Wind Gust & Pressure Anomaly",
             "standard_warning_area_km2": 3500.0,
             "pinpoint_warning_area_km2": 78.5,
-            "area_reduction_pct": 97.8,
+            "area_reduction_pct": round((1.0 - 78.54 / 3500.0) * 100.0, 2),
             "status": "operational",
             "data_source": "ECMWF ERA5 (Copernicus/Open-Meteo) + NOAA IBTrACS v04r01 (Agency: IMD New Delhi)",
             "description": "Super Cyclonic Storm with central pressure 920 hPa and sustained eyewall winds of 220+ km/h. Traditional NWP smoothed the intense eyewall gradient."

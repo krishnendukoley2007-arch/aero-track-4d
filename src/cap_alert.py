@@ -79,7 +79,7 @@ class CAPAlertGenerator:
             f"lat {alert_data.get('location', {}).get('lat')}, lon {alert_data.get('location', {}).get('lon')}. "
             f"Resolved Wind: {alert_data.get('predicted_local_wind_kmh', 0)} km/h (P90 Gusts: {alert_data.get('predicted_p90_gust_kmh', 0)} km/h). "
             f"Rainfall: {alert_data.get('predicted_local_rain_mmh', 0)} mm/h. "
-            f"Spatial footprint refinement provides 5 km pinpoint impact zone (78.5 km²) reducing warning false-alarm area by 97.8%."
+            f"Spatial footprint refinement provides 5 km pinpoint impact zone (78.5 km²) with geometric footprint corridor refinement."
         )
         ET.SubElement(info, "description").text = description
         ET.SubElement(info, "instruction").text = alert_data.get("action_directive", "Follow NDRF and district disaster management instructions.")

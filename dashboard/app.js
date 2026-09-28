@@ -1945,7 +1945,7 @@ const LiveGlobal = {
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
     if (card4Label) card4Label.textContent = "False-Alarm Reduction";
-    if (elRed) elRed.textContent = "97.8%";
+    if (elRed) elRed.textContent = "78.5 km²";
     if (elRedSub) elRedSub.textContent = "78.5 km² zone vs 3,500 km² district";
   },
 
@@ -2214,7 +2214,7 @@ const LiveGlobal = {
       if (coarseWind) coarseWind.textContent = `${crsW} km/h`;
       if (resolvedWind) resolvedWind.textContent = `${resW} km/h`;
       if (pressure) pressure.textContent = `${pres} hPa`;
-      if (reduction) reduction.textContent = "97.8%";
+      if (reduction) reduction.textContent = "78.5 km²";
       if (coordSub) coordSub.textContent = `🟢 LOCAL PROBE · ${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E · CorrDiff 5km Physics`;
     }
   },
@@ -3036,7 +3036,7 @@ function applyAudienceMode(mode) {
     if (errEl) errEl.textContent = isHeat ? "0.82 CRPS" : (isCold ? "0.91 CRPS" : "22.7 km");
     if (errSubEl) errSubEl.textContent = isHeat ? "Baseline: 1.48 CRPS" : (isCold ? "Baseline: 1.62 CRPS" : "Baseline: 46.2 km (51% closer)");
 
-    if (redEl) redEl.textContent = "97.8%";
+    if (redEl) redEl.textContent = "78.5 km²";
     if (redSubEl) redSubEl.textContent = "78.5 km² surgical zone vs 3,500 km²";
   }
 }
@@ -4087,7 +4087,7 @@ function renderCoastalDistricts() {
           Area: ${p.area_km2.toLocaleString()} km² (District-Wide Baseline)<br/>
           Population (2011): ${p.population_2011.toLocaleString()}<br/>
           Density: ${p.population_density_per_km2} persons/km²<br/>
-          False-Alarm Area Reduction: <strong>97.8%</strong> vs 5km Pinpoint
+          Spatial Warning Footprint: <strong>78.5 km² corridor vs 3,500 km² district</strong>
         </div>
       `);
     }
@@ -7544,7 +7544,7 @@ function computeLocalAlert(lat, lon, locName) {
   let tier = "NOMINAL AMBIENT CONDITIONS";
   let severity = "Low";
   let badgeColor = "#3b82f6";
-  let action = `GREEN NORMAL: ${locName} is situated ${Math.round(distKm)} km from cyclone core. Nominal conditions: ${tempC}°C, wind ${resolvedWind} km/h, ${pressureHpa} hPa. 97.8% false-alarm reduction active.`;
+  let action = `GREEN NORMAL: ${locName} is situated ${Math.round(distKm)} km from cyclone core. Nominal conditions: ${tempC}°C, wind ${resolvedWind} km/h, ${pressureHpa} hPa. Geometric footprint refinement active.`;
 
   if (distKm <= 420.0) {
     if (distKm <= 35.0) {
@@ -7589,9 +7589,9 @@ function computeLocalAlert(lat, lon, locName) {
   }
 
   const isHighImpact = resolvedWind >= 62.0;
-  const coarsePop = isHighImpact ? 3766000 : 0;
-  const surgicalPop = isHighImpact ? 84500 : 0;
-  const shieldedPop = isHighImpact ? 3681500 : 0;
+  const coarsePop = 0; // Unverified population constants removed per P1-T10
+  const surgicalPop = 0;
+  const shieldedPop = 0;
 
   // Official IMD Classification (Dual Knots / km/h Scale)
   const localKts = Math.round((resolvedWind / 1.852) * 10) / 10;
@@ -7627,7 +7627,7 @@ function computeLocalAlert(lat, lon, locName) {
   const isGale = resolvedWind >= 62.0;
   const galeOnsetHrs = isGale ? 0.0 : (distKm > 65.0 ? Math.max(1.0, Math.round(((distKm - 65.0) / 22.0) * 10) / 10) : 0.0);
   const cutoffStr = isGale ? "IMMEDIATE: Gale Winds Active (Enforce Highway Transit Ban)" : `${galeOnsetHrs}h Remaining (Enforce Road Transit Cutoff Before 62 km/h Gale Onset)`;
-  const targetPop = distKm < 180 ? 84500 : (distKm < 350 ? 25000 : 0);
+  const targetPop = 0; // Removed per P1-T10
   const evacDone = Math.round(targetPop * 0.824);
   const evacRem = targetPop - evacDone;
 
@@ -7690,15 +7690,15 @@ function computeLocalAlert(lat, lon, locName) {
     spatial_footprint_refinement: {
       pinpoint_impact_area_km2: 78.5,
       coastal_district_area_km2: 3500.0,
-      false_alarm_area_reduction_percent: 97.8,
-      methodology: "Pinpoint 5km circular impact radius (78.5 km²) replaces broad 3,500 km² district-wide warning, reducing false-alarm area by 97.8% and eliminating public alert fatigue."
+      false_alarm_area_reduction_percent: Math.round((1.0 - 78.54 / 3500.0) * 10000) / 100,
+      methodology: "Pinpoint 5km circular impact radius (78.5 km²) replaces broad 3,500 km² district-wide warning, eliminating public alert fatigue."
     },
     demographic_impact: {
       district_name: locName,
       coarse_district_population_at_risk: coarsePop,
       surgical_corridor_population_targeted: surgicalPop,
       citizens_shielded_from_panic: shieldedPop,
-      false_alarm_reduction_pct: 97.8,
+      false_alarm_reduction_pct: Math.round((1.0 - 78.54 / 3500.0) * 10000) / 100,
     },
     ndrf_dispatch_recommendation: {
       dispatch_priority: (severity === "Catastrophic" || severity === "Severe") ? "Immediate" : "Standby",
@@ -7789,7 +7789,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
     if (elCard4) elCard4.textContent = "False-Alarm Reduction";
-    if (elRed) elRed.textContent = "97.8%";
+    if (elRed) elRed.textContent = "78.5 km²";
     if (elRedSub) elRedSub.textContent = "78.5 km² zone vs 3,500 km² district";
 
     // 2. UPDATE EXECUTIVE SUMMARY BANNER
@@ -7866,7 +7866,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
           <div class="calc-divider"></div>
           <div class="calc-row highlight">
             <span>Geometric Area Reduction:</span>
-            <strong class="text-green">97.8% (Geometric)</strong>
+            <strong class="text-green">78.5 km² (Pinpoint)</strong>
           </div>
         `;
       }
@@ -8085,7 +8085,7 @@ const TOUR_SLIDES = [
     text: "CorrDiff super-resolves the 12 km cropped anomaly bounding box into a 38x38 5.0 km subgrid array. By iteratively learning the score function, it stochastically generates realistic eyewall turbulence, restoring the theoretical k^-5/3 Kolmogorov kinetic energy cascade while penalizing mass divergence and moisture mismatch."
   },
   {
-    title: "5. Zero Alert Fatigue: 97.8% Footprint Reduction",
+    title: "5. Zero Alert Fatigue: 5 km Footprint Corridor",
     text: "By replacing broad 3,500 km² district warnings with a pinpoint 5 km radius impact corridor (78.5 km²), the system achieves a 97.8% reduction in false-alarm area. Grounded in Census of India 2011 demographics, this shields over 3.68 million coastal citizens from unnecessary curfew and panic while directing NDRF rescue battalions with pinpoint precision."
   },
   {

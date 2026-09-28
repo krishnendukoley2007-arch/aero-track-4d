@@ -220,7 +220,7 @@ SUB: SUPER CYCLONIC STORM ‘AMPHAN’ (PRONOUNCED AS UM-PUN) OVER BAY OF BENGAL
    • Action Directive: {alert_data.get('action_directive', 'Execute standard operating procedures.')}
    • Spatial Footprint Refinement: Pinpoint 5 km radius ({refine.get('pinpoint_impact_area_km2', 78.5)} km²) replaces
      broad district warning ({refine.get('coastal_district_area_km2', 3500)} km²), reducing false-alarm warning
-     area by {refine.get('false_alarm_area_reduction_percent', 97.8)}%."""
+     area by {refine.get('false_alarm_area_reduction_percent', 97.76)}%."""
 
         bulletin += f"""
 
@@ -509,7 +509,7 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language:
   &bull; Reference Sector: <em>Purba Medinipur Coastal Belt, West Bengal</em> (Census 2011 Area: 4,736 km&sup2;)<br>
   &bull; Broad District Warning Area: ~3,500 km&sup2; division-wide polygon<br>
   &bull; AERO-TRACK Pinpoint 5 km Footprint: 78.5 km&sup2; circular impact zone (Radius: 5.0 km)<br>
-  &bull; <strong>Geometric Area Footprint Reduction: 97.8% reduction in alert footprint area vs broad district polygon</strong>
+  &bull; <strong>Geometric Area Footprint Reduction: 78.5 km² pinpoint corridor vs ~3,500 km² broad district polygon</strong>
 </div>
 
 <h4>4. Operational Directives for First Responders (NDRF &amp; SDMA)</h4>

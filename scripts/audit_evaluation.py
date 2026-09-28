@@ -1,7 +1,13 @@
 """
-Phase 0 Audit Evaluation Script.
+Phase 0 & Phase 1 Audit Evaluation Script.
 Computes and verifies every quantitative claim across the AERO-TRACK 4D repository
 from the actual code and model checkpoints, saving unvarnished results to results/audit_metrics.json.
+
+Includes:
+- Identity baseline (coarse NWP input without downscaling)
+- Inverse-attenuation baseline (coarse ÷ 0.82 inverting the 0.82 spectral damping factor)
+- Standard U-Net (L2 loss conditional mean)
+- CorrDiff Generative Diffusion (ensemble mean and P90 tail risk)
 """
 
 import os
@@ -25,7 +31,7 @@ from src.coastal_districts import CoastalDistrictsEngine
 def run_audit() -> dict:
     results = {}
 
-    # --- P0-T1: Spherical GNN & Mesh ---
+    # --- 1. Spherical GNN & Mesh ---
     mesh = IcosahedralSphericalMesh(subdivisions=6)
     n_nodes = len(mesh.nodes)
     n_edges = len(mesh.edge_index)
@@ -62,7 +68,7 @@ def run_audit() -> dict:
         "gat_weights_file_exists": gat_ckpt_exists,
     }
 
-    # --- P0-T2: Anomaly Detection, Climatology & Track Error ---
+    # --- 2. Anomaly Detection, Climatology & Track Error ---
     dl = WeatherDataLoader(event_id="amphan_2020")
     tracker = AnomalyTracker(dl)
     track_res = tracker.track_full_event()
@@ -84,7 +90,7 @@ def run_audit() -> dict:
         "held_out_mean_track_error_km": round(held_out_mean_error, 2),
     }
 
-    # --- P0-T3: Data Loader Splits & Inputs ---
+    # --- 3. Data Loader Splits & Inputs ---
     X_train, Y_train, X_test, Y_test = dl.build_training_dataset()
     results["data_loader"] = {
         "event_id": dl.event_id,
@@ -99,7 +105,7 @@ def run_audit() -> dict:
         "humidity_q_available": False,
     }
 
-    # --- P0-T4: Medium Range Ensemble ---
+    # --- 4. Medium Range Ensemble ---
     ens_engine = MediumRangeEnsembleEngine()
     ens_res = ens_engine.generate_medium_range_ensemble()
     results["ensemble_medium_range"] = {
@@ -109,7 +115,7 @@ def run_audit() -> dict:
         "chaos_formula": ens_res["chaos_growth_summary"]["chaos_power_law"],
     }
 
-    # --- P0-T5: CorrDiff Downscaling Model ---
+    # --- 5. CorrDiff Downscaling Model & Baselines ---
     corrdiff = PhysicsNeMoCorrDiff()
     corrdiff_total_params = sum(p.numel() for p in corrdiff.parameters())
     mean_pred_params = sum(p.numel() for p in corrdiff.mean_predictor.parameters())
@@ -123,9 +129,28 @@ def run_audit() -> dict:
     calib = downscale_amphan["calibration_metrics"]
     phys = downscale_amphan["physics_diagnostics"]
 
+    target_peak = float(peak_wind["native_era5_target"])
+    coarse_peak = float(peak_wind["coarse_nwp"])
+    unet_peak = float(peak_wind["standard_unet_smoothed"])
+    cd_mean_peak = float(peak_wind["corrdiff_ensemble_mean"])
+    cd_p90_peak = float(peak_wind["corrdiff_p90_high_impact"])
+
+    # Baselines: Identity (coarse directly) and Inverse-Attenuation (coarse / 0.82)
+    identity_peak = coarse_peak
+    identity_rec = round((identity_peak / target_peak) * 100.0, 2)
+    inv_atten_peak = round(coarse_peak / 0.82, 2)
+    inv_atten_rec = round((inv_atten_peak / target_peak) * 100.0, 2)
+
     # Multi-storm evaluations
     fani_eval = inf_engine.run_downscale(step_idx=7, event_id="fani_2019")
+    fani_target = float(fani_eval["amplitude_evaluation"]["peak_wind"]["native_era5_target"])
+    fani_coarse = float(fani_eval["amplitude_evaluation"]["peak_wind"]["coarse_nwp"])
+    fani_inv = round(fani_coarse / 0.82, 2)
+
     yaas_eval = inf_engine.run_downscale(step_idx=5, event_id="yaas_2021")
+    yaas_target = float(yaas_eval["amplitude_evaluation"]["peak_wind"]["native_era5_target"])
+    yaas_coarse = float(yaas_eval["amplitude_evaluation"]["peak_wind"]["coarse_nwp"])
+    yaas_inv = round(yaas_coarse / 0.82, 2)
 
     results["downscaling_corrdiff"] = {
         "model_parameters": {
@@ -133,13 +158,39 @@ def run_audit() -> dict:
             "mean_predictor": mean_pred_params,
             "diffusion_corrector": diff_corr_params,
         },
+        "baselines": {
+            "identity_coarse_nwp": {
+                "peak_wind_kmh": round(identity_peak, 2),
+                "recovery_percent": identity_rec,
+                "description": "Returns coarse NWP input directly without modification"
+            },
+            "inverse_attenuation_coarse_div_082": {
+                "peak_wind_kmh": round(inv_atten_peak, 2),
+                "recovery_percent": inv_atten_rec,
+                "description": "Inverts the 0.82 coarse spectral damping factor (coarse ÷ 0.82)"
+            },
+            "standard_unet": {
+                "peak_wind_kmh": round(unet_peak, 2),
+                "recovery_percent": round(float(rec_pct["standard_unet"]), 2),
+                "description": "Deterministic L2 regression baseline (smoothed conditional mean)"
+            },
+            "corrdiff_ensemble_mean": {
+                "peak_wind_kmh": round(cd_mean_peak, 2),
+                "recovery_percent": round(float(rec_pct["corrdiff_mean"]), 2),
+                "description": "PhysicsNeMo score-based diffusion model (ensemble mean)"
+            },
+        },
         "amphan_step_5_measured": {
-            "native_era5_target_kmh": round(float(peak_wind["native_era5_target"]), 2),
-            "coarse_nwp_kmh": round(float(peak_wind["coarse_nwp"]), 2),
-            "standard_unet_kmh": round(float(peak_wind["standard_unet_smoothed"]), 2),
-            "corrdiff_ensemble_mean_kmh": round(float(peak_wind["corrdiff_ensemble_mean"]), 2),
-            "corrdiff_p90_kmh": round(float(peak_wind["corrdiff_p90_high_impact"]), 2),
+            "native_era5_target_kmh": round(target_peak, 2),
+            "coarse_nwp_kmh": round(coarse_peak, 2),
+            "identity_baseline_kmh": round(identity_peak, 2),
+            "inverse_attenuation_baseline_kmh": round(inv_atten_peak, 2),
+            "standard_unet_kmh": round(unet_peak, 2),
+            "corrdiff_ensemble_mean_kmh": round(cd_mean_peak, 2),
+            "corrdiff_p90_kmh": round(cd_p90_peak, 2),
             "corrdiff_gain_over_unet_kmh": round(float(amp_eval["corrdiff_gain_over_unet_kmh"]), 2),
+            "recovery_percent_identity": identity_rec,
+            "recovery_percent_inv_attenuation": inv_atten_rec,
             "recovery_percent_corrdiff_mean": round(float(rec_pct["corrdiff_mean"]), 2),
             "crps_wind_kmh": round(float(calib["crps_wind_kmh"]), 3),
             "fss_precipitation": round(float(calib["fss_precipitation_score"]), 3),
@@ -147,14 +198,18 @@ def run_audit() -> dict:
         },
         "multistorm_measured": {
             "fani_2019": {
-                "era5_target_kmh": round(float(fani_eval["amplitude_evaluation"]["peak_wind"]["native_era5_target"]), 2),
+                "era5_target_kmh": round(fani_target, 2),
+                "coarse_nwp_kmh": round(fani_coarse, 2),
+                "inverse_attenuation_kmh": fani_inv,
                 "corrdiff_mean_kmh": round(float(fani_eval["amplitude_evaluation"]["peak_wind"]["corrdiff_ensemble_mean"]), 2),
                 "recovery_percent": round(float(fani_eval["amplitude_evaluation"]["measured_recovery_percent"]["corrdiff_mean"]), 2),
                 "crps_wind_kmh": round(float(fani_eval["calibration_metrics"]["crps_wind_kmh"]), 3),
                 "fss_precipitation": round(float(fani_eval["calibration_metrics"]["fss_precipitation_score"]), 3),
             },
             "yaas_2021": {
-                "era5_target_kmh": round(float(yaas_eval["amplitude_evaluation"]["peak_wind"]["native_era5_target"]), 2),
+                "era5_target_kmh": round(yaas_target, 2),
+                "coarse_nwp_kmh": round(yaas_coarse, 2),
+                "inverse_attenuation_kmh": yaas_inv,
                 "corrdiff_mean_kmh": round(float(yaas_eval["amplitude_evaluation"]["peak_wind"]["corrdiff_ensemble_mean"]), 2),
                 "recovery_percent": round(float(yaas_eval["amplitude_evaluation"]["measured_recovery_percent"]["corrdiff_mean"]), 2),
                 "crps_wind_kmh": round(float(yaas_eval["calibration_metrics"]["crps_wind_kmh"]), 3),
@@ -169,11 +224,9 @@ def run_audit() -> dict:
         ]
     }
 
-    # --- P0-T7: Coastal Districts & Footprint Arithmetic ---
-    districts = CoastalDistrictsEngine.DISTRICT_BOUNDARIES
-    d0 = districts[0]
+    # --- 6. Spatial Footprint Geometric Comparison ---
     pinpoint_r = 5.0
-    pinpoint_area = float(np.pi * pinpoint_r ** 2)
+    pinpoint_area = float(np.pi * (pinpoint_r ** 2))
     typical_district_area = 3500.0
     area_red_pct = float((1.0 - pinpoint_area / typical_district_area) * 100.0)
 
@@ -182,14 +235,13 @@ def run_audit() -> dict:
         "pinpoint_area_km2": round(pinpoint_area, 2),
         "typical_district_area_km2": typical_district_area,
         "computed_area_reduction_percent": round(area_red_pct, 2),
-        "false_alarm_reduction_provenance": "Pure geometric circle area ratio: 1 - (78.5 / 3500) = 97.75%",
-        "citizens_shielded_provenance": "Hardcoded in api.py: 3,766,000 - 84,500 = 3,681,500 based on assumed population and area ratio",
+        "provenance": "Pure geometric area comparison: 5 km circular radius corridor (pi * 5^2 = 78.54 km2) vs 3,500 km2 standard district polygon. Unverified population constants removed."
     }
 
     # Save to results/
     os.makedirs(os.path.join(REPO_ROOT, "results"), exist_ok=True)
     out_path = os.path.join(REPO_ROOT, "results", "audit_metrics.json")
-    with open(out_path, "w") as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
     print(f"Audit results successfully written to: {out_path}")

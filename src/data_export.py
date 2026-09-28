@@ -262,8 +262,8 @@ class OperationalDataExporter:
                 "peak_corrdiff": peak_info.get("corrdiff_resolved", 0.0),
                 "peak_coarse": peak_info.get("coarse_nwp", 0.0),
                 "unit": peak_info.get("unit", "m/s"),
-                "area_reduction_pct": 97.8,
-                "alert_fatigue_reduction": "97.8% unnecessary evacuation area eliminated"
+                "area_reduction_pct": round((1.0 - 78.54 / 3500.0) * 100.0, 2),
+                "alert_fatigue_reduction": "Geometric footprint refinement eliminates unnecessary broad warning area"
             },
             "features": [
                 {

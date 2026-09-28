@@ -80,32 +80,62 @@
       "mean_predictor": 176164,
       "diffusion_corrector": 184708
     },
+    "baselines": {
+      "identity_coarse_nwp": {
+        "peak_wind_kmh": 63.4,
+        "recovery_percent": 57.38,
+        "description": "Returns coarse NWP input directly without modification"
+      },
+      "inverse_attenuation_coarse_div_082": {
+        "peak_wind_kmh": 77.32,
+        "recovery_percent": 69.97,
+        "description": "Inverts the 0.82 coarse spectral damping factor (coarse \u00f7 0.82)"
+      },
+      "standard_unet": {
+        "peak_wind_kmh": 53.3,
+        "recovery_percent": 48.3,
+        "description": "Deterministic L2 regression baseline (smoothed conditional mean)"
+      },
+      "corrdiff_ensemble_mean": {
+        "peak_wind_kmh": 53.1,
+        "recovery_percent": 48.0,
+        "description": "PhysicsNeMo score-based diffusion model (ensemble mean)"
+      }
+    },
     "amphan_step_5_measured": {
       "native_era5_target_kmh": 110.5,
       "coarse_nwp_kmh": 63.4,
+      "identity_baseline_kmh": 63.4,
+      "inverse_attenuation_baseline_kmh": 77.32,
       "standard_unet_kmh": 53.3,
-      "corrdiff_ensemble_mean_kmh": 53.4,
-      "corrdiff_p90_kmh": 54.5,
-      "corrdiff_gain_over_unet_kmh": 0.0,
-      "recovery_percent_corrdiff_mean": 48.3,
-      "crps_wind_kmh": 16.326,
-      "fss_precipitation": 0.106,
-      "physics_diagnostic_score": 36.4
+      "corrdiff_ensemble_mean_kmh": 53.1,
+      "corrdiff_p90_kmh": 54.6,
+      "corrdiff_gain_over_unet_kmh": -0.3,
+      "recovery_percent_identity": 57.38,
+      "recovery_percent_inv_attenuation": 69.97,
+      "recovery_percent_corrdiff_mean": 48.0,
+      "crps_wind_kmh": 16.302,
+      "fss_precipitation": 0.287,
+      "physics_diagnostic_score": 38.0
     },
     "multistorm_measured": {
       "fani_2019": {
         "era5_target_kmh": 111.1,
-        "corrdiff_mean_kmh": 50.8,
-        "recovery_percent": 45.7,
-        "crps_wind_kmh": 14.803,
-        "fss_precipitation": 0.212
+        "coarse_nwp_kmh": 58.1,
+        "inverse_attenuation_kmh": 70.85,
+        "corrdiff_mean_kmh": 49.8,
+        "recovery_percent": 44.9,
+        "crps_wind_kmh": 14.849,
+        "fss_precipitation": 0.296
       },
       "yaas_2021": {
         "era5_target_kmh": 92.3,
-        "corrdiff_mean_kmh": 46.5,
-        "recovery_percent": 50.4,
-        "crps_wind_kmh": 18.567,
-        "fss_precipitation": 0.659
+        "coarse_nwp_kmh": 52.5,
+        "inverse_attenuation_kmh": 64.02,
+        "corrdiff_mean_kmh": 45.5,
+        "recovery_percent": 49.3,
+        "crps_wind_kmh": 18.506,
+        "fss_precipitation": 0.604
       }
     },
     "physics_loss_terms": [
@@ -120,7 +150,6 @@
     "pinpoint_area_km2": 78.54,
     "typical_district_area_km2": 3500.0,
     "computed_area_reduction_percent": 97.76,
-    "false_alarm_reduction_provenance": "Pure geometric circle area ratio: 1 - (78.5 / 3500) = 97.75%",
-    "citizens_shielded_provenance": "Hardcoded in api.py: 3,766,000 - 84,500 = 3,681,500 based on assumed population and area ratio"
+    "provenance": "Pure geometric area comparison: 5 km circular radius corridor (pi * 5^2 = 78.54 km2) vs 3,500 km2 standard district polygon. Unverified population constants removed."
   }
 }

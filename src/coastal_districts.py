@@ -3,7 +3,7 @@ Coastal Districts GeoJSON & Hyper-Local Footprint Refinement Engine for SIH 2607
 Provides real coastal district boundaries for Odisha and West Bengal landfall zones
 (East Midnapore, South 24 Parganas, Balasore, Bhadrak, Kendrapara, Jagatsinghpur).
 
-Directly demonstrates the 97.8% area reduction:
+Directly demonstrates the geometric area footprint reduction:
 Broad District Warning (Avg 3,500 - 4,500 sq km) vs AERO-TRACK 5-km Pinpoint Footprint (78.5 sq km).
 """
 
@@ -163,7 +163,7 @@ class CoastalDistrictsEngine:
                 "total_districts": len(cls.DISTRICT_BOUNDARIES),
                 "total_district_area_km2": sum(d["area_km2"] for d in cls.DISTRICT_BOUNDARIES),
                 "pinpoint_area_km2": 78.5,
-                "overall_area_reduction_pct": 97.8,
+                "overall_area_reduction_pct": round((1.0 - 78.54 / 3500.0) * 100.0, 2),
                 "census_source": "Census of India 2011"
             },
             "features": features
