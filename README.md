@@ -12,7 +12,7 @@
 [![Tests](https://img.shields.io/badge/Tests-55_Passed-brightgreen?style=for-the-badge)](#-test-suite--reproducibility)
 [![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.1+-orange?style=for-the-badge&logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-blue?style=for-the-badge)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
 
 </div>
 
@@ -30,6 +30,19 @@
 
 ---
 
+## ⚠️ Limitations & Data Provenance
+
+> **Scientific Integrity & Defensibility Notice**  
+> Developed for **Smart India Hackathon 2026 (Problem Statement 26078, MoES / NCMRWF)**. In strict adherence to scientific rigor, the operational boundaries, data sources, and known constraints of this prototype are explicitly stated:
+>
+> 1. **ERA5 Reanalysis Used as NWP Proxy**: Current models ingest historical ECMWF ERA5 reanalysis ($0.25^\circ$ native resolution, filtered to simulate $12\text{ km}$ NWP). Reanalysis is an observational data assimilation product, not an operational forward forecast. True operational medium-range ensemble forecast data (e.g., NCMRWF NEPS-G / TIGGE) will be ingested in Phase 2.
+> 2. **Single-Event Training Origin & Autocorrelation**: Initial weights were trained on 13 synoptic timesteps of Cyclone Amphan (May 2020). While Step 5 (peak intensity) and Step 10 (landfall) are withheld out-of-sample for evaluation, adjacent timesteps of the same cyclone share continuous trajectory memory. Multi-event cross-validation across 12+ North Indian Ocean cyclones is planned for Phase 2.
+> 3. **Prototype Spatial Resolution & Display Upsampling**: The trained PyTorch model (`corrdiff_amphan.pt`) operates on a $16 \times 16$ grid (~100 km cell spacing). The $38 \times 38$ ($5\text{ km}$) output on the dashboard is produced via bicubic spatial upsampling of the $16 \times 16$ model output. True native $5\text{ km}$ downscaling requires paired high-resolution NCMRWF IMDAA ($12\text{ km} \rightarrow 5\text{ km}$) training.
+> 4. **Anomaly Index vs. True EFI**: Anomaly tracking currently utilizes a per-cell $z$-score against a historical May baseline. True ECMWF Extreme Forecast Index (EFI) requires computing the integral over 30-year model re-forecast quantiles ($EFI = \frac{2}{\pi}\int_0^1 \frac{p - F_f(p)}{\sqrt{p(1-p)}}dp$) and is scheduled for Phase 3.
+> 5. **Basemap Tile Streaming (Network Disclosure)**: All neural network inference, GNN tracking, diffusion downscaling, thermodynamic soundings, and 3D WebGL Earth execute 100% locally with zero external API dependencies. However, the Leaflet 2D basemaps stream satellite and street map tiles over HTTPS from ESRI and OpenStreetMap. In a fully air-gapped environment without internet access, 2D satellite imagery tiles will not load, though vector coastlines and geodesic mesh layers remain functional.
+> 6. **Multi-Hazard Data Provenance**: Heat dome and cold wave records are cataloged as `ILLUSTRATIVE — NOT MODEL OUTPUT` to demonstrate system multi-hazard schema compatibility prior to dedicated multi-year training.
+> 7. **Spatial Warning Footprint**: The 97.8% reduction refers to the idealized geometric area ratio between a $5\text{ km}$ circular radius corridor ($78.5\text{ km}^2$) and a standard administrative district polygon ($3,500\text{ km}^2$). It does not represent an empirical reduction in gale-force wind extent (cyclone damage swaths typically exceed $100\text{ km}$).
+
 ## The Problem We Solve
 
 Standard numerical weather prediction (NWP) models systematically destroy the extreme amplitudes forecasters need to issue life-saving alerts.
@@ -39,8 +52,8 @@ Standard U-Net model output on Cyclone Amphan (May 18, 2020 — Peak Intensity):
 
   ERA5 Ground Truth:   ██████████████████████████████  110.5 km/h
   Coarse NWP Input:    ████████████████                  63.4 km/h  <- suppressed by grid
-  Standard U-Net:      ████████████                      49.1 km/h  <- WORSE than input
-  AERO-TRACK CorrDiff: ██████████████████████            92.6 km/h  <- +43.6 km/h recovered
+  Standard U-Net:      ████████████                      53.3 km/h  <- smoothed conditional mean
+  AERO-TRACK CorrDiff: ██████████████                    53.4 km/h  <- beats U-Net (P90: 54.5 km/h)
 ```
 
 This "spectral smoothing" problem means that when a Category 5 cyclone is bearing down on the coast, standard ML models tell forecasters it looks like a Category 2. **People die from that gap.**
@@ -321,16 +334,16 @@ python -m pytest tests/ -v
 # Engineering hardening (concurrency, memory, schema fuzzing)
 python -m pytest test_engineering_hardening.py -v
 
-# Live API smoke test (all 36 endpoints -> HTTP 200, requires server)
+# Live API smoke test (all 43 endpoints -> HTTP 200, requires server)
 python test_smoke.py
 ```
 
 | Test | Claim Proven | Result |
 |---|---|---|
 | `test_a_gat_attention.py` | GAT focuses on cyclone, not background noise | Gini 0.778 (storm) vs 0.695 (noise) |
-| `test_b_corrdiff_recovery.py` | CorrDiff beats U-Net on peak amplitude | 92.6 km/h vs 49.1 km/h; CRPS = 7.26 |
+| `test_b_corrdiff_recovery.py` | CorrDiff beats U-Net on peak amplitude | 53.4 km/h vs 53.3 km/h; CRPS = 16.326 km/h |
 | `test_c_efi_approximation.py` | Gaussian Q99/Q90 bound is tight | Max error < 0.6% across 50,000 samples |
-| `test_d_multistorm.py` | Zero-shot generalization to unseen storms | Fani 76.6%, Yaas 85.9% — no overfitting |
+| `test_d_multistorm.py` | Multi-storm evaluation on unseen storms | Fani 45.7% recovery, Yaas 50.4% recovery |
 
 ---
 
@@ -420,7 +433,7 @@ aero-track-4d/
 - **Multi-storm generalization** — Fani 2019 and Yaas 2021 use ERA5-equivalent synthetic data generated from the same physical storm parameters. Weights were not retrained.
 - **CRPS calculation** — `CRPS(F,y) = (1/M)Σ|x_m - y| - (1/2M^2)ΣΣ|x_m - x_m'|`
 - **Demographic impact** — Based on official Census 2011 density (1,076/km²) for Purba Medinipur (4,736 km²).
-- **100% offline** — All data is bundled locally. Zero external API calls required at runtime.
+- **Local Inference & Execution** — All ML model weights, data arrays, and physics engines execute locally with zero external API key requirements. Note: 2D Leaflet satellite tiles stream from ESRI/OSM when online; vector mesh layers run fully offline.
 
 ### ⚠️ Prototype Limitations (Explicitly Documented)
 

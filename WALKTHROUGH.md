@@ -6,6 +6,19 @@
 
 ---
 
+## ⚠️ Limitations & Data Provenance
+
+> **Scientific Integrity & Defensibility Notice**  
+> Developed for **Smart India Hackathon 2026 (Problem Statement 26078, MoES / NCMRWF)**. In strict adherence to scientific rigor, the operational boundaries, data sources, and known constraints of this prototype are explicitly stated:
+>
+> 1. **ERA5 Reanalysis Used as NWP Proxy**: Current models ingest historical ECMWF ERA5 reanalysis ($0.25^\circ$ native resolution, filtered to simulate $12\text{ km}$ NWP). Reanalysis is an observational data assimilation product, not an operational forward forecast. True operational medium-range ensemble forecast data (e.g., NCMRWF NEPS-G / TIGGE) will be ingested in Phase 2.
+> 2. **Single-Event Training Origin & Autocorrelation**: Initial weights were trained on 13 synoptic timesteps of Cyclone Amphan (May 2020). While Step 5 (peak intensity) and Step 10 (landfall) are withheld out-of-sample for evaluation, adjacent timesteps of the same cyclone share continuous trajectory memory. Multi-event cross-validation across 12+ North Indian Ocean cyclones is planned for Phase 2.
+> 3. **Prototype Spatial Resolution & Display Upsampling**: The trained PyTorch model (`corrdiff_amphan.pt`) operates on a $16 \times 16$ grid (~100 km cell spacing). The $38 \times 38$ ($5\text{ km}$) output on the dashboard is produced via bicubic spatial upsampling of the $16 \times 16$ model output. True native $5\text{ km}$ downscaling requires paired high-resolution NCMRWF IMDAA ($12\text{ km} \rightarrow 5\text{ km}$) training.
+> 4. **Anomaly Index vs. True EFI**: Anomaly tracking currently utilizes a per-cell $z$-score against a historical May baseline. True ECMWF Extreme Forecast Index (EFI) requires computing the integral over 30-year model re-forecast quantiles ($EFI = \frac{2}{\pi}\int_0^1 \frac{p - F_f(p)}{\sqrt{p(1-p)}}dp$) and is scheduled for Phase 3.
+> 5. **Basemap Tile Streaming (Network Disclosure)**: All neural network inference, GNN tracking, diffusion downscaling, thermodynamic soundings, and 3D WebGL Earth execute 100% locally with zero external API dependencies. However, the Leaflet 2D basemaps stream satellite and street map tiles over HTTPS from ESRI and OpenStreetMap. In a fully air-gapped environment without internet access, 2D satellite imagery tiles will not load, though vector coastlines and geodesic mesh layers remain functional.
+> 6. **Multi-Hazard Data Provenance**: Heat dome and cold wave records are cataloged as `ILLUSTRATIVE — NOT MODEL OUTPUT` to demonstrate system multi-hazard schema compatibility prior to dedicated multi-year training.
+> 7. **Spatial Warning Footprint**: The 97.8% reduction refers to the idealized geometric area ratio between a $5\text{ km}$ circular radius corridor ($78.5\text{ km}^2$) and a standard administrative district polygon ($3,500\text{ km}^2$). It does not represent an empirical reduction in gale-force wind extent (cyclone damage swaths typically exceed $100\text{ km}$).
+
 ## 🌟 Executive Pitch: The Problem & Why Existing Systems Fail
 
 Numerical Weather Prediction (NWP) outputs in the 3- to 10-day medium range suffer from two compounding challenges:
@@ -27,7 +40,7 @@ AERO-TRACK 4D delivers an automated, physics-informed hybrid AI pipeline structu
 │ • Eliminates 2D planar map projection distortion across the spherical Earth     │
 │ • True icosahedron subdivision (Level 6: 269 nodes, 742 edges, 0.439% variance)  │
 │ • Trainable multi-head Graph Attention Network (GAT) over (u, v, mslp, t2m)     │
-│ • Non-parametric ECMWF CDF integral EFI + Shift-of-Tails (SOT)                   │
+│ • Extreme Forecast Index (EFI) z-score anomaly against May baseline              │
 │ • Kalman Filter + Hungarian Assignment (22.7 km mean held-out track error)      │
 │ • 3D Cartesian weighted centroid aggregation & dynamic 4D bounding boxes        │
 └────────────────────────────────────────┬────────────────────────────────────────┘
@@ -46,7 +59,7 @@ AERO-TRACK 4D delivers an automated, physics-informed hybrid AI pipeline structu
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │ STAGE 3: Zero-Alert-Fatigue NDRF Dispatch & Automated Operations Dashboard       │
 │ • Replaces 3,500 km² district warnings with 5 km radius impact zones (78.5 km²) │
-│ • 97.8% False-Alarm Area Reduction eliminating public alert fatigue              │
+│ • 97.8% Geometric Area Footprint Reduction (78.5 km² vs 3,500 km²)              │
 │ • Automated MoES/IMD National Cyclone Advisory Bulletin generation              │
 │ • Verified on Held-Out Test Split (Peak Super Cyclone & Landfall Timesteps)      │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -248,12 +261,12 @@ This script is structured around the 5 persistent views. Follow this exact flow 
 ### ⏱️ Minute 4:45 – 5:30 // View 6: Methodology & Limitations (Scientific Integrity)
 - **What to show**: Click **"Methodology & Data"** in the top navigation.
 - **The Talking Point**:
-  > *"Every single deliverable in Problem Statement 26078 is verified, backed by a live REST API running completely offline. Furthermore, we maintain complete transparency regarding our assumptions, training splits, and physical limitations."*
+  > *"Every single deliverable in Problem Statement 26078 is verified, backed by a live local REST API. Furthermore, we maintain complete transparency regarding our assumptions, training splits, and physical limitations."*
 - **Action**:
   - Walk the judges through the **Deliverables Checklist Table**: every deliverable is verified with endpoint and screen name.
   - Show the **Limitations & Threats to Validity** section: candidly documenting the 16x16 coarse grid, single primary case study (Amphan), single out-of-sample train/test split, and the ERA5 resolution ceiling.
-  - Conclude with the **Offline Ground Rule**:
-    > *"This entire demo runs with zero external internet calls. All data stems from genuine ECMWF ERA5 reanalysis and NOAA IBTrACS archives. AERO-TRACK 4D is production-ready, scientifically grounded, and ready to deploy."*
+  - Conclude with the **Offline Execution & Local Modeling Ground Rule**:
+    > *"All neural inference, tracking, diffusion, and MetPy thermodynamic audits run 100% locally with zero external API dependencies. All data stems from genuine ECMWF ERA5 reanalysis and NOAA IBTrACS archives. Note: 2D satellite basemap imagery streams tiles online from ESRI/OSM; full vector layers and 3D globe run offline."*
 
 ---
 
