@@ -73,6 +73,9 @@ class IMDBulletinGenerator:
         metric_val = step_data.get("metric_val", 47.6)
         loc_name = loc.get("name", "Northwest India / Rajasthan Zone")
         return f"""========================================================================================
+*** SIMULATED ADVISORY — PROTOTYPE SYSTEM FOR RESEARCH & DEMONSTRATION ONLY ***
+*** NOT AN OFFICIAL IMD PRODUCT — DO NOT USE FOR OPERATIONAL WARNING DISPATCH ***
+========================================================================================
                       GOVERNMENT OF INDIA - MINISTRY OF EARTH SCIENCES
                          INDIA METEOROLOGICAL DEPARTMENT (IMD)
                    NATIONAL DISASTER MANAGEMENT AUTHORITY (NDMA), NEW DELHI
@@ -123,6 +126,9 @@ Contact: MoES / NDMA Emergency Operations Room | SIH 26078 Production System
         metric_val = step_data.get("metric_val", 1.9)
         loc_name = loc.get("name", "Indo-Gangetic Plain Agricultural Zone")
         return f"""========================================================================================
+*** SIMULATED ADVISORY — PROTOTYPE SYSTEM FOR RESEARCH & DEMONSTRATION ONLY ***
+*** NOT AN OFFICIAL IMD PRODUCT — DO NOT USE FOR OPERATIONAL WARNING DISPATCH ***
+========================================================================================
                       GOVERNMENT OF INDIA - MINISTRY OF EARTH SCIENCES
                          INDIA METEOROLOGICAL DEPARTMENT (IMD)
                    AGRICULTURAL METEOROLOGY DIVISION, PUNE / NEW DELHI
@@ -169,6 +175,9 @@ Contact: MoES / Agrimet Emergency Operations Room | SIH 26078 Production System
     @staticmethod
     def _generate_bulletin_english(bulletin_no, timestamp, stage, category, centroid, wind_kmh, wind_kts, mslp_hpa, step_data, alert_data, loc, refine) -> str:
         bulletin = f"""========================================================================================
+*** SIMULATED ADVISORY — PROTOTYPE SYSTEM FOR RESEARCH & DEMONSTRATION ONLY ***
+*** NOT AN OFFICIAL IMD PRODUCT — DO NOT USE FOR OPERATIONAL WARNING DISPATCH ***
+========================================================================================
                       GOVERNMENT OF INDIA - MINISTRY OF EARTH SCIENCES
                          INDIA METEOROLOGICAL DEPARTMENT (IMD)
                           CYCLONE WARNING DIVISION, NEW DELHI
@@ -230,6 +239,9 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language:
     @staticmethod
     def _generate_bulletin_hindi(bulletin_no, timestamp, stage, category, centroid, wind_kmh, wind_kts, mslp_hpa, step_data, alert_data, loc, refine) -> str:
         bulletin = f"""========================================================================================
+*** सिमुलेटेड बुलेटिन — केवल अनुसंधान एवं तकनीकी प्रदर्शन हेतु (प्रोटोटाइप) ***
+*** आधिकारिक आईएमडी उत्पाद नहीं — वास्तविक आपदा चेतावनी हेतु मान्य नहीं ***
+========================================================================================
                           भारत सरकार - पृथ्वी विज्ञान मंत्रालय
                          भारत मौसम विज्ञान विभाग (आईएमडी)
                             चक्रवात चेतावनी प्रभाग, नई दिल्ली
@@ -288,6 +300,9 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language:
     @staticmethod
     def _generate_bulletin_bengali(bulletin_no, timestamp, stage, category, centroid, wind_kmh, wind_kts, mslp_hpa, step_data, alert_data, loc, refine) -> str:
         bulletin = f"""========================================================================================
+*** সিমুলেটেড বুলেটিন — গবেষণা ও কারিগরি প্রদর্শনের জন্য (প্রোটোটাইপ) ***
+*** সরকারি আইএমডি পণ্য নয় — জরুরি সতর্কতার কাজে ব্যবহারযোগ্য নয় ***
+========================================================================================
                               ভারত সরকার - ভূবিজ্ঞান মন্ত্রক
                              ভারত আবহাওয়া অধিদপ্তর (আইএমডি)
                                ঘূর্ণিঝড় সতর্কতা বিভাগ, নতুন দিল্লি
@@ -346,6 +361,9 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language:
     @staticmethod
     def _generate_bulletin_odia(bulletin_no, timestamp, stage, category, centroid, wind_kmh, wind_kts, mslp_hpa, step_data, alert_data, loc, refine) -> str:
         bulletin = f"""========================================================================================
+*** ସିମୁଲେଟେଡ୍ ବୁଲେଟିନ୍ — କେବଳ ଗବେଷଣା ଏବଂ ପ୍ରଦର୍ଶନ ପାଇଁ (ପ୍ରୋଟୋଟାଇପ୍) ***
+*** ସରକାରୀ ଆଇଏମଡି ଉତ୍ପାଦ ନୁହେଁ — ପ୍ରକୃତ ବିପର୍ଯ୍ୟୟ ଚେତାବନୀ ପାଇଁ ବ୍ୟବହାରଯୋଗ୍ୟ ନୁହେଁ ***
+========================================================================================
                                 ଭାରତ ସରକାର - ପୃଥିବୀ ବିଜ୍ଞାନ ମନ୍ତ୍ରଣାଳୟ
                                ଭାରତ ପାଣିପାଗ ବିଭାଗ (ଆଇଏମଡି)
                                  ବାତ୍ୟା ଚେତାବନୀ ବିଭାଗ, ନୂଆଦିଲ୍ଲୀ
@@ -430,7 +448,9 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language:
 <meta charset="UTF-8">
 <title>IMD National Cyclone Advisory Bulletin No. {bulletin_no:02d}</title>
 <style>
-  body {{ font-family: 'Times New Roman', serif; margin: 30px; color: #111; line-height: 1.4; }}
+  body {{ font-family: 'Times New Roman', serif; margin: 30px; color: #111; line-height: 1.4; position: relative; }}
+  .watermark {{ position: fixed; top: 35%; left: 5%; width: 90%; transform: rotate(-25deg); font-size: 38pt; color: rgba(220, 38, 38, 0.12); font-weight: bold; pointer-events: none; z-index: 1000; text-align: center; line-height: 1.2; text-transform: uppercase; }}
+  .simulated-banner {{ background: #fee2e2; border: 2px solid #ef4444; color: #b91c1c; font-weight: bold; text-align: center; padding: 8px 12px; margin-bottom: 16px; font-size: 10.5pt; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px; }}
   .header {{ text-align: center; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 16px; }}
   .header h2 {{ margin: 0; font-size: 16pt; text-transform: uppercase; letter-spacing: 0.5px; }}
   .header h3 {{ margin: 4px 0; font-size: 13pt; font-weight: normal; }}
@@ -442,11 +462,15 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language:
   th {{ background: #eee; font-weight: bold; }}
   .alert-banner {{ border: 2px solid #b91c1c; background: #fef2f2; padding: 10px; margin: 12px 0; font-weight: bold; color: #991b1b; font-size: 10pt; }}
   .census-box {{ background: #eff6ff; border: 1px solid #3b82f6; padding: 10px; margin: 12px 0; font-size: 9pt; }}
-  .footer {{ margin-top: 24px; border-top: 1px solid #666; padding-top: 8px; font-size: 8.5pt; text-align: center; color: #555; }}
+  .footer {{ margin-top: 24px; border-top: 2px solid #b91c1c; padding-top: 8px; font-size: 9pt; text-align: center; color: #7f1d1d; background: #fef2f2; padding: 8px; border-radius: 4px; }}
   @media print {{ body {{ margin: 10mm; }} }}
 </style>
 </head>
 <body>
+<div class="watermark">SIMULATED<br><span style="font-size: 22pt;">NOT AN OFFICIAL IMD PRODUCT</span></div>
+<div class="simulated-banner">
+  ⚠️ SIMULATED ADVISORY &bull; PROTOTYPE RESEARCH SYSTEM (SIH 26078) &bull; NOT AN OFFICIAL IMD PRODUCT &bull; DO NOT DISPATCH OPERATIONAL EVACUATIONS
+</div>
 <div class="header">
   <h2>Government of India &bull; Ministry of Earth Sciences</h2>
   <h3>India Meteorological Department &bull; Cyclone Warning Division, New Delhi</h3>
@@ -479,13 +503,13 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language:
   {action}
 </div>
 
-<h4>3. Zero Alert Fatigue: 5 km Impact Zone vs District Baseline</h4>
+<h4>3. Spatial Impact: 5 km Impact Zone vs District Baseline</h4>
 <div class="census-box">
-  <strong>Demographic Precision Analysis (Grounded in Census of India 2011):</strong><br>
-  &bull; Reference District: <em>Purba Medinipur (East Midnapore), West Bengal</em> (Census 2011 Density: 1,076 persons/km&sup2; | Area: 4,736 km&sup2; | Est. Pop: ~5,095,875)<br>
-  &bull; Broad District-Wide Warning Impact: ~3,500 km&sup2; area &rarr; <strong>~3,766,000 citizens placed under disruption/curfew</strong><br>
-  &bull; AERO-TRACK Pinpoint 5 km Warning Footprint: 78.5 km&sup2; radius &rarr; <strong>~84,466 citizens directly in severe eyewall path</strong><br>
-  &bull; <strong>Net Population Shielded from False-Alarm Evacuation Panic: 3,681,534 citizens (97.8% False-Alarm Reduction)</strong>
+  <strong>Spatial Footprint Refinement:</strong><br>
+  &bull; Reference Sector: <em>Purba Medinipur Coastal Belt, West Bengal</em> (Census 2011 Area: 4,736 km&sup2;)<br>
+  &bull; Broad District Warning Area: ~3,500 km&sup2; division-wide polygon<br>
+  &bull; AERO-TRACK Pinpoint 5 km Footprint: 78.5 km&sup2; circular impact zone (Radius: 5.0 km)<br>
+  &bull; <strong>Geometric Area Footprint Reduction: 97.8% reduction in alert footprint area vs broad district polygon</strong>
 </div>
 
 <h4>4. Operational Directives for First Responders (NDRF &amp; SDMA)</h4>
@@ -496,7 +520,8 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language:
 </ul>
 
 <div class="footer">
-  Official MoES / NCMRWF Automated Advisory &bull; Grounded in ECMWF ERA5 Reanalysis &amp; NOAA IBTrACS v04r01 (Agency: IMD New Delhi) &bull; SIH 26078
+  <strong>⚠️ SIMULATED ADVISORY &bull; NOT AN OFFICIAL GOVERNMENT WARNING</strong><br>
+  National Centre for Medium Range Weather Forecasting (NCMRWF) &bull; Ministry of Earth Sciences &bull; SIH 26078 Prototype
 </div>
 </body>
 </html>"""
