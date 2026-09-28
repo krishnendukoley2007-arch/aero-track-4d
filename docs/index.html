@@ -1546,78 +1546,42 @@
         <!-- Deliverables Checklist Table -->
         <div class="method-card rubric-checklist-card">
           <div class="card-headline">
-            <span><i data-lucide="file-check"></i> Official PS Deliverables Compliance Rubric</span>
-            <span class="verified-tag">All 10 Items Verified</span>
+            <span><i data-lucide="file-check"></i> Official PS Deliverables Compliance Rubric (4 Core Deliverables)</span>
+            <span class="verified-tag">4 PS Deliverables Aligned</span>
           </div>
           <table class="rubric-table font-mono">
             <thead>
               <tr>
-                <th>Deliverable</th>
-                <th>Implementation in AERO-TRACK 4D</th>
-                <th>Live Endpoint / Screen</th>
-                <th>Status</th>
+                <th style="width: 18%;">PS Deliverable</th>
+                <th style="width: 32%;">What Exists in AERO-TRACK 4D</th>
+                <th style="width: 25%;">How Verified</th>
+                <th style="width: 25%;">Known Limitations</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Automatic Anomaly Onset</td>
-                <td>Non-parametric ECMWF CDF integral EFI + Shift-of-Tails against pre-monsoon climatology</td>
-                <td>Track &amp; Timeline / <code>/api/track</code></td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
+                <td><strong>1. The Tracking Core</strong></td>
+                <td>Spatio-Temporal GNN on 269-node geodesic mesh patch (742 edges, 127.6 km spacing, 4,929 trainable GAT parameters). Computes dynamic 4D bounding boxes and tracks anomaly centroids over 13 evaluation steps across 5 days (May 16–21, 2020).</td>
+                <td><code>/api/track</code>, <code>/api/gnn-mesh-state</code><br><span class="text-green">50.9 km mean error vs NOAA IBTrACS</span> (8.7 km landfall error on held-out Step 10). Verified in <a href="results/audit_metrics.json" target="_blank" style="color: var(--accent-cyan);">audit_metrics.json</a>.</td>
+                <td>Evaluated on ERA5 reanalysis as NWP proxy rather than operational numerical forecasts. Climatological EFI uses z-score baseline; true 30-year climatological CDF integral planned for Phase 2/3.</td>
               </tr>
               <tr>
-                <td>Complete 4D Stream Tracking</td>
-                <td>13-step 4D spatio-temporal trajectory across genesis, peak, and landfall</td>
-                <td>Overview &amp; Timeline / <code>/api/track</code></td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
+                <td><strong>2. The Downscaling Core</strong></td>
+                <td>Physics-informed CorrDiff conditional diffusion model (360k parameters: U-Net mean predictor + Langevin diffusion corrector) downscaling 12 km coarse NWP proxy fields to 5 km display grid.</td>
+                <td><code>/api/downscale</code><br><span class="text-green">53.4 km/h peak wind</span> (beats U-Net 53.3 km/h by +0.1 km/h) on held-out Amphan Step 5; CRPS = 16.33 km/h; FSS = 0.106. Verified in <a href="results/audit_metrics.json" target="_blank" style="color: var(--accent-cyan);">audit_metrics.json</a>.</td>
+                <td>Active checkpoint runs natively on 16×16 grid; 38×38 display grid is bicubic spatial upsampling, not 5km-native inference. Coarse NWP input is simulated via Gaussian blurring (σ=1.2). Native 5 km resolution requires NCMRWF IMDAA 12 km → 5 km paired training (Phase 4).</td>
               </tr>
               <tr>
-                <td>Dynamic 4D Bounding Boxes</td>
-                <td>Spherical geodesic anomaly component bounding box drawn dynamically</td>
-                <td>Leaflet Map / <code>/api/gnn-mesh-state</code></td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
+                <td><strong>3. Operations Dashboard</strong></td>
+                <td>Full 6-view operations room with Dual 2D Leaflet and 3D WebGL Three.js Earth, interactive swipe comparison slider, animated wind vectors, and 10-member medium-range ensemble outlook.</td>
+                <td>Interactive browser test suite (43 passed); client-side WebGL &amp; Leaflet execution at 60 FPS; static GitHub Pages deployment mode.</td>
+                <td>Satellite basemap imagery requires internet connection to stream tiles from ESRI/OSM; offline mode falls back to vector coastlines and geodesic mesh without aerial photography.</td>
               </tr>
               <tr>
-                <td>12 km &rarr; 5 km Downscaling</td>
-                <td>CorrDiff score-based diffusion super-resolving to 38x38 5 km subgrid array</td>
-                <td>Downscaling Lab / <code>/api/downscale</code></td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
-              </tr>
-              <tr>
-                <td>Amplitude Preservation</td>
-                <td>Recovers 102.1 km/h eyewall peak (92% of ERA5) vs 56.5 km/h U-Net smoothing</td>
-                <td>Downscaling Lab / Benchmark Table</td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
-              </tr>
-              <tr>
-                <td>Physics Conservation Checks</td>
-                <td>Continuity divergence penalty (3.2&times;10⁻⁵ s⁻¹) + Moisture Flux Convergence</td>
-                <td>Physics Telemetry / Loss Function</td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
-              </tr>
-              <tr>
-                <td>Prioritized Severity Scoring</td>
-                <td>EFI composite score mapping directly to uniform 4-tier alert scale</td>
-                <td>Alert &amp; Bulletin / <code>/api/alert</code></td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
-              </tr>
-              <tr>
-                <td>Official Report Generation</td>
-                <td>Automated IMD National Cyclone Bulletin in 4 languages (EN, HI, BN, OR)</td>
-                <td>Alert &amp; Bulletin / <code>/api/bulletin/download</code></td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
-              </tr>
-              <tr>
-                <td>Interactive Operations Dashboard</td>
-                <td>Full 6-view operations room with Dual 2D/3D WebGL Earth, swipe comparison, &amp; basemap toggles</td>
-                <td>Full Application / Port 8000</td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
-              </tr>
-              <tr>
-                <td>3–10 Day Medium-Range Ensemble Spread</td>
-                <td>10-member EPS cone of uncertainty with chaotic power law &sigma;(t) &sim; t¹&period;² calibrated to CorrDiff spread</td>
-                <td>Medium-Range Outlook / <code>/api/medium-range-ensemble</code></td>
-                <td><span class="status-pass">✓ VERIFIED</span></td>
+                <td><strong>4. The Alerting API</strong></td>
+                <td>FastAPI REST backend with 34 endpoints. Generates 5 km hyper-local pinpoint alert envelopes, multilingual IMD-formatted advisory bulletins (EN, HI, BN, OR), OASIS CAP v1.2 XML, and NDMA cell broadcast payloads.</td>
+                <td><code>POST /api/alert</code>, <code>/api/bulletin</code>, <code>/api/alert/cap</code><br><span class="text-green">All 43 smoke tests passing HTTP 200</span>; 22 engineering hardening contracts verified.</td>
+                <td>97.8% footprint reduction is an idealized geometric comparison (78.5 km² 5 km circle vs 3,500 km² district polygon). Severe cyclone gale winds physically span 100+ km; field-derived threshold exceedance polygons are planned for Phase 5.</td>
               </tr>
             </tbody>
           </table>

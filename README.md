@@ -257,6 +257,17 @@ An offline AI assistant built on atmospheric science domain knowledge:
 | **Outlook** | 10-member ensemble fan · Cone of Uncertainty σ(t)~t^1.2 · EPS roster |
 | **Rubric** | PS 26078 compliance matrix · full mathematical formulation · transparency statement |
 
+### Official Problem Statement Deliverables Compliance Matrix
+
+Aligned directly to the 4 deliverables mandated by SIH 2026 PS 26078 (MoES / NCMRWF):
+
+| PS Deliverable | What Exists in AERO-TRACK 4D | How Verified | Known Limitations |
+|---|---|---|---|
+| **1. Tracking Core** | Spatio-Temporal GNN on 269-node geodesic mesh patch (742 edges, 127.6 km spacing, 4,929 trainable GAT parameters). Computes dynamic 4D bounding boxes and tracks anomaly centroids over 13 evaluation steps across 5 days (May 16–21, 2020). | `/api/track`, `/api/gnn-mesh-state`; **50.9 km mean error vs NOAA IBTrACS** (8.7 km landfall error on held-out Step 10). Ground truth in [`results/audit_metrics.json`](results/audit_metrics.json). | Evaluated on ERA5 reanalysis as NWP proxy rather than operational numerical forecasts. Climatological EFI uses z-score baseline; true 30-year climatological CDF integral planned for Phase 2/3. |
+| **2. Downscaling Core** | Physics-informed CorrDiff conditional diffusion model (360k parameters: U-Net mean predictor + Langevin diffusion corrector) downscaling 12 km coarse NWP proxy fields to 5 km display grid. | `/api/downscale`; **53.4 km/h peak wind** (beats U-Net 53.3 km/h by +0.1 km/h) on held-out Amphan Step 5; CRPS = 16.33 km/h; FSS = 0.106. Ground truth in [`results/audit_metrics.json`](results/audit_metrics.json). | Active checkpoint runs natively on 16×16 grid; 38×38 display grid is bicubic spatial upsampling, not 5km-native inference. Coarse NWP input is simulated via Gaussian blurring (σ=1.2). Native 5 km resolution requires NCMRWF IMDAA 12 km → 5 km paired training (Phase 4). |
+| **3. Operations Dashboard** | Full 6-view operations room with Dual 2D Leaflet and 3D WebGL Three.js Earth, interactive swipe comparison slider, animated wind vectors, and 10-member medium-range ensemble outlook. | Automated smoke tests (43 passed); client-side WebGL & Leaflet execution at 60 FPS; static GitHub Pages deployment mode. | Satellite basemap imagery requires internet connection to stream tiles from ESRI/OSM; offline mode falls back to vector coastlines and geodesic mesh without aerial photography. |
+| **4. Alerting API** | FastAPI REST backend with 34 endpoints. Generates 5 km hyper-local pinpoint alert envelopes, multilingual IMD-formatted advisory bulletins (EN, HI, BN, OR), OASIS CAP v1.2 XML, and NDMA cell broadcast payloads. | `POST /api/alert`, `/api/bulletin`, `/api/alert/cap`; **All 43 smoke tests passing HTTP 200**; 22 engineering hardening contracts verified. | 97.8% footprint reduction is an idealized geometric comparison (78.5 km² 5 km circle vs 3,500 km² district polygon). Severe cyclone gale winds physically span 100+ km; field-derived threshold exceedance polygons are planned for Phase 5. |
+
 ### Alert Area Precision: 5 km Pinpoint vs. District-Wide Warning
  
 Standard district-wide cyclone warnings cover broad administrative boundaries (e.g., Purba Medinipur, 4,736 km² or typical coastal district ~3,500 km²).  
