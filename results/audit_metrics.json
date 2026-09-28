@@ -1,0 +1,126 @@
+{
+  "spherical_gnn": {
+    "mesh_type": "Regional patch on icosphere subdivision-6",
+    "domain_lat": [
+      8.0,
+      26.0
+    ],
+    "domain_lon": [
+      78.0,
+      96.0
+    ],
+    "total_nodes": 269,
+    "total_edges": 742,
+    "cell_area_variance_percent": 0.439,
+    "node_spacing_km": {
+      "min": 111.15,
+      "mean": 127.57,
+      "max": 131.8
+    },
+    "gat_trainable_parameters": 4929,
+    "gat_weights_file_exists": true
+  },
+  "tracking_and_anomaly": {
+    "climatology_source": "ECMWF ERA5 Reanalysis (Bay of Bengal Pre-Monsoon Baseline)",
+    "climatology_shape": [
+      16,
+      16
+    ],
+    "total_eval_steps": 13,
+    "all_step_track_errors_km": [
+      83.0,
+      37.5,
+      57.3,
+      25.0,
+      59.8,
+      36.6,
+      42.3,
+      39.2,
+      67.0,
+      60.8,
+      8.7,
+      26.6,
+      117.3
+    ],
+    "mean_track_error_km": 50.85,
+    "step_5_peak_error_km": 36.6,
+    "step_10_landfall_error_km": 8.7,
+    "held_out_mean_track_error_km": 22.65
+  },
+  "data_loader": {
+    "event_id": "amphan_2020",
+    "grid_shape": [
+      16,
+      16
+    ],
+    "total_timestamps": 168,
+    "train_samples_count": 142,
+    "test_samples_count": 26,
+    "test_hour_ranges": "72-84 (Peak) and 120-132 (Landfall)",
+    "coarse_filter": "gaussian_filter sigma=1.2 (wind, pres) and sigma=1.0 (precip) with scale 0.75-0.85",
+    "variables_loaded": [
+      "wind_speed_10m",
+      "wind_direction_10m (u,v)",
+      "surface_pressure",
+      "precipitation",
+      "temperature_2m"
+    ],
+    "upper_air_levels_available": false,
+    "humidity_q_available": false
+  },
+  "ensemble_medium_range": {
+    "total_members": 10,
+    "is_synthetic_perturbation": true,
+    "real_forecast_data_used": false,
+    "chaos_formula": "sigma(t) = sigma_0 * (t / 24h)^1.2"
+  },
+  "downscaling_corrdiff": {
+    "model_parameters": {
+      "total": 360872,
+      "mean_predictor": 176164,
+      "diffusion_corrector": 184708
+    },
+    "amphan_step_5_measured": {
+      "native_era5_target_kmh": 110.5,
+      "coarse_nwp_kmh": 63.4,
+      "standard_unet_kmh": 53.3,
+      "corrdiff_ensemble_mean_kmh": 53.4,
+      "corrdiff_p90_kmh": 54.5,
+      "corrdiff_gain_over_unet_kmh": 0.0,
+      "recovery_percent_corrdiff_mean": 48.3,
+      "crps_wind_kmh": 16.326,
+      "fss_precipitation": 0.106,
+      "physics_diagnostic_score": 36.4
+    },
+    "multistorm_measured": {
+      "fani_2019": {
+        "era5_target_kmh": 111.1,
+        "corrdiff_mean_kmh": 50.8,
+        "recovery_percent": 45.7,
+        "crps_wind_kmh": 14.803,
+        "fss_precipitation": 0.212
+      },
+      "yaas_2021": {
+        "era5_target_kmh": 92.3,
+        "corrdiff_mean_kmh": 46.5,
+        "recovery_percent": 50.4,
+        "crps_wind_kmh": 18.567,
+        "fss_precipitation": 0.659
+      }
+    },
+    "physics_loss_terms": [
+      "loss_mse",
+      "loss_l1",
+      "loss_divergence (computed on scalar wind channel pred[:, 0:1], not vector u,v)",
+      "loss_moisture_convergence (computed on -div(scalar_wind) * precip without humidity q)"
+    ]
+  },
+  "spatial_alert_and_demographics": {
+    "pinpoint_radius_km": 5.0,
+    "pinpoint_area_km2": 78.54,
+    "typical_district_area_km2": 3500.0,
+    "computed_area_reduction_percent": 97.76,
+    "false_alarm_reduction_provenance": "Pure geometric circle area ratio: 1 - (78.5 / 3500) = 97.75%",
+    "citizens_shielded_provenance": "Hardcoded in api.py: 3,766,000 - 84,500 = 3,681,500 based on assumed population and area ratio"
+  }
+}
