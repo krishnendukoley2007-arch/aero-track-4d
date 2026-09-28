@@ -15,18 +15,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/static/style.css?v=aerotrack_v6_step6">
+  <link rel="stylesheet" href="./style.css?v=aerotrack_v6_step6">
 
   <!-- Leaflet & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Lucide Icons -->
-  <script src="/static/vendor/lucide.min.js"></script>
+  <script src="./vendor/lucide.min.js"></script>
 
   <!-- Three.js & OrbitControls for 3D Earth Monitor -->
-  <script src="/static/vendor/three.min.js"></script>
-  <script src="/static/vendor/OrbitControls.js"></script>
+  <script src="./vendor/three.min.js"></script>
+  <script src="./vendor/OrbitControls.js"></script>
 </head>
 <body>
   <!-- ============================================================== -->
@@ -83,6 +83,16 @@
         </select>
       </div>
 
+      <!-- Audience Mode Switch: Citizen Safety Mode vs Forecaster MoES Mode -->
+      <div class="audience-mode-switch" id="audience-mode-switch" role="group" aria-label="Audience View Mode">
+        <button class="btn-aud-mode active" id="btn-aud-citizen" data-audience="citizen" title="Citizen Safety Mode: Clear danger alerts, plain-language summaries, emergency checklists">
+          <i data-lucide="shield-alert"></i> <span>Citizen</span>
+        </button>
+        <button class="btn-aud-mode" id="btn-aud-forecaster" data-audience="forecaster" title="Forecaster Mode: MoES/NCMRWF atmospheric physics, 5km CorrDiff diagnostics, and tensor metrics">
+          <i data-lucide="microscope"></i> <span>Forecaster</span>
+        </button>
+      </div>
+
       <div class="operational-mode-switch" id="op-mode-switch">
         <button class="btn-op-mode active" id="btn-op-live" data-op-mode="live" title="100% Real-Time Live Earth (ECMWF & NOAA GFS)">
           <span class="pulse-dot green"></span> Live Earth
@@ -93,6 +103,9 @@
       </div>
 
       <div class="header-actions">
+        <button id="btn-ai-copilot" class="btn-action btn-ai-pulse" title="AERO-AI Meteorological Copilot (100% Free Offline + Optional Gemini)">
+          <span class="icon"><i data-lucide="sparkles"></i></span> AERO-AI
+        </button>
         <button id="btn-proof-modal" class="btn-action btn-proof" title="Official Model Verification & Science Proof (SIH 26078)">
           <span class="icon"><i data-lucide="shield-check"></i></span> Proof
         </button>
@@ -172,6 +185,44 @@
           <span class="kpi-tag" id="ov-card4-label">False-Alarm Reduction</span>
           <div class="kpi-value text-green font-mono" id="ov-reduction">97.8%</div>
           <div class="kpi-sub" id="ov-reduction-sub">78.5 km² surgical zone vs 3,500 km²</div>
+        </div>
+      </div>
+
+      <!-- Citizen Mode Emergency Quick-Action Banner (Shown in Citizen Mode) -->
+      <div class="citizen-safety-card" id="citizen-safety-card">
+        <div class="safety-card-header">
+          <div class="safety-header-left">
+            <span class="safety-pulse-dot"></span>
+            <strong class="safety-title" id="safety-banner-title">IMD STAGE-3 RED WARNING &bull; ACTIVE EVACUATION DIRECTIVE</strong>
+          </div>
+          <div class="safety-helpline-chips">
+            <a href="tel:1078" class="helpline-chip" title="National Disaster Response Force"><i data-lucide="phone-call"></i> NDRF: <strong>1078</strong></a>
+            <a href="tel:1070" class="helpline-chip" title="State Disaster Management Authority"><i data-lucide="phone"></i> SDMA: <strong>1070</strong></a>
+            <a href="tel:18001801717" class="helpline-chip" title="IMD Weather Helpline"><i data-lucide="phone"></i> IMD: <strong>1800-180-1717</strong></a>
+          </div>
+        </div>
+        <div class="safety-actions-grid">
+          <div class="safety-action-item danger">
+            <div class="safety-icon"><i data-lucide="home"></i></div>
+            <div class="safety-text">
+              <strong>Move to Pucca Cyclone Shelters</strong>
+              <span id="safety-action-1-text">Kutcha houses and tin roofs cannot withstand 102+ km/h eyewall winds. Move to concrete shelter immediately.</span>
+            </div>
+          </div>
+          <div class="safety-action-item warning">
+            <div class="safety-icon"><i data-lucide="anchor"></i></div>
+            <div class="safety-text">
+              <strong>Total Fishing &amp; Sea Operation Ban</strong>
+              <span id="safety-action-2-text">Complete suspension of coastal fishing, port operations, and trawling across Bengal/Odisha littoral sectors.</span>
+            </div>
+          </div>
+          <div class="safety-action-item info">
+            <div class="safety-icon"><i data-lucide="shield-check"></i></div>
+            <div class="safety-text">
+              <strong>Emergency Supplies Readiness</strong>
+              <span id="safety-action-3-text">Store boiled drinking water for 72 hrs, keep dry rations, charged powerbanks, and waterproof pouch for documents.</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -832,7 +883,17 @@
         <div class="swipe-comparison-card">
           <div class="swipe-header">
             <span class="swipe-label-left">◀ Coarse NWP (12–25 km)</span>
-            <span class="swipe-instruction">Drag divider to compare resolution</span>
+            <div class="downscale-tool-selector" id="downscale-tool-selector">
+              <button class="btn-downscale-tool active" id="btn-tool-swipe" data-tool="swipe" title="Swipe to compare coarse NWP vs CorrDiff 5km resolution">
+                <i data-lucide="split"></i> Swipe Slider
+              </button>
+              <button class="btn-downscale-tool" id="btn-tool-transect" data-tool="transect" title="Slice arbitrary cross-section across anomaly">
+                <i data-lucide="scissors"></i> Transect Slice
+              </button>
+              <button class="btn-downscale-tool" id="btn-tool-clear" title="Clear transect cross-section line">
+                <i data-lucide="rotate-ccw"></i> Reset
+              </button>
+            </div>
             <span class="swipe-label-right">CorrDiff (5 km Subgrid) ▶</span>
           </div>
 
@@ -945,19 +1006,19 @@
               <span class="export-badge">CF-1.8 COMPLIANT</span>
             </div>
             <div class="export-buttons-grid">
-              <a id="btn-export-nc" href="/api/export/netcdf" download="aerotrack_corrdiff_5km.nc" class="export-btn export-btn-nc">
+              <a id="btn-export-nc" href="https://aero-track-4d.onrender.com/api/export/netcdf" download="aerotrack_corrdiff_5km.nc" class="export-btn export-btn-nc">
                 <span class="export-icon"><i data-lucide="grid"></i></span>
                 <div class="export-meta"><strong>NetCDF (.nc)</strong><small>CF-1.8 Binary Grid</small></div>
               </a>
-              <a id="btn-export-asc" href="/api/export/asc-grid" download="aerotrack_corrdiff_grid.asc" class="export-btn export-btn-asc">
+              <a id="btn-export-asc" href="https://aero-track-4d.onrender.com/api/export/asc-grid" download="aerotrack_corrdiff_grid.asc" class="export-btn export-btn-asc">
                 <span class="export-icon"><i data-lucide="map"></i></span>
                 <div class="export-meta"><strong>ESRI Grid (.asc)</strong><small>GIS Spatial Layer</small></div>
               </a>
-              <a id="btn-export-geojson" href="/api/export/geojson" download="aerotrack_threat_polygon.geojson" class="export-btn export-btn-geojson">
+              <a id="btn-export-geojson" href="https://aero-track-4d.onrender.com/api/export/geojson" download="aerotrack_threat_polygon.geojson" class="export-btn export-btn-geojson">
                 <span class="export-icon"><i data-lucide="map-pin"></i></span>
                 <div class="export-meta"><strong>GeoJSON 5km</strong><small>97.8% Alert Reduction</small></div>
               </a>
-              <a id="btn-export-agri" href="/api/export/agri-csv" download="kvk_agri_advisory.csv" class="export-btn export-btn-agri">
+              <a id="btn-export-agri" href="https://aero-track-4d.onrender.com/api/export/agri-csv" download="kvk_agri_advisory.csv" class="export-btn export-btn-agri">
                 <span class="export-icon"><i data-lucide="sprout"></i></span>
                 <div class="export-meta"><strong>KVK Agri (.csv)</strong><small>Block-Level Farm Protocols</small></div>
               </a>
@@ -2195,10 +2256,203 @@
           </div>
         </div>
       </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- FLOATING ASK AI TRIGGER BUTTON                                  -->
+  <!-- ============================================================== -->
+  <div id="fab-ai-copilot" class="fab-ai-copilot" title="Ask AERO-AI Meteorological Copilot">
+    <div class="fab-ai-glow"></div>
+    <button class="fab-ai-btn" id="btn-fab-ai-trigger" aria-label="Open AERO-AI Copilot">
+      <span class="fab-ai-icon"><i data-lucide="sparkles"></i></span>
+      <span class="fab-ai-text">Ask AI</span>
+      <span class="fab-ai-badge">FREE</span>
+    </button>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- AERO-AI COPILOT SLIDE-OUT DRAWER                                -->
+  <!-- 100% Free Offline Client-Side Intelligence + Optional Gemini    -->
+  <!-- ============================================================== -->
+  <div id="ai-copilot-drawer" class="ai-copilot-drawer closed" aria-hidden="true">
+    <div class="ai-drawer-header">
+      <div class="ai-drawer-brand">
+        <div class="ai-bot-avatar">
+          <i data-lucide="bot"></i>
+          <span class="ai-status-pulse" id="ai-status-pulse"></span>
+        </div>
+        <div class="ai-title-wrap">
+          <h3 class="ai-drawer-title">AERO-AI Copilot</h3>
+          <span class="ai-engine-tag font-mono" id="ai-engine-tag">100% Free Offline Engine Active</span>
+        </div>
+      </div>
+      <div class="ai-header-controls">
+        <button class="ai-btn-icon" id="btn-ai-settings-toggle" title="Configure AI Engine / Optional Gemini API Key">
+          <i data-lucide="settings"></i>
+        </button>
+        <button class="ai-btn-icon" id="btn-ai-clear-chat" title="Clear conversation">
+          <i data-lucide="trash-2"></i>
+        </button>
+        <button class="ai-btn-icon ai-btn-close" id="btn-ai-close-drawer" title="Close Copilot">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Optional API Key & Engine Config Accordion -->
+    <div class="ai-config-panel hidden" id="ai-config-panel">
+      <div class="ai-config-header">
+        <span class="font-mono text-xs text-muted">AI ENGINE CONFIGURATION</span>
+        <span class="badge-free">ZERO COST DEFAULT</span>
+      </div>
+      <div class="ai-engine-selector-row">
+        <label class="ai-radio-lbl">
+          <input type="radio" name="ai-engine-mode" value="offline" id="radio-ai-offline" checked>
+          <span><strong>Client-Side Expert (Free)</strong><br><small>Zero latency, 100% offline, no API key needed</small></span>
+        </label>
+        <label class="ai-radio-lbl">
+          <input type="radio" name="ai-engine-mode" value="gemini" id="radio-ai-gemini">
+          <span><strong>Google Gemini 1.5 / 2.0 (Optional)</strong><br><small>Open-ended reasoning using your free Google AI Studio key</small></span>
+        </label>
+      </div>
+      <div class="ai-gemini-key-wrap" id="ai-gemini-key-wrap" style="display:none;">
+        <label for="input-gemini-api-key" class="font-mono text-xs">Enter Free Google Gemini API Key:</label>
+        <div class="ai-key-input-group">
+          <input type="password" id="input-gemini-api-key" class="input-gemini-key font-mono" placeholder="AIzaSy..." autocomplete="off">
+          <button class="btn-save-key" id="btn-save-gemini-key">Save</button>
+        </div>
+        <small class="text-muted">Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Saved only in your browser's localStorage.</small>
+      </div>
+    </div>
+
+    <!-- Live Storm Telemetry Context Banner in AI Drawer -->
+    <div class="ai-live-context-strip" id="ai-live-context-strip">
+      <div class="context-item">
+        <span class="ctx-lbl">Active Hazard:</span>
+        <strong class="ctx-val font-mono" id="ai-ctx-hazard">Super Cyclone Amphan</strong>
+      </div>
+      <div class="context-item">
+        <span class="ctx-lbl">Eye Distance:</span>
+        <strong class="ctx-val font-mono text-cyan" id="ai-ctx-dist">86 km</strong>
+      </div>
+      <div class="context-item">
+        <span class="ctx-lbl">Alert Level:</span>
+        <span class="ctx-badge font-mono badge-red" id="ai-ctx-alert">RED WARNING</span>
+      </div>
+    </div>
+
+    <!-- Quick Question Prompt Chips -->
+    <div class="ai-prompt-chips-wrap">
+      <div class="ai-chips-scroll">
+        <button class="ai-chip-btn" data-prompt="Is my location in the danger zone? What is my distance to the storm eye?">
+          📍 Distance &amp; Hazard Zone
+        </button>
+        <button class="ai-chip-btn" data-prompt="What emergency safety actions should citizens take right now?">
+          🛡️ Citizen Safety Checklist
+        </button>
+        <button class="ai-chip-btn" data-prompt="When will peak eyewall winds make landfall and what is the storm heading?">
+          🌪️ Landfall ETA &amp; Heading
+        </button>
+        <button class="ai-chip-btn" data-prompt="Explain how 5km CorrDiff generative diffusion works and why it outperforms NWP.">
+          🔬 CorrDiff AI Physics
+        </button>
+        <button class="ai-chip-btn" data-prompt="What are the emergency disaster helpline numbers for West Bengal and Odisha?">
+          🚨 Emergency Helplines
+        </button>
+      </div>
+    </div>
+
+    <!-- Message Thread Container -->
+    <div class="ai-chat-thread" id="ai-chat-thread">
+      <!-- Initial AI Welcome Bubble -->
+      <div class="ai-msg ai-msg-bot">
+        <div class="ai-msg-avatar"><i data-lucide="bot"></i></div>
+        <div class="ai-msg-content">
+          <p><strong>Namaste! I am AERO-AI, your 24/7 meteorological copilot.</strong></p>
+          <p>I am actively monitoring <strong>Super Cyclone Amphan</strong>. Current eyewall winds are <strong>102.1 km/h</strong> with central pressure at <strong>920 hPa</strong>. The storm eye is <strong>86 km</strong> from the selected Digha coastal sector moving <strong>NNE at 18 km/h</strong>.</p>
+          <p>How can I assist you today? You can ask about danger zones, evacuation advice, landfall ETA, or the underlying CorrDiff AI downscaling physics.</p>
+          <span class="ai-msg-time font-mono" id="ai-init-time">Ready • Offline Mode</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Chat Input Box -->
+    <div class="ai-chat-input-area">
+      <form id="ai-chat-form" class="ai-input-form" onsubmit="return false;">
+        <input type="text" id="ai-user-input" class="ai-input-field" placeholder="Ask about storm safety, landfall ETA, or AI science..." autocomplete="off">
+        <button type="submit" id="btn-ai-send" class="btn-ai-send" aria-label="Send message">
+          <i data-lucide="send"></i>
+        </button>
+      </form>
+      <div class="ai-input-footer font-mono">
+        <span>MoES/NCMRWF SIH 26078 &bull; 100% Free Client Intelligence</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- FLOATING POINTER INTELLIGENCE HUD                              -->
+  <!-- Real-Time Hover Telemetry across 2D Map, 3D Globe, & Downscale -->
+  <!-- ============================================================== -->
+  <div id="pointer-intelligence-hud" class="pointer-hud-container" style="display: none;">
+    <div class="pointer-hud-header">
+      <div class="pointer-hud-badge-group">
+        <span class="hud-pulse-dot" id="ptr-pulse-dot"></span>
+        <span class="pointer-hud-advisory-badge font-mono" id="ptr-advisory-badge">RED WARNING</span>
+      </div>
+      <div class="pointer-hud-coords font-mono" id="ptr-coords">21.626°N, 87.508°E</div>
+    </div>
+    
+    <div class="pointer-hud-body">
+      <!-- Distance Telemetry Row -->
+      <div class="pointer-hud-dist-row font-mono">
+        <div class="hud-chip">
+          <span class="hud-chip-lbl"><i data-lucide="target"></i> Eye Dist:</span>
+          <strong class="hud-chip-val text-cyan" id="ptr-eye-dist">86 km</strong>
+        </div>
+        <div class="hud-chip">
+          <span class="hud-chip-lbl"><i data-lucide="navigation"></i> Nearest Landfall:</span>
+          <strong class="hud-chip-val text-white" id="ptr-landfall-dist">42 km (Digha)</strong>
+        </div>
+      </div>
+
+      <!-- 4-Cell Weather & Prediction Matrix -->
+      <div class="pointer-hud-matrix">
+        <div class="hud-matrix-cell">
+          <span class="hud-m-lbl">Current Wind</span>
+          <strong class="hud-m-val text-amber font-mono" id="ptr-wind-val">102.1 km/h</strong>
+          <span class="hud-m-sub font-mono" id="ptr-wind-sub">Gust: 136.8 km/h</span>
+        </div>
+        <div class="hud-matrix-cell">
+          <span class="hud-m-lbl">Surface Pressure</span>
+          <strong class="hud-m-val text-white font-mono" id="ptr-pressure-val">952.4 hPa</strong>
+          <span class="hud-m-sub font-mono" id="ptr-pressure-sub">-58 hPa Anomaly</span>
+        </div>
+        <div class="hud-matrix-cell">
+          <span class="hud-m-lbl">Future Forecast</span>
+          <strong class="hud-m-val text-rose font-mono" id="ptr-future-val">Cat 5 Impact</strong>
+          <span class="hud-m-sub font-mono" id="ptr-future-sub">ETA: ~4.5 hrs</span>
+        </div>
+        <div class="hud-matrix-cell">
+          <span class="hud-m-lbl">Storm Heading</span>
+          <strong class="hud-m-val text-cyan font-mono" id="ptr-heading-val">NNE 28° @ 18 km/h</strong>
+          <span class="hud-m-sub font-mono" id="ptr-heading-sub">CLOSING IN (+14 km/h)</span>
+        </div>
+      </div>
+
+      <!-- Actionable Advisory Protocol & Resolution Tag -->
+      <div class="pointer-hud-footer">
+        <div class="hud-advisory-msg" id="ptr-advisory-msg">
+          Mandatory coastal evacuation. Marine & fishing operations completely halted.
+        </div>
+        <div class="hud-source-tag font-mono" id="ptr-source-tag">
+          CorrDiff 5km High-Res Physics
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Main JavaScript Application Logic -->
-  <script src="/static/app.js?v=aerotrack_v6_step5"></script>
+  <script src="./app.js?v=aerotrack_v6_step6"></script>
 </body>
 </html>
