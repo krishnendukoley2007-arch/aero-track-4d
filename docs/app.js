@@ -2786,11 +2786,17 @@ function evaluateSafetyCardVisibility(lat, lon) {
 
   const storm = (typeof getActiveStormTelemetry === "function")
     ? getActiveStormTelemetry()
-    : { lat: 18.5, lon: 86.5, windSpeed: 102.1, speedKmh: 18.0, name: "Cyclone" };
+    : { lat: 18.5, lon: 86.5, eyeLat: 18.5, eyeLon: 86.5, windSpeed: 102.1, maxWindKmh: 102.1, speedKmh: 18.0, name: "Cyclone" };
 
-  const distKm = (typeof getGeodesicDistanceKm === "function")
-    ? Math.round(getGeodesicDistanceKm(lat, lon, storm.lat, storm.lon))
+  const sLat = (storm.lat !== undefined) ? storm.lat : ((storm.eyeLat !== undefined) ? storm.eyeLat : 18.5);
+  const sLon = (storm.lon !== undefined) ? storm.lon : ((storm.eyeLon !== undefined) ? storm.eyeLon : 86.5);
+  const sSpeed = storm.speedKmh || storm.stormSpeedKmh || 18.0;
+  const sName = storm.name || storm.stormName || "Active Storm";
+
+  const rawDist = (typeof getGeodesicDistanceKm === "function")
+    ? getGeodesicDistanceKm(lat, lon, sLat, sLon)
     : 999;
+  const distKm = Number.isFinite(rawDist) ? Math.round(rawDist) : 999;
 
   if (distKm <= THREAT_RADIUS_KM) {
     // Within danger zone — show card and update location-specific threat data
@@ -2798,7 +2804,7 @@ function evaluateSafetyCardVisibility(lat, lon) {
     safetyCard.classList.add("card-entering");
     setTimeout(() => safetyCard.classList.remove("card-entering"), 400);
 
-    const etaHrs = Math.max(0.5, Math.round((distKm / Math.max(storm.speedKmh || 18, 10)) * 10) / 10);
+    const etaHrs = Math.max(0.5, Math.round((distKm / Math.max(sSpeed, 10)) * 10) / 10);
     const pointName = `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
 
     // Update the distance / ETA KPI cards dynamically
@@ -2816,7 +2822,7 @@ function evaluateSafetyCardVisibility(lat, lon) {
       const colour  = distKm < 150 ? "#ff4444" : distKm < 350 ? "#f59e0b" : "#fca5a5";
       safetyTitle.innerHTML =
         `<span class="safety-pulse-dot"></span> ` +
-        `<span style="color:${colour}">${urgency} — ${storm.name || "Active Storm"} · ${distKm} km away</span>`;
+        `<span style="color:${colour}">${urgency} — ${sName} · ${distKm} km away</span>`;
     }
   } else {
     // Outside danger zone — hide the card
@@ -2825,28 +2831,68 @@ function evaluateSafetyCardVisibility(lat, lon) {
 }
 
 // ---------------- Audience Mode Switch (Citizen Safety vs MoES Forecaster) ----------------
-function initAudienceModeSwitch() {
+function setAudienceMode(mode) {
+  state.audienceMode = mode;
   const btnCitizen = document.getElementById("btn-aud-citizen");
   const btnForecaster = document.getElementById("btn-aud-forecaster");
+  if (btnCitizen && btnForecaster) {
+    if (mode === "citizen") {
+      btnCitizen.classList.add("active");
+      btnForecaster.classList.remove("active");
+    } else {
+      btnForecaster.classList.add("active");
+      btnCitizen.classList.remove("active");
+    }
+  }
+  applyAudienceMode(mode);
+}
+window.setAudienceMode = setAudienceMode;
 
-  if (!btnCitizen || !btnForecaster) return;
+function initAudienceModeSwitch() {
+  const switchContainer = document.getElementById("audience-mode-switch");
+  if (switchContainer) {
+    switchContainer.addEventListener("click", (e) => {
+      const btn = e.target.closest(".btn-aud-mode");
+      if (!btn) return;
+      const mode = btn.dataset.audience || (btn.id === "btn-aud-forecaster" ? "forecaster" : "citizen");
+      setAudienceMode(mode);
+    });
+  }
 
-  btnCitizen.addEventListener("click", () => {
-    state.audienceMode = "citizen";
-    btnCitizen.classList.add("active");
-    btnForecaster.classList.remove("active");
-    applyAudienceMode("citizen");
-  });
+  const btnCitizen = document.getElementById("btn-aud-citizen");
+  const btnForecaster = document.getElementById("btn-aud-forecaster");
+  if (btnCitizen) {
+    btnCitizen.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setAudienceMode("citizen");
+    });
+  }
+  if (btnForecaster) {
+    btnForecaster.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setAudienceMode("forecaster");
+    });
+  }
+}
 
-  btnForecaster.addEventListener("click", () => {
-    state.audienceMode = "forecaster";
-    btnForecaster.classList.add("active");
-    btnCitizen.classList.remove("active");
-    applyAudienceMode("forecaster");
-  });
+// Auto-run early if DOM is ready
+if (document.readyState === "complete" || document.readyState === "interactive") {
+  initAudienceModeSwitch();
 }
 
 function applyAudienceMode(mode) {
+  const btnCitizen = document.getElementById("btn-aud-citizen");
+  const btnForecaster = document.getElementById("btn-aud-forecaster");
+  if (btnCitizen && btnForecaster) {
+    if (mode === "citizen") {
+      btnCitizen.classList.add("active");
+      btnForecaster.classList.remove("active");
+    } else {
+      btnForecaster.classList.add("active");
+      btnCitizen.classList.remove("active");
+    }
+  }
+
   const safetyCard = document.getElementById("citizen-safety-card");
   const card1Lbl = document.getElementById("ov-card1-label");
   const card2Lbl = document.getElementById("ov-card2-label");
@@ -2931,18 +2977,25 @@ function applyAudienceMode(mode) {
         windSpeed: 102.1,
         lat: 21.0,
         lon: 88.0,
+        eyeLat: 21.0,
+        eyeLon: 88.0,
         speedKmh: 18.0
       };
+      const sLat = (storm.lat !== undefined) ? storm.lat : ((storm.eyeLat !== undefined) ? storm.eyeLat : 21.0);
+      const sLon = (storm.lon !== undefined) ? storm.lon : ((storm.eyeLon !== undefined) ? storm.eyeLon : 88.0);
+      const sSpeed = storm.speedKmh || storm.stormSpeedKmh || 18.0;
+      const sWind = storm.windSpeed || storm.maxWindKmh || 102.1;
       const userLoc = state.selectedLocation || { lat: 21.626, lon: 87.508, name: "Digha Coast" };
-      const distKm = (typeof getGeodesicDistanceKm === "function")
-        ? Math.round(getGeodesicDistanceKm(userLoc.lat, userLoc.lon, storm.lat, storm.lon))
+      const rawDist = (typeof getGeodesicDistanceKm === "function")
+        ? getGeodesicDistanceKm(userLoc.lat, userLoc.lon, sLat, sLon)
         : 86;
-      const etaHrs = Math.max(1, Math.round((distKm / Math.max(storm.speedKmh, 10)) * 10) / 10);
+      const distKm = Number.isFinite(rawDist) ? Math.round(rawDist) : 86;
+      const etaHrs = Math.max(1, Math.round((distKm / Math.max(sSpeed, 10)) * 10) / 10);
 
       if (stageEl) stageEl.textContent = "Catastrophic (Cat 5)";
       if (stageSubEl) stageSubEl.innerHTML = `<span class="text-rose font-mono">RED ALERT</span> &bull; Severe Eyewall Impact`;
 
-      if (windEl) windEl.textContent = `${Math.round(storm.windSpeed)} km/h (Eyewall)`;
+      if (windEl) windEl.textContent = `${Math.round(sWind)} km/h (Eyewall)`;
       if (windSubEl) windSubEl.innerHTML = `Uproots large trees &amp; electric poles`;
 
       if (errEl) errEl.textContent = `${distKm} km (${userLoc.name.split(" ")[0]})`;
@@ -4640,7 +4693,20 @@ function getActiveStormTelemetry() {
     }
   }
 
-  return { eyeLat, eyeLon, stormHeadingDeg, stormSpeedKmh, stormStage, stormName, maxWindKmh };
+  return {
+    lat: eyeLat,
+    lon: eyeLon,
+    eyeLat,
+    eyeLon,
+    stormHeadingDeg,
+    stormSpeedKmh,
+    speedKmh: stormSpeedKmh,
+    stormStage,
+    stormName,
+    name: stormName,
+    maxWindKmh,
+    windSpeed: maxWindKmh
+  };
 }
 
 // Universal Pointer Intelligence HUD Updater

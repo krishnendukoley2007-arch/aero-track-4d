@@ -15,18 +15,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/static/style.css?v=aerotrack_v6_step6">
+  <link rel="stylesheet" href="./style.css?v=aerotrack_v6_step7">
 
   <!-- Leaflet & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Lucide Icons -->
-  <script src="/static/vendor/lucide.min.js"></script>
+  <script src="./vendor/lucide.min.js"></script>
 
   <!-- Three.js & OrbitControls for 3D Earth Monitor -->
-  <script src="/static/vendor/three.min.js"></script>
-  <script src="/static/vendor/OrbitControls.js"></script>
+  <script src="./vendor/three.min.js"></script>
+  <script src="./vendor/OrbitControls.js"></script>
 </head>
 <body>
   <!-- ============================================================== -->
@@ -85,10 +85,10 @@
 
       <!-- Audience Mode Switch: Citizen Safety Mode vs Forecaster MoES Mode -->
       <div class="audience-mode-switch" id="audience-mode-switch" role="group" aria-label="Audience View Mode">
-        <button class="btn-aud-mode active" id="btn-aud-citizen" data-audience="citizen" title="Citizen Safety Mode: Clear danger alerts, plain-language summaries, emergency checklists">
+        <button class="btn-aud-mode active" id="btn-aud-citizen" data-audience="citizen" onclick="setAudienceMode('citizen')" title="Citizen Safety Mode: Clear danger alerts, plain-language summaries, emergency checklists">
           <i data-lucide="shield-alert"></i> <span>Citizen</span>
         </button>
-        <button class="btn-aud-mode" id="btn-aud-forecaster" data-audience="forecaster" title="Forecaster Mode: MoES/NCMRWF atmospheric physics, 5km CorrDiff diagnostics, and tensor metrics">
+        <button class="btn-aud-mode" id="btn-aud-forecaster" data-audience="forecaster" onclick="setAudienceMode('forecaster')" title="Forecaster Mode: MoES/NCMRWF atmospheric physics, 5km CorrDiff diagnostics, and tensor metrics">
           <i data-lucide="microscope"></i> <span>Forecaster</span>
         </button>
       </div>
@@ -2453,6 +2453,6 @@
   </div>
 
   <!-- Main JavaScript Application Logic -->
-  <script src="/static/app.js?v=aerotrack_v6_step6"></script>
+  <script src="./app.js?v=aerotrack_v6_step7"></script>
 </body>
 </html>

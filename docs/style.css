@@ -7835,14 +7835,23 @@ input:focus-visible,
   font-weight: 700;
   letter-spacing: 0.3px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 5;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
+}
+
+.btn-aud-mode:active {
+  transform: scale(0.96);
 }
 
 .btn-aud-mode i, .btn-aud-mode svg {
   width: 13px;
   height: 13px;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 .btn-aud-mode:hover {
