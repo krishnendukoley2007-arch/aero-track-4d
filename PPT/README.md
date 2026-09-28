@@ -26,7 +26,7 @@
 
 ### [Slide 1: Title Page](slide_previews/slide_1.png)
 - Official SIH 2026 Title layout with Team ID `126325`, Team Name `Omnis Cura`, College placeholder, and Underlined Problem Statement Title.
-- 4 Verification Badges: `✔ 22/22 Tests Passing`, `⚡ <50 ms GPU Latency`, `🎯 5.0 km Subgrid Target`, `📉 97.8% Alert Area Reduction`.
+- 4 Verification Badges: `✔ 22/22 Tests Passing`, `⚡ <50 ms GPU Latency`, `🎯 5.0 km Subgrid Target`, `📉 Alert-Corridor Area (78.5 km² vs 3,500 km²)`.
 
 ### [Slide 2: Proposed Solution & Innovation](slide_previews/slide_2.png)
 - **Left Column:** Operational Challenge & Root Causes (Atmospheric Chaos in 3–10d NWP, Spectral Smoothing Trap, Severe Public Alert Fatigue) and Two-Stage Hybrid AI Solution Architecture.

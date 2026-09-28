@@ -1734,7 +1734,7 @@ const LiveGlobal = {
     if (summaryHeadline) summaryHeadline.textContent = `Live Global Earth Monitor • ${data.coordinate.name}`;
     const summarySubtext = document.getElementById("summary-subtext");
     if (summarySubtext) {
-      summarySubtext.innerHTML = `<strong>Live Global Earth Monitor Active.</strong> Fetching real-time ECMWF/GFS 10-day forecasts from Open-Meteo for ${data.coordinate.name}. CorrDiff super-resolution recovers ${cc.corrdiff_resolved_wind_kmh} km/h winds where standard models smooth out peaks, delivering a <strong>97.8% reduction in false-alarm warning area</strong> vs broad district alerts.`;
+      summarySubtext.innerHTML = `<strong>Live Global Earth Monitor Active.</strong> Fetching real-time ECMWF/GFS 10-day forecasts from Open-Meteo for ${data.coordinate.name}. CorrDiff super-resolution recovers ${cc.corrdiff_resolved_wind_kmh} km/h winds where standard models smooth out peaks, delivering an <strong>alert-corridor area vs assumed district area (geometry, not model skill) (78.5 km² vs 3,500 km²)</strong>.`;
     }
 
     // Top 4 Metric Cards for Live Global Earth
@@ -1916,7 +1916,7 @@ const LiveGlobal = {
     }
     if (subtext) {
       subtext.innerHTML = `Pinpoint 5 km alert corridor active near 14.9°N, 87.5°E. Generative CorrDiff diffusion recovers 102.1 km/h
-        eyewall winds where standard models smooth out peaks, delivering a <strong>97.8% reduction in false-alarm warning area</strong>
+        eyewall winds where standard models smooth out peaks, providing an <strong>alert-corridor area vs assumed district area (geometry, not model skill) (78.5 km² vs 3,500 km²)</strong>
         vs broad district alerts.`;
     }
 
@@ -2589,7 +2589,7 @@ const LiveGlobal = {
 
     if (headline) headline.textContent = `Forecast: ${storm.name} • ${step.lead_time_label} (${step.stage})`;
     if (subtext) {
-      subtext.innerHTML = `<strong>Active 5-Day Forward Forecast (${step.lead_time_label}).</strong> Predicted center at ${step.centroid.lat}°N, ${step.centroid.lon}°E. CorrDiff generative diffusion resolves <strong>${step.corrdiff_resolved_wind_kmh} km/h</strong> peak eyewall winds vs ${step.coarse_nwp_wind_kmh} km/h coarse NWP (+61.5% recovered). Pinpoint 5 km corridor yields <strong>${step.false_alarm_reduction_pct}% false-alarm reduction</strong>.`;
+      subtext.innerHTML = `<strong>Active 5-Day Forward Forecast (${step.lead_time_label}).</strong> Predicted center at ${step.centroid.lat}°N, ${step.centroid.lon}°E. CorrDiff generative diffusion resolves <strong>${step.corrdiff_resolved_wind_kmh} km/h</strong> peak eyewall winds vs ${step.coarse_nwp_wind_kmh} km/h coarse NWP (+61.5% recovered). Pinpoint 5 km corridor yields an <strong>alert-corridor area vs assumed district area (geometry, not model skill) (78.5 km² vs 3,500 km²)</strong>.`;
     }
     if (badge) {
       badge.textContent = `LEAD: ${step.lead_time_label} (${step.stage.toUpperCase()})`;
@@ -7799,7 +7799,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     }
     const summarySubtext = document.getElementById("summary-subtext");
     if (summarySubtext) {
-      summarySubtext.innerHTML = `<strong>Surgical 5 km alert corridor active at ${data.location.lat}°N, ${data.location.lon}°E.</strong> ${data.action_directive} Local probe reading: ${data.weather_icon || '⛅'} ${data.weather_desc}, ${data.temperature_c}°C, resolved wind: ${data.predicted_local_wind_kmh} km/h (gusts ${data.predicted_p90_gust_kmh} km/h), surface pressure: ${data.surface_pressure_hpa} hPa. Delivers a <strong>97.8% reduction in false-alarm warning area</strong> vs broad district alerts.`;
+      summarySubtext.innerHTML = `<strong>Surgical 5 km alert corridor active at ${data.location.lat}°N, ${data.location.lon}°E.</strong> ${data.action_directive} Local probe reading: ${data.weather_icon || '⛅'} ${data.weather_desc}, ${data.temperature_c}°C, resolved wind: ${data.predicted_local_wind_kmh} km/h (gusts ${data.predicted_p90_gust_kmh} km/h), surface pressure: ${data.surface_pressure_hpa} hPa. Provides an <strong>alert-corridor area vs assumed district area (geometry, not model skill) (78.5 km² vs 3,500 km²)</strong>.`;
     }
     const badgeSeverity = document.getElementById("summary-severity-badge");
     if (badgeSeverity) {
@@ -8086,7 +8086,7 @@ const TOUR_SLIDES = [
   },
   {
     title: "5. Zero Alert Fatigue: 5 km Footprint Corridor",
-    text: "By replacing broad 3,500 km² district warnings with a pinpoint 5 km radius impact corridor (78.5 km²), the system achieves a 97.8% reduction in false-alarm area. Grounded in Census of India 2011 demographics, this shields over 3.68 million coastal citizens from unnecessary curfew and panic while directing NDRF rescue battalions with pinpoint precision."
+    text: "By isolating a pinpoint 5 km radius impact corridor (78.5 km²) alongside an assumed 3,500 km² district area, the system defines an alert-corridor area vs assumed district area (geometry, not model skill). This directs NDRF rescue battalions to localized impact zones with pinpoint spatial precision."
   },
   {
     title: "6. 3- to 10-Day Medium-Range Ensemble Outlook",
@@ -9625,7 +9625,7 @@ async function switchHazard(hazardId) {
     // Update Overview headline & cards
     const peakStep = hData.tracked_steps[2] || hData.tracked_steps[0];
     document.getElementById("summary-headline").textContent = `Tracking ${hData.name} • ${peakStep.stage}`;
-    document.getElementById("summary-subtext").innerHTML = `Pinpoint 5 km alert corridor active near <strong>${peakStep.centroid.lat}°N, ${peakStep.centroid.lon}°E</strong>. Generative CorrDiff diffusion recovers true peak amplitude, delivering a <strong>97.8%+ reduction in false-alarm warning area</strong> vs broad regional warnings.`;
+    document.getElementById("summary-subtext").innerHTML = `Pinpoint 5 km alert corridor active near <strong>${peakStep.centroid.lat}°N, ${peakStep.centroid.lon}°E</strong>. Generative CorrDiff diffusion recovers true peak amplitude, providing an <strong>alert-corridor area vs assumed district area (geometry, not model skill) (78.5 km² vs 3,500 km²)</strong>.`;
     document.getElementById("summary-severity-badge").textContent = `SEVERITY: ${peakStep.severity.toUpperCase()}`;
 
     document.getElementById("ov-card1-label").textContent = "Hazard Stage";
