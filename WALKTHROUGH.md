@@ -228,9 +228,9 @@ This script is structured around the 5 persistent views. Follow this exact flow 
   - Grab the **Interactive Draggable Swipe Divider** and slide it left and right:
     - Left side: Coarse NWP input showing the filtered 63.4 km/h wind field.
     - Right side: CorrDiff diffusion generating the 53.1 km/h eyewall prediction (beats U-Net 53.3 km/h).
-  - Toggle **Realizations**: Show **Ensemble Mean (53.1 km/h)**, **P90 High-Impact Scenario (54.6 km/h)**, and **Diffusion Spread**.
+  - Toggle **Realizations**: Show **Ensemble Mean (53.1 km/h)**, **P90 High-Impact Scenario (55.2 km/h)**, and **Diffusion Spread**.
   - Point to the **Physics Conservation Diagnostic Cards**:
-    - Moisture Flux Convergence (MFC): **38.0 / 100 diagnostic conformity**.
+    - Moisture Flux Convergence (MFC): **39.0 / 100 diagnostic conformity**.
     - Wind Field Divergence: **$3.2 \times 10^{-5}\text{ s}^{-1}$**, kinematic audit.
   - Present the **Two-Gap Honesty Diagram**:
     > *"We are completely honest about our numbers: CorrDiff addresses Gap 1 (+0.1 km/h gain over U-Net on prototype 16×16 grid). Gap 2 (between 110.5 km/h ERA5 and 222.2 km/h IBTrACS in-situ eyewall) is a known physical limitation of global 25 km reanalyses. True 5 km-native downscaling requires training on NCMRWF's 12 km regional IMDAA dataset (Phase 2 & Phase 4)."*

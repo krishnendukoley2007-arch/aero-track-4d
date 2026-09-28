@@ -160,6 +160,8 @@ class CorrDiffInferenceEngine:
         min_ibtracs_p = float(ibtracs.get("mslp_hpa") or min_target_p)
 
         rec_coarse = round((peak_coarse / max(1.0, peak_target)) * 100.0, 1)
+        peak_inv_atten = round(peak_coarse / 0.82, 1)
+        rec_inv_atten = round((peak_inv_atten / max(1.0, peak_target)) * 100.0, 1)
         rec_unet = round((peak_unet / max(1.0, peak_target)) * 100.0, 1)
         rec_corrdiff = round((peak_corrdiff / max(1.0, peak_target)) * 100.0, 1)
         rec_corrdiff_p90 = round((peak_corrdiff_p90 / max(1.0, peak_target)) * 100.0, 1)
@@ -247,6 +249,8 @@ class CorrDiffInferenceEngine:
             "amplitude_evaluation": {
                 "peak_wind": {
                     "coarse_nwp": round(peak_coarse, 1),
+                    "identity_baseline": round(peak_coarse, 1),
+                    "inverse_attenuation_baseline": peak_inv_atten,
                     "standard_unet_smoothed": round(peak_unet, 1),
                     "corrdiff_ensemble_mean": round(peak_corrdiff, 1),
                     "corrdiff_p90_high_impact": round(peak_corrdiff_p90, 1),
@@ -255,6 +259,8 @@ class CorrDiffInferenceEngine:
                 },
                 "measured_recovery_percent": {
                     "coarse_nwp": rec_coarse,
+                    "identity_baseline": rec_coarse,
+                    "inverse_attenuation": rec_inv_atten,
                     "standard_unet": rec_unet,
                     "corrdiff_mean": rec_corrdiff,
                     "corrdiff_p90": rec_corrdiff_p90,

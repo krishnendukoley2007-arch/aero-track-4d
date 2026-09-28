@@ -195,8 +195,8 @@ RAW MULTIVARIABLE 4D ENSEMBLE NWP STREAM (12 km resolution)
 | **Identity Baseline (Coarse NWP Directly)** | 63.4 km/h | 57.4% | Direct coarse NWP input without modification |
 | **Inverse-Attenuation Baseline (Coarse ÷ 0.82)** | 77.3 km/h | 70.0% | Inverts the 0.82 coarse spectral damping factor |
 | **Standard U-Net (L2 Loss)** | 53.3 km/h | 48.2% | Conditional mean $E[Y|X]$ averages high wavenumbers |
-| **CorrDiff Ensemble Mean** | **53.1 km/h** | **48.0%** | Score-based reverse diffusion model (ensemble mean) |
-| **CorrDiff P90 High-Impact** | **54.6 km/h** | **49.4%** | 90th percentile tail risk ensemble realization |
+| **CorrDiff Ensemble Mean** | **53.1 km/h** | **48.1%** | Score-based reverse diffusion model (ensemble mean) |
+| **CorrDiff P90 High-Impact** | **55.2 km/h** | **50.0%** | 90th percentile tail risk ensemble realization |
 | **Native ERA5 Target (Ground Truth)** | **110.5 km/h** | **100.0%** | Native 0.25° reanalysis baseline (16×16 crop) |
 | *IBTrACS In-Situ Peak (Eyewall Core)* | *222.2 km/h* | *—* | *10-min sustained best track (cannot be resolved by 25 km reanalysis)* |
 
@@ -207,9 +207,9 @@ RAW MULTIVARIABLE 4D ENSEMBLE NWP STREAM (12 km resolution)
 
 | Calibration Metric | Measured Value | Evaluation & Threshold |
 |---|---|---|
-| **CRPS (Continuous Ranked Probability Score)** | **16.302 km/h** | Probabilistically calibrated ensemble spread (< 30 km/h target) |
-| **FSS (Fractions Skill Score, Precipitation)** | **0.287** | Spatial precipitation conformity on 5 km neighborhood |
-| **Physics Diagnostic Conformity Score** | **38.0 / 100** | Diagnostic MFC alignment and 2D kinematic consistency audit |
+| **CRPS (Continuous Ranked Probability Score)** | **16.330 km/h** | Probabilistically calibrated ensemble spread (< 30 km/h target) |
+| **FSS (Fractions Skill Score, Precipitation)** | **0.156** | Spatial precipitation conformity on 5 km neighborhood |
+| **Physics Diagnostic Conformity Score** | **39.0 / 100** | Diagnostic MFC alignment and 2D kinematic consistency audit |
 
 #### Stage 1 — Track Accuracy vs NOAA IBTrACS
 
@@ -228,9 +228,9 @@ Weights trained **only on Amphan 2020** were evaluated on two unseen storms:
 
 | Storm Event | Intensity Category | ERA5 Target | CorrDiff Peak | ERA5 Recovery | CRPS (Ensemble) | Precip FSS |
 |---|---|---|---|---|---|---|
-| **Cyclone Amphan (2020)** | Super Cyclone (Cat 5) | 110.5 km/h | **53.1 km/h** | **48.0%** | 16.302 km/h | 0.287 |
-| **Cyclone Fani (2019)** *(Unseen)* | Extremely Severe (Cat 5) | 111.1 km/h | **49.8 km/h** | **44.9%** | 14.849 km/h | 0.296 |
-| **Cyclone Yaas (2021)** *(Unseen)* | Very Severe (Cat 3) | 92.3 km/h | **45.5 km/h** | **49.3%** | 18.506 km/h | 0.604 |
+| **Cyclone Amphan (2020)** | Super Cyclone (Cat 5) | 110.5 km/h | **53.1 km/h** | **48.1%** | 16.330 km/h | 0.156 |
+| **Cyclone Fani (2019)** *(Unseen)* | Extremely Severe (Cat 5) | 111.1 km/h | **50.9 km/h** | **45.8%** | 14.772 km/h | 0.339 |
+| **Cyclone Yaas (2021)** *(Unseen)* | Very Severe (Cat 3) | 92.3 km/h | **46.3 km/h** | **50.1%** | 18.562 km/h | 0.486 |
 
 No overfitting to Amphan. Zero-shot performance holds across all three intensity categories.
 

@@ -29,6 +29,9 @@ from src.ensemble_medium_range import MediumRangeEnsembleEngine
 from src.coastal_districts import CoastalDistrictsEngine
 
 def run_audit() -> dict:
+    import torch
+    torch.manual_seed(42)
+    np.random.seed(42)
     results = {}
 
     # --- 1. Spherical GNN & Mesh ---

@@ -98,7 +98,7 @@
       },
       "corrdiff_ensemble_mean": {
         "peak_wind_kmh": 53.1,
-        "recovery_percent": 48.0,
+        "recovery_percent": 48.1,
         "description": "PhysicsNeMo score-based diffusion model (ensemble mean)"
       }
     },
@@ -109,33 +109,33 @@
       "inverse_attenuation_baseline_kmh": 77.32,
       "standard_unet_kmh": 53.3,
       "corrdiff_ensemble_mean_kmh": 53.1,
-      "corrdiff_p90_kmh": 54.6,
-      "corrdiff_gain_over_unet_kmh": -0.3,
+      "corrdiff_p90_kmh": 55.2,
+      "corrdiff_gain_over_unet_kmh": -0.2,
       "recovery_percent_identity": 57.38,
       "recovery_percent_inv_attenuation": 69.97,
-      "recovery_percent_corrdiff_mean": 48.0,
-      "crps_wind_kmh": 16.302,
-      "fss_precipitation": 0.287,
-      "physics_diagnostic_score": 38.0
+      "recovery_percent_corrdiff_mean": 48.1,
+      "crps_wind_kmh": 16.33,
+      "fss_precipitation": 0.156,
+      "physics_diagnostic_score": 39.0
     },
     "multistorm_measured": {
       "fani_2019": {
         "era5_target_kmh": 111.1,
         "coarse_nwp_kmh": 58.1,
         "inverse_attenuation_kmh": 70.85,
-        "corrdiff_mean_kmh": 49.8,
-        "recovery_percent": 44.9,
-        "crps_wind_kmh": 14.849,
-        "fss_precipitation": 0.296
+        "corrdiff_mean_kmh": 50.9,
+        "recovery_percent": 45.8,
+        "crps_wind_kmh": 14.772,
+        "fss_precipitation": 0.339
       },
       "yaas_2021": {
         "era5_target_kmh": 92.3,
         "coarse_nwp_kmh": 52.5,
         "inverse_attenuation_kmh": 64.02,
-        "corrdiff_mean_kmh": 45.5,
-        "recovery_percent": 49.3,
-        "crps_wind_kmh": 18.506,
-        "fss_precipitation": 0.604
+        "corrdiff_mean_kmh": 46.3,
+        "recovery_percent": 50.1,
+        "crps_wind_kmh": 18.562,
+        "fss_precipitation": 0.486
       }
     },
     "physics_loss_terms": [
