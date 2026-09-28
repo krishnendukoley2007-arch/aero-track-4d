@@ -114,37 +114,29 @@ class CorrDiffInferenceEngine:
         target_precip_5km = zoom(target_precip_16, zoom_factor, order=3)
         coarse_wind_5km = zoom(coarse_wind_16, zoom_factor, order=1)
 
-        # Standard U-Net: L2 conditional mean averages out eyewall turbulence
-        unet_wind_5km = zoom(unet_wind_16, zoom_factor, order=3) * 0.92
+        # Standard U-Net: L2 conditional mean — bicubic upsampled from actual 16x16 model output
+        # NOTE: The *0.92 deflation factor was removed; we report raw model output honestly.
+        unet_wind_5km = zoom(unet_wind_16, zoom_factor, order=3)
         unet_mslp_5km = zoom(unet_mslp_16, zoom_factor, order=3)
 
-        # CorrDiff Stage 2: Generative Diffusion restores high-wavenumber eyewall turbulence
-        np.random.seed(42 + step_idx)
-        center_y, center_x = np.unravel_index(np.argmax(target_wind_5km), target_wind_5km.shape)
-        yy, xx = np.indices(subgrid_shape)
-        dist_from_eye = np.hypot(xx - center_x, yy - center_y)
-        eyewall_mask = np.exp(-((dist_from_eye - 4.5)**2) / 10.0)
+        # ---- HONEST CorrDiff 5km Output ----------------------------------------
+        # The trained corrdiff_amphan.pt model runs at 16x16 resolution.
+        # We bicubically upsample the actual model output to the 38x38 display grid.
+        # This is spatial interpolation, NOT 5km-native inference.
+        # True 5km-native inference requires IMDAA 12km→5km training pairs (see Roadmap).
+        # -------------------------------------------------------------------------
+        cd_wind_mean_5km  = np.maximum(0, zoom(cd_mean[0]         * 3.6,  zoom_factor, order=3))
+        cd_wind_high_5km  = np.maximum(0, zoom(cd_high_impact[0]  * 3.6,  zoom_factor, order=3))
+        cd_wind_spread_5km = np.maximum(0, zoom(cd_spread[0]      * 3.6,  zoom_factor, order=3))
+        cd_mslp_mean_5km  = zoom(cd_mean[1] * 25.0 + 1000.0,               zoom_factor, order=3)
+        cd_precip_mean_5km = np.maximum(0, zoom(cd_precip_mean_16,          zoom_factor, order=3))
 
-        turb_noise = np.random.normal(0, 1, subgrid_shape)
-        turb_filtered = zoom(np.random.normal(0, 1, (19, 19)), 2.0, order=2)[:38, :38]
-
-        cd_gain = unet_wind_5km * 0.85
-        cd_wind_mean_5km = np.maximum(0, unet_wind_5km + cd_gain + 3.5 * eyewall_mask * turb_filtered)
-        cd_wind_high_5km = np.maximum(0, cd_wind_mean_5km + 8.5 * eyewall_mask + 2.0 * np.abs(turb_noise))
-        cd_wind_spread_5km = np.maximum(0.5, 4.0 * eyewall_mask + 1.2 * np.abs(turb_filtered))
-
-        cd_mslp_mean_5km = target_mslp_5km * 0.95 + unet_mslp_5km * 0.05
-        cd_precip_mean_5km = zoom(cd_precip_mean_16, zoom_factor, order=3) * (1.0 + 0.3 * eyewall_mask)
-
-        # Generate individual 5 km ensemble members for CRPS calculation
+        # Ensemble members: upsample each real diffusion member from 16x16
         ens_members_wind = []
-        for m_idx, m_raw in enumerate(raw_members):
+        for m_raw in raw_members:
             m_w16 = np.maximum(0, m_raw[0] * 3.6)
-            m_w5 = zoom(m_w16, zoom_factor, order=3)
-            # Add member-specific turbulent perturbation
-            m_turb = zoom(np.random.normal(0, 0.8, (19, 19)), 2.0, order=2)[:38, :38]
-            m_w5_turb = np.maximum(0, m_w5 + cd_gain + (2.5 + 0.5 * m_idx) * eyewall_mask * m_turb)
-            ens_members_wind.append(m_w5_turb)
+            m_w5  = np.maximum(0, zoom(m_w16, zoom_factor, order=3))
+            ens_members_wind.append(m_w5)
         ens_members_wind = np.stack(ens_members_wind)  # [M, 38, 38]
 
         # ---------------- CRPS Calibration & Precipitation FSS ----------------

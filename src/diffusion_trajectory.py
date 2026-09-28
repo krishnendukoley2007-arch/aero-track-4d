@@ -85,46 +85,57 @@ class DiffusionTrajectoryEngine:
     }
 
     @classmethod
-    def generate_grid_for_step(cls, t: int, grid_size: int = 16) -> List[List[float]]:
+    def generate_grid_for_step(cls, t: int, grid_size: int = 64) -> List[List[float]]:
         """
         Synthesizes a realistic 2D wind field grid for diffusion timestep t.
-        Blends between pure Gaussian noise (t=10) and coherent cyclonic vortex (t=0).
+        Blends between pure Gaussian noise (t=10) and coherent cyclonic vortex (t=0)
+        at full 64x64 (5 km) subgrid resolution.
         """
         np.random.seed(42 + t)
         meta = cls.STEPS_METADATA.get(t, cls.STEPS_METADATA[0])
         peak = meta["peak_wind_kmh"]
         sigma = meta["noise_level_sigma"]
 
-        grid = []
         center = (grid_size - 1) / 2.0
+        y, x = np.ogrid[:grid_size, :grid_size]
+        r_norm = np.hypot(x - center, y - center) / center
+        theta = np.arctan2(y - center, x - center)
 
-        for r in range(grid_size):
-            row = []
-            for c in range(grid_size):
-                dist = math.hypot(r - center, c - center) / center
-                # Rankine vortex core
-                if dist < 0.22:
-                    vortex_val = (dist / 0.22) * peak
-                else:
-                    vortex_val = peak * math.pow(0.22 / dist, 0.65)
+        # 1. Coherent Rankine cyclonic vortex core + spiral inflow bands
+        rmw = 0.22  # Radius of Maximum Wind
+        v_rankine = np.where(
+            r_norm < rmw,
+            (r_norm / rmw) * peak,
+            peak * np.power(rmw / np.maximum(0.01, r_norm), 0.65)
+        )
 
-                # Add noise proportional to sigma
-                noise = np.random.normal(0, 1) * sigma * 24.0
-                val = max(12.0, vortex_val * (1.0 - sigma * 0.45) + noise)
-                row.append(round(val, 1))
-            grid.append(row)
+        # Logarithmic spiral rainband perturbations
+        spiral_phase = theta - 2.8 * np.log(np.maximum(0.04, r_norm))
+        spiral_bands = np.sin(spiral_phase * 2.0) * (peak * 0.16) * np.exp(-1.8 * np.abs(r_norm - 0.45))
+        v_coherent = np.maximum(10.0, v_rankine + spiral_bands)
 
-        return grid
+        # 2. Multi-scale Kolmogorov turbulence noise field
+        white_noise = np.random.normal(0, 1, (grid_size, grid_size))
+        # Spatial smoothing to simulate inertial subrange turbulence
+        from scipy.ndimage import gaussian_filter
+        filtered_noise = gaussian_filter(white_noise, sigma=1.2) * 2.2
+        noise_field = filtered_noise * (sigma * 32.0)
+
+        # Progressive blending: t=10 is pure noise, t=0 is coherent high-res field
+        v_blend = v_coherent * (1.0 - 0.85 * sigma) + noise_field
+        v_blend = np.clip(v_blend, 8.0, 140.0)
+
+        return np.round(v_blend, 1).tolist()
 
     @classmethod
     def get_full_trajectory(cls) -> Dict[str, Any]:
         """
-        Returns full reverse diffusion sequence metadata and frames.
+        Returns full reverse diffusion sequence metadata and frames at 64x64 resolution.
         """
         frames = []
         for t in [10, 8, 6, 4, 2, 0]:
             info = dict(cls.STEPS_METADATA[t])
-            info["grid_2d"] = cls.generate_grid_for_step(t, grid_size=16)
+            info["grid_2d"] = cls.generate_grid_for_step(t, grid_size=64)
             frames.append(info)
 
         return {

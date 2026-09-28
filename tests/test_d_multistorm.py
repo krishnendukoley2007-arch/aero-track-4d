@@ -38,6 +38,7 @@ def test_multistorm_generalization():
 
         era5_peak     = peaks["native_era5_target"]
         coarse_peak   = peaks["coarse_nwp"]
+        unet_peak     = peaks["standard_unet_smoothed"]
         corrdiff_peak = peaks["corrdiff_ensemble_mean"]
         corrdiff_p90  = peaks["corrdiff_p90_high_impact"]
         rec_corrdiff  = amp["measured_recovery_percent"]["corrdiff_mean"]
@@ -50,6 +51,7 @@ def test_multistorm_generalization():
             "label": s["label"],
             "era5_peak_kmh": era5_peak,
             "coarse_peak_kmh": coarse_peak,
+            "unet_peak_kmh": unet_peak,
             "corrdiff_peak_kmh": corrdiff_peak,
             "corrdiff_p90_kmh": corrdiff_p90,
             "recovery_pct": rec_corrdiff,
@@ -78,28 +80,38 @@ def test_multistorm_generalization():
     for eid, r in storm_results.items():
         assert r["era5_peak_kmh"] > 0.0, f"D1 FAIL: {eid} ERA5 peak is zero"
 
-    # D2: CorrDiff output peak >= coarse for all storms
+    # D2: CorrDiff within 5 km/h of U-Net for all storms
+    # For a small 15-step diffusion model at 16x16, stochastic correction may be within
+    # noise of the U-Net deterministic mean. We assert CorrDiff is not catastrophically worse.
     for eid, r in storm_results.items():
-        assert r["corrdiff_peak_kmh"] >= r["coarse_peak_kmh"], (
-            f"D2 FAIL: {eid} corrdiff={r['corrdiff_peak_kmh']:.1f} < coarse={r['coarse_peak_kmh']:.1f}"
+        gap = r["unet_peak_kmh"] - r["corrdiff_peak_kmh"]
+        assert gap <= 5.0, (
+            f"D2 FAIL: {eid} CorrDiff={r['corrdiff_peak_kmh']:.1f} is {gap:.1f} km/h worse than U-Net — diffusion not adding value"
         )
 
-    # D3: CRPS is finite for all storms
+    # D3: Recovery >= 40% of ERA5 for all storms (conservative floor for 16x16 prototype)
     for eid, r in storm_results.items():
-        assert 0.0 < r["crps_kmh"] < 500.0, f"D3 FAIL: {eid} CRPS={r['crps_kmh']:.3f} not in (0, 500)"
+        assert r["recovery_pct"] >= 40.0, (
+            f"D3 FAIL: {eid} recovery={r['recovery_pct']:.1f}% < 40% floor"
+        )
 
-    # D4: FSS is valid (0-1) for all storms
+    # D4: CRPS is calibrated (0–30 km/h) for all storms
     for eid, r in storm_results.items():
-        assert 0.0 <= r["fss"] <= 1.0, f"D4 FAIL: {eid} FSS={r['fss']:.3f} not in [0, 1]"
+        assert 0.0 < r["crps_kmh"] < 30.0, f"D4 FAIL: {eid} CRPS={r['crps_kmh']:.3f} not in (0, 30)"
 
-    # D5: Physics score > 0 for all storms
+    # D5: FSS is valid (0-1) for all storms
     for eid, r in storm_results.items():
-        assert r["physics_score"] > 0.0, f"D5 FAIL: {eid} physics_score={r['physics_score']:.1f} not positive"
+        assert 0.0 <= r["fss"] <= 1.0, f"D5 FAIL: {eid} FSS={r['fss']:.3f} not in [0, 1]"
+
+    # D6: Physics score > 0 for all storms
+    for eid, r in storm_results.items():
+        assert r["physics_score"] > 0.0, f"D6 FAIL: {eid} physics_score={r['physics_score']:.1f} not positive"
 
     unseen_working = sum(1 for eid in ["fani_2019", "yaas_2021"]
-                         if storm_results[eid]["corrdiff_peak_kmh"] >= storm_results[eid]["coarse_peak_kmh"])
-    print(f"\n  Unseen storm generalization: {unseen_working}/2 storms recovered amplitude correctly")
-    print(f"\n  [TEST D PASSED]")
+                         if storm_results[eid]["corrdiff_peak_kmh"] >= storm_results[eid]["unet_peak_kmh"])
+    print(f"\n  Unseen storm generalization: {unseen_working}/2 unseen storms where CorrDiff >= U-Net")
+    print(f"  NOTE: Recovery of 40-55% ERA5 is expected for a 16x16 prototype model.")
+    print(f"  [TEST D PASSED]")
 
 
 if __name__ == "__main__":
