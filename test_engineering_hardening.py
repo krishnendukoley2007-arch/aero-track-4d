@@ -203,7 +203,7 @@ class TestDefensibleAPIContracts:
         assert "probabilistic_confidence_score" in conf
         assert "spatial_footprint_refinement" in data
         refine = data["spatial_footprint_refinement"]
-        assert refine["false_alarm_area_reduction_percent"] >= 95.0
+        assert refine["geometric_footprint_reduction_percent"] >= 95.0
 
     def test_multilingual_bulletin_generation(self):
         """Verifies official IMD advisory bulletins in English, Hindi, Bengali, and Odia."""

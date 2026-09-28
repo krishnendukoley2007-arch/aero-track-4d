@@ -1769,7 +1769,7 @@ const LiveGlobal = {
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
     if (card4Label) card4Label.textContent = "Alert Corridor Area";
-    if (elRed) elRed.textContent = `${data.precision_impact.false_alarm_area_reduction_pct}%`;
+    if (elRed) elRed.textContent = `${data.precision_impact.geometric_area_reduction_pct}%`;
     if (elRedSub) elRedSub.textContent = `78.5 km² zone vs 3,500 km² district`;
   },
 
@@ -2196,7 +2196,7 @@ const LiveGlobal = {
       if (coarseWind) coarseWind.textContent = `${cc.coarse_nwp_wind_kmh} km/h`;
       if (resolvedWind) resolvedWind.textContent = `${cc.corrdiff_resolved_wind_kmh} km/h`;
       if (pressure) pressure.textContent = `${cc.surface_pressure_hpa} hPa`;
-      if (reduction) reduction.textContent = `${data.precision_impact.false_alarm_area_reduction_pct}%`;
+      if (reduction) reduction.textContent = `${data.precision_impact.geometric_area_reduction_pct}%`;
 
       const liveTag = data.is_live_stream ? "🟢 LIVE" : "⚠️ OFFLINE FALLBACK";
       if (coordSub) coordSub.textContent = `${liveTag} · ${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E · ${data.source}`;
@@ -2614,7 +2614,7 @@ const LiveGlobal = {
 
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (elRed) elRed.textContent = `${step.false_alarm_reduction_pct}%`;
+    if (elRed) elRed.textContent = `${step.geometric_area_reduction_pct}%`;
     if (elRedSub) elRedSub.textContent = `78.5 km² zone vs 3,500 km² district`;
 
     // Directive card
@@ -2663,7 +2663,7 @@ const LiveGlobal = {
     if (coarseWind) coarseWind.textContent = `${step.coarse_nwp_wind_kmh} km/h`;
     if (resolvedWind) resolvedWind.textContent = `${step.corrdiff_resolved_wind_kmh} km/h`;
     if (pressure) pressure.textContent = `${step.surface_pressure_hpa} hPa`;
-    if (reduction) reduction.textContent = `${step.false_alarm_reduction_pct}%`;
+    if (reduction) reduction.textContent = `${step.geometric_area_reduction_pct}%`;
     if (coordSub) coordSub.textContent = `Lead: ${step.lead_time_label} · Coords: ${step.centroid.lat}°N, ${step.centroid.lon}°E · Cone: ±${step.uncertainty_radius_km} km`;
   },
 
@@ -7690,15 +7690,15 @@ function computeLocalAlert(lat, lon, locName) {
     spatial_footprint_refinement: {
       pinpoint_impact_area_km2: 78.5,
       coastal_district_area_km2: 3500.0,
-      false_alarm_area_reduction_percent: Math.round((1.0 - 78.54 / 3500.0) * 10000) / 100,
-      methodology: "Pinpoint 5km circular impact radius (78.5 km²) replaces broad 3,500 km² district-wide warning, eliminating public alert fatigue."
+      geometric_footprint_reduction_percent: Math.round((1.0 - 78.54 / 3500.0) * 10000) / 100,
+      methodology: "Pinpoint 5km circular impact radius (78.5 km²) replaces broad 3,500 km² district-wide warning."
     },
     demographic_impact: {
       district_name: locName,
       coarse_district_population_at_risk: coarsePop,
       surgical_corridor_population_targeted: surgicalPop,
-      citizens_shielded_from_panic: shieldedPop,
-      false_alarm_reduction_pct: Math.round((1.0 - 78.54 / 3500.0) * 10000) / 100,
+      citizens_outside_pinpoint_corridor: shieldedPop,
+      geometric_area_reduction_pct: Math.round((1.0 - 78.54 / 3500.0) * 10000) / 100,
     },
     ndrf_dispatch_recommendation: {
       dispatch_priority: (severity === "Catastrophic" || severity === "Severe") ? "Immediate" : "Standby",

@@ -24,7 +24,7 @@
 Numerical Weather Prediction (NWP) outputs in the 3- to 10-day medium range suffer from two compounding challenges:
 1. **Atmospheric Chaos**: Small initial uncertainties grow non-linearly over medium-range forecast windows (3 to 10 days). Single deterministic model runs drift significantly, requiring the processing of multi-member 4D Ensemble Prediction Systems (EPS).
 2. **Spectral Smoothing in Deep Learning**: When researchers apply standard Convolutional Neural Networks (CNNs) or U-Nets to downscale weather grids, training with standard Mean Squared Error (MSE / L2 loss) forces the model to predict the conditional expected mean $\mathbb{E}[Y | X]$. This mathematical averaging systematically destroys high-frequency spatial gradients, severely attenuating the extreme amplitudes—such as hurricane eyewall wind speeds or torrential convective precipitation cores—that forecasters actually need to track.
-3. **Severe Public Alert Fatigue**: Coarse 12–25 km global NWP models force emergency authorities (NDRF, SDMAs) to issue broad district-wide red alerts across 3,500–5,000 km² regions. Because only a fraction of the district experiences peak destruction, communities experience repeated false alarms, leading to dangerous public complacency and massive unnecessary economic disruption.
+3. **Severe Public Alert Fatigue**: Coarse 12–25 km global NWP models force emergency authorities (NDRF, SDMAs) to issue broad district-wide red alerts across 3,500–5,000 km² regions. Because only a fraction of the district experiences peak destruction, communities experience repeated wide-area alerts, leading to dangerous public complacency and massive unnecessary economic disruption.
 
 ---
 

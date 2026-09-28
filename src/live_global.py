@@ -501,7 +501,7 @@ def get_live_point_forecast(lat: float, lon: float, location_name: Optional[str]
         "precision_impact": {
             "standard_district_alert_area_km2": district_area_km2,
             "corrdiff_pinpoint_impact_area_km2": round(corrdiff_pinpoint_area_km2, 1),
-            "false_alarm_area_reduction_pct": reduction_pct
+            "geometric_area_reduction_pct": reduction_pct
         },
         "amplitude_evaluation": amplitude_eval_payload,
         "hourly_forecast": hourly_forecast_payload,
@@ -928,7 +928,7 @@ def get_active_global_storms() -> Dict[str, Any]:
                 "uncertainty_radius_km": uncertainty_r_km,
                 "pinpoint_corridor_area_km2": 78.5,
                 "standard_district_area_km2": 3500.0,
-                "false_alarm_reduction_pct": round((1.0 - 78.54 / 3500.0) * 100.0, 2),
+                "geometric_area_reduction_pct": round((1.0 - 78.54 / 3500.0) * 100.0, 2),
                 "action_directive": (
                     f"NDRF Operational Directive: Immediate pinpoint 5 km coastal readiness for {storm['region']}. "
                     f"CorrDiff resolves {corrdiff_resolved_wind} km/h peak eyewall speed (+61.5% recovered vs {raw_wind:.1f} km/h coarse NWP). "

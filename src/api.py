@@ -339,7 +339,6 @@ def calculate_ndrf_alert(req: AlertRequest):
                 "spatial_footprint_refinement": {
                     "pinpoint_impact_area_km2": impact_zone_area_km2,
                     "coastal_district_area_km2": typical_district_area_km2,
-                    "false_alarm_area_reduction_percent": spatial_refinement_pct,
                     "geometric_footprint_reduction_percent": spatial_refinement_pct,
                     "methodology": f"Geometric comparison: Pinpoint 5km circular radius ({impact_zone_area_km2} km^2) vs standard {typical_district_area_km2:,.0f} km^2 district polygon ({spatial_refinement_pct}% geometric reduction).",
                     "provenance": "computed_geometric_area_ratio"
@@ -423,7 +422,6 @@ def calculate_ndrf_alert(req: AlertRequest):
             "spatial_footprint_refinement": {
                 "pinpoint_impact_area_km2": round(math.pi * (5.0 ** 2), 2),
                 "coastal_district_area_km2": 3500.0,
-                "false_alarm_area_reduction_percent": round((1.0 - (math.pi * 25.0) / 3500.0) * 100.0, 2),
                 "geometric_footprint_reduction_percent": round((1.0 - (math.pi * 25.0) / 3500.0) * 100.0, 2),
                 "methodology": "Geometric comparison: Pinpoint 5km circular radius vs broad 3,500 km^2 district warning.",
                 "provenance": "computed_geometric_area_ratio"
@@ -523,7 +521,6 @@ def calculate_ndrf_alert(req: AlertRequest):
             "spatial_footprint_refinement": {
                 "pinpoint_impact_area_km2": round(math.pi * (5.0 ** 2), 2),
                 "coastal_district_area_km2": 3500.0,
-                "false_alarm_area_reduction_percent": round((1.0 - (math.pi * 25.0) / 3500.0) * 100.0, 2),
                 "geometric_footprint_reduction_percent": round((1.0 - (math.pi * 25.0) / 3500.0) * 100.0, 2),
                 "methodology": "Geometric comparison: Pinpoint 5km circular radius vs broad 3,500 km^2 district warning.",
                 "provenance": "computed_geometric_area_ratio"
@@ -797,7 +794,6 @@ def calculate_ndrf_alert(req: AlertRequest):
         "spatial_footprint_refinement": {
             "pinpoint_impact_area_km2": impact_zone_area_km2,
             "coastal_district_area_km2": typical_district_area_km2,
-            "false_alarm_area_reduction_percent": spatial_refinement_pct,
             "geometric_footprint_reduction_percent": spatial_refinement_pct,
             "methodology": f"Geometric comparison: Pinpoint 5km circular radius ({impact_zone_area_km2} km^2) vs standard {typical_district_area_km2:,.0f} km^2 district polygon ({spatial_refinement_pct}% geometric reduction).",
             "provenance": "computed_geometric_area_ratio"
