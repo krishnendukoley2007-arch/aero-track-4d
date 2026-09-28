@@ -469,6 +469,6 @@ These constraints are documented so evaluators can assess the work with complete
 *Built for Smart India Hackathon 2026 — Problem Statement 26078*  
 *National Centre for Medium Range Weather Forecasting (NCMRWF) · Ministry of Earth Sciences · Government of India*
 
-**[Open Live App](https://krishnendukoley2007-arch.github.io/aero-track-4d/)** · **[API Docs](https://aero-track-4d.onrender.com/docs)** · **[License](https://creativecommons.org/licenses/by-nc-sa/4.0/)**
+**[Open Live App](https://krishnendukoley2007-arch.github.io/aero-track-4d/)** · **[API Docs](https://aero-track-4d.onrender.com/docs)** · **[License (MIT)](LICENSE)**
 
 </div>
