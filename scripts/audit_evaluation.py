@@ -238,7 +238,7 @@ def run_audit() -> dict:
         "pinpoint_area_km2": round(pinpoint_area, 2),
         "typical_district_area_km2": typical_district_area,
         "computed_area_reduction_percent": round(area_red_pct, 2),
-        "provenance": "Pure geometric area comparison: 5 km circular radius corridor (pi * 5^2 = 78.54 km2) vs 3,500 km2 standard district polygon. Unverified population constants removed."
+        "provenance": "Pure geometric area comparison: 5 km circular radius corridor (pi * 5^2 = 78.54 km2) vs assumed 3,500 km2 district area (assumed_constant). Alert-corridor area vs assumed district area (geometry, not model skill)."
     }
 
     # Save to results/

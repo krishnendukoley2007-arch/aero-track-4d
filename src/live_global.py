@@ -440,7 +440,7 @@ def get_live_point_forecast(lat: float, lon: float, location_name: Optional[str]
             "uncertainty_spread_km": round(sigma * 8.5, 1)
         })
 
-    # NDRF False-Alarm Reduction metrics
+    # Alert-corridor area vs assumed district area (geometry, not model skill)
     district_area_km2 = 3500.0
     corrdiff_pinpoint_area_km2 = math.pi * 5.0 * 5.0  # 78.5 km²
     reduction_pct = round(((district_area_km2 - corrdiff_pinpoint_area_km2) / district_area_km2) * 100.0, 1)
@@ -932,7 +932,7 @@ def get_active_global_storms() -> Dict[str, Any]:
                 "action_directive": (
                     f"NDRF Operational Directive: Immediate pinpoint 5 km coastal readiness for {storm['region']}. "
                     f"CorrDiff resolves {corrdiff_resolved_wind} km/h peak eyewall speed (+61.5% recovered vs {raw_wind:.1f} km/h coarse NWP). "
-                    f"Surface pressure: {raw_press:.1f} hPa. False-alarm footprint reduced geometrically (78.5 km² corridor vs 3,500 km² district)."
+                    f"Surface pressure: {raw_press:.1f} hPa. Alert-corridor area vs assumed district area (geometry, not model skill): 78.5 km² corridor vs 3,500 km² district."
                 )
             })
 

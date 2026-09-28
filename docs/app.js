@@ -1768,7 +1768,7 @@ const LiveGlobal = {
     const card4Label = document.getElementById("ov-card4-label");
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (card4Label) card4Label.textContent = "False-Alarm Reduction";
+    if (card4Label) card4Label.textContent = "Alert Corridor Area";
     if (elRed) elRed.textContent = `${data.precision_impact.false_alarm_area_reduction_pct}%`;
     if (elRedSub) elRedSub.textContent = `78.5 km² zone vs 3,500 km² district`;
   },
@@ -1944,7 +1944,7 @@ const LiveGlobal = {
     const card4Label = document.getElementById("ov-card4-label");
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (card4Label) card4Label.textContent = "False-Alarm Reduction";
+    if (card4Label) card4Label.textContent = "Alert Corridor Area";
     if (elRed) elRed.textContent = "78.5 km²";
     if (elRedSub) elRedSub.textContent = "78.5 km² zone vs 3,500 km² district";
   },
@@ -3011,7 +3011,7 @@ function applyAudienceMode(mode) {
     if (card1Lbl) card1Lbl.textContent = "Classification";
     if (card2Lbl) card2Lbl.textContent = "Eyewall Wind (5km)";
     if (card3Lbl) card3Lbl.textContent = "Held-out Track Error";
-    if (card4Lbl) card4Lbl.textContent = "False-Alarm Reduction";
+    if (card4Lbl) card4Lbl.textContent = "Alert Corridor Area";
 
     if (stageEl) {
       if (state.trackedData && state.trackedData.tracked_steps && state.trackedData.tracked_steps[state.currentStep]) {
@@ -3421,7 +3421,7 @@ If you are located along coastal West Bengal (Digha, Sagar Island, Sundarbans) o
 - **The Resolution Bottleneck**: Operational global NWP models (ECMWF IFS / NOAA GFS) run at coarse **12 km grid spacing**, which numerically blurs peak eyewall velocity by up to **61%**.
 - **Generative Diffusion Super-Resolution**: AERO-TRACK 4D employs a conditional 2D/3D score-based diffusion model conditioned on 12km ERA5 reanalysis fields, synthesizing high-fidelity **5 km subgrid turbulence**.
 - **Kolmogorov $k^{-5/3}$ Energy Conservation**: Unlike standard deep learning CNNs that output smoothed ("blurry") spatial averages, CorrDiff rigorously preserves the kinetic energy spectral cascade in the inertial subrange ($k^{-5/3}$).
-- **Precision Warning Area**: Slashes false-alarm evacuation footprints from **3,500 km²** down to a **78.5 km²** surgical impact corridor (a **97.8% reduction** in civil disruption).`;
+- **Precision Warning Area**: Reduces warning footprint from assumed district area from **3,500 km²** down to a **78.5 km²** surgical impact corridor (a **97.8% reduction** in civil disruption).`;
     }
 
     // 5. Emergency Helplines
@@ -7788,7 +7788,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elCard4 = document.getElementById("ov-card4-label");
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (elCard4) elCard4.textContent = "False-Alarm Reduction";
+    if (elCard4) elCard4.textContent = "Alert Corridor Area";
     if (elRed) elRed.textContent = "78.5 km²";
     if (elRedSub) elRedSub.textContent = "78.5 km² zone vs 3,500 km² district";
 

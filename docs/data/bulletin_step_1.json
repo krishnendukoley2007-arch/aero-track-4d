@@ -1,4 +1,7 @@
 ========================================================================================
+*** SIMULATED ADVISORY — PROTOTYPE SYSTEM FOR RESEARCH & DEMONSTRATION ONLY ***
+*** NOT AN OFFICIAL IMD PRODUCT — DO NOT USE FOR OPERATIONAL WARNING DISPATCH ***
+========================================================================================
                       GOVERNMENT OF INDIA - MINISTRY OF EARTH SCIENCES
                          INDIA METEOROLOGICAL DEPARTMENT (IMD)
                           CYCLONE WARNING DIVISION, NEW DELHI
@@ -33,12 +36,12 @@ SUB: SUPER CYCLONIC STORM ‘AMPHAN’ (PRONOUNCED AS UM-PUN) OVER BAY OF BENGAL
 4. HYPER-LOCALIZED 5-KM RADIUS DIRECTIVE (ZERO ALERT FATIGUE FOR NDRF):
    • Target Location: Digha Coast (West Bengal) (21.626°N, 87.508°E)
    • Distance to Core Circulation: 1253.1 km
-   • Predicted Local Wind at Site: 28.7 km/h (P90 Gusts: 46.9 km/h)
+   • Predicted Local Wind at Site: 8.4 km/h (P90 Gusts: 22.9 km/h)
    • Alert Classification: NOMINAL AMBIENT CONDITIONS [Ensemble Spread: ±4.5 km/h | Conf: HIGH (Narrow Ensemble Spread)]
-   • Action Directive: GREEN NORMAL: Digha Coast (West Bengal) is situated 1253 km outside Cyclone Amphan convective zone. Local conditions: Clear Skies (28.7°C, wind 28.7 km/h, 1005.0 hPa). 97.8% false-alarm reduction active.
-   • Spatial Footprint Refinement: Pinpoint 5 km radius (78.5 km²) replaces
-     broad district warning (3500.0 km²), reducing false-alarm warning
-     area by 97.8%.
+   • Action Directive: GREEN NORMAL: Digha Coast (West Bengal) is situated 1253 km outside Cyclone Amphan convective zone. Local conditions: Overcast (30.3°C, wind 8.4 km/h, 1005.5 hPa). Geometric footprint refinement active.
+   • Spatial Footprint Refinement: Pinpoint 5 km radius (78.54 km²) replaces
+     broad district warning (3500.0 km²), alert-corridor area vs assumed district area (geometry, not model skill):
+     corridor area 78.54 km² vs assumed district 3500.0 km².
 
 5. ACTIONABLE DIRECTIVES FOR FIRST RESPONDERS & DISTRICT MAGISTRATES:
    • Fishermen Warning: Total suspension of fishing operations over deep sea and coastal waters.

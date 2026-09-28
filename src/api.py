@@ -132,7 +132,7 @@ def get_status():
             "reanalysis_grid": "ECMWF ERA5 Hourly Spatial Grid (May 15-21, 2020, 256 coordinates)",
             "observation_records": "NOAA IBTrACS v04r01 (Agency: IMD New Delhi, 51 records)",
             "climatology_baseline": "36-hour pre-onset ERA5 baseline (May 15 00Z–May 16 12Z, ambient conditions)",
-            "license": "CC-BY-NC-SA-4.0",
+            "license": "MIT (Code) / Copernicus Open Access (Data) — see docs/DATA_LICENSES.md",
         },
         "modules": {
             "stage_1_tracker": "EFI-Inspired z-Score + Icosahedral Spherical Geodesic Propagation Mesh",
@@ -1057,7 +1057,7 @@ def get_agri_advisory(
 def get_coastal_districts():
     """Returns GeoJSON FeatureCollection of coastal district polygons with geometric footprint refinement metrics."""
     data = dict(_coastal_districts_cache)
-    data["provenance"] = "official_survey_of_india_boundaries"
+    data["provenance"] = "assumed_constant"
     return data
 
 

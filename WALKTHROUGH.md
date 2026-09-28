@@ -17,7 +17,7 @@
 > 4. **Anomaly Index vs. True EFI**: Anomaly tracking currently utilizes a per-cell $z$-score against a historical May baseline. True ECMWF Extreme Forecast Index (EFI) requires computing the integral over 30-year model re-forecast quantiles ($EFI = \frac{2}{\pi}\int_0^1 \frac{p - F_f(p)}{\sqrt{p(1-p)}}dp$) and is scheduled for Phase 3.
 > 5. **Basemap Tile Streaming (Network Disclosure)**: All neural network inference, GNN tracking, diffusion downscaling, thermodynamic soundings, and 3D WebGL Earth execute 100% locally with zero external API dependencies. However, the Leaflet 2D basemaps stream satellite and street map tiles over HTTPS from ESRI and OpenStreetMap. In a fully air-gapped environment without internet access, 2D satellite imagery tiles will not load, though vector coastlines and geodesic mesh layers remain functional.
 > 6. **Multi-Hazard Data Provenance**: Heat dome and cold wave records are cataloged as `ILLUSTRATIVE — NOT MODEL OUTPUT` to demonstrate system multi-hazard schema compatibility prior to dedicated multi-year training.
-> 7. **Spatial Warning Footprint**: The 97.8% reduction refers to the idealized geometric area ratio between a $5\text{ km}$ circular radius corridor ($78.5\text{ km}^2$) and a standard administrative district polygon ($3,500\text{ km}^2$). It does not represent an empirical reduction in gale-force wind extent (cyclone damage swaths typically exceed $100\text{ km}$).
+> 7. **Spatial Warning Footprint**: The alert-corridor area comparison refers to the idealized geometric ratio between a $5\text{ km}$ circular radius corridor ($78.5\text{ km}^2$) and an assumed administrative district polygon ($3,500\text{ km}^2$) (geometry, not model skill). It does not represent an empirical reduction in gale-force wind extent (cyclone damage swaths typically exceed $100\text{ km}$).
 
 ## 🌟 Executive Pitch: The Problem & Why Existing Systems Fail
 
@@ -59,7 +59,7 @@ AERO-TRACK 4D delivers an automated, physics-informed hybrid AI pipeline structu
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │ STAGE 3: Zero-Alert-Fatigue NDRF Dispatch & Automated Operations Dashboard       │
 │ • Replaces 3,500 km² district warnings with 5 km radius impact zones (78.5 km²) │
-│ • 97.8% Geometric Area Footprint Reduction (78.5 km² vs 3,500 km²)              │
+│ • Alert-Corridor Area vs Assumed District Area (78.5 km² vs 3,500 km²)              │
 │ • Automated MoES/IMD National Cyclone Advisory Bulletin generation              │
 │ • Verified on Held-Out Test Split (Peak Super Cyclone & Landfall Timesteps)      │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -245,7 +245,7 @@ This script is structured around the 5 persistent views. Follow this exact flow 
     - District baseline (Purba Medinipur): **4,736 km² area**.
     - Standard district warning covers the entire **~3,500 km² district footprint**.
     - Our 5 km pinpoint alert zone (78.5 km² circle) isolates the localized corridor.
-    - Result: **97.8% geometric area footprint reduction** ($1 - 78.5/3500$). *(Note: Severe cyclone gale winds physically span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5).*
+    - Result: **Alert-corridor area vs assumed district area (geometry, not model skill)** ($1 - 78.5/3500$). *(Note: Severe cyclone gale winds physically span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5).*
   - Click **"Download Official IMD Advisory (.html)"**:
     - Downloads an authentic, MoES/IMD Cyclone Warning Centre formatted advisory with official crest, metadata box, Census 2011 density metrics, and operational directives.
 

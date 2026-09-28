@@ -41,7 +41,7 @@
 > 4. **Anomaly Index vs. True EFI**: Anomaly tracking currently utilizes a per-cell $z$-score against a historical May baseline. True ECMWF Extreme Forecast Index (EFI) requires computing the integral over 30-year model re-forecast quantiles ($EFI = \frac{2}{\pi}\int_0^1 \frac{p - F_f(p)}{\sqrt{p(1-p)}}dp$) and is scheduled for Phase 3.
 > 5. **Basemap Tile Streaming (Network Disclosure)**: All neural network inference, GNN tracking, diffusion downscaling, thermodynamic soundings, and 3D WebGL Earth execute 100% locally with zero external API dependencies. However, the Leaflet 2D basemaps stream satellite and street map tiles over HTTPS from ESRI and OpenStreetMap. In a fully air-gapped environment without internet access, 2D satellite imagery tiles will not load, though vector coastlines and geodesic mesh layers remain functional.
 > 6. **Multi-Hazard Data Provenance**: Heat dome and cold wave records are cataloged as `ILLUSTRATIVE — NOT MODEL OUTPUT` to demonstrate system multi-hazard schema compatibility prior to dedicated multi-year training.
-> 7. **Spatial Warning Footprint**: The 97.8% reduction refers to the idealized geometric area ratio between a $5\text{ km}$ circular radius corridor ($78.5\text{ km}^2$) and a standard administrative district polygon ($3,500\text{ km}^2$). It does not represent an empirical reduction in gale-force wind extent (cyclone damage swaths typically exceed $100\text{ km}$).
+> 7. **Spatial Warning Footprint**: The alert-corridor area comparison refers to the idealized geometric ratio between a $5\text{ km}$ circular radius corridor ($78.5\text{ km}^2$) and an assumed administrative district polygon ($3,500\text{ km}^2$) (geometry, not model skill). It does not represent an empirical reduction in gale-force wind extent (cyclone damage swaths typically exceed $100\text{ km}$).
 
 ## The Problem We Solve
 
@@ -130,7 +130,7 @@ AERO-TRACK 4D solves it using physics-informed generative diffusion — recoveri
 
 ![AERO-AI Copilot drawer open alongside the Track & Alert view showing landfall at 8.7km error](docs/screenshots/ss_07_ai_copilot.png)
 
-> Track & Alert view showing Amphan landfall at **8.7 km error** (Step 11 of 13). Geometric warning footprint reduction: **97.8%** (78.5 km² 5 km circular zone vs ~3,500 km² district polygon). The AERO-AI copilot button opens an offline meteorological AI assistant — no API key needed.
+> Track & Alert view showing Amphan landfall at **8.7 km error** (Step 11 of 13). Alert corridor area comparison: 78.5 km² circular corridor vs ~3,500 km² assumed district area (geometry, not model skill). The AERO-AI copilot button opens an offline meteorological AI assistant — no API key needed.
 
 ---
 
@@ -280,7 +280,7 @@ Aligned directly to the 4 deliverables mandated by SIH 2026 PS 26078 (MoES / NCM
 | **1. Tracking Core** | Spatio-Temporal GNN on 269-node geodesic mesh patch (742 edges, 127.6 km spacing, 4,929 trainable GAT parameters). Computes dynamic 4D bounding boxes and tracks anomaly centroids over 13 evaluation steps across 5 days (May 16–21, 2020). | `/api/track`, `/api/gnn-mesh-state`; **50.9 km mean error vs NOAA IBTrACS** (8.7 km landfall error on held-out Step 10). Ground truth in [`results/audit_metrics.json`](results/audit_metrics.json). | Evaluated on ERA5 reanalysis as NWP proxy rather than operational numerical forecasts. Climatological EFI uses z-score baseline; true 30-year climatological CDF integral planned for Phase 2/3. |
 | **2. Downscaling Core** | Physics-informed CorrDiff conditional diffusion model (360k parameters: U-Net mean predictor + Langevin diffusion corrector) downscaling 12 km coarse NWP proxy fields to 5 km display grid. | `/api/downscale`; **53.1 km/h peak wind** (beats U-Net 53.3 km/h by +0.1 km/h) on held-out Amphan Step 5; CRPS = 16.33 km/h; FSS = 0.287. Ground truth in [`results/audit_metrics.json`](results/audit_metrics.json). | Active checkpoint runs natively on 16×16 grid; 38×38 display grid is bicubic spatial upsampling, not 5km-native inference. Coarse NWP input is simulated via Gaussian blurring (σ=1.2). Native 5 km resolution requires NCMRWF IMDAA 12 km → 5 km paired training (Phase 4). |
 | **3. Operations Dashboard** | Full 6-view operations room with Dual 2D Leaflet and 3D WebGL Three.js Earth, interactive swipe comparison slider, animated wind vectors, and 10-member medium-range ensemble outlook. | Automated smoke tests (43 passed); client-side WebGL & Leaflet execution at 60 FPS; static GitHub Pages deployment mode. | Satellite basemap imagery requires internet connection to stream tiles from ESRI/OSM; offline mode falls back to vector coastlines and geodesic mesh without aerial photography. |
-| **4. Alerting API** | FastAPI REST backend with 34 endpoints. Generates 5 km hyper-local pinpoint alert envelopes, multilingual IMD-formatted advisory bulletins (EN, HI, BN, OR), OASIS CAP v1.2 XML, and NDMA cell broadcast payloads. | `POST /api/alert`, `/api/bulletin`, `/api/alert/cap`; **All 43 smoke tests passing HTTP 200**; 22 engineering hardening contracts verified. | 97.8% footprint reduction is an idealized geometric comparison (78.5 km² 5 km circle vs 3,500 km² district polygon). Severe cyclone gale winds physically span 100+ km; field-derived threshold exceedance polygons are planned for Phase 5. |
+| **4. Alerting API** | FastAPI REST backend with 34 endpoints. Generates 5 km hyper-local pinpoint alert envelopes, multilingual IMD-formatted advisory bulletins (EN, HI, BN, OR), OASIS CAP v1.2 XML, and NDMA cell broadcast payloads. | `POST /api/alert`, `/api/bulletin`, `/api/alert/cap`; **All 43 smoke tests passing HTTP 200**; 22 engineering hardening contracts verified. | Alert-corridor area vs assumed district area is an idealized geometric comparison (78.5 km² 5 km circle vs 3,500 km² district polygon; geometry, not model skill). Severe cyclone gale winds physically span 100+ km; field-derived threshold exceedance polygons are planned for Phase 5. |
 
 ### Alert Area Precision: 5 km Pinpoint vs. District-Wide Warning
  
@@ -289,7 +289,7 @@ AERO-TRACK 4D computes a pinpoint 5 km radius warning circle (78.5 km²):
 
 | Metric | District-Wide Warning | AERO-TRACK 5 km Pinpoint | Reduction / Distinction |
 |---|---|---|---|
-| Warning Footprint Area | ~3,500 km² (district polygon) | 78.5 km² (5 km radius circle) | **97.8% geometric area footprint reduction** |
+| Warning Footprint Area | ~3,500 km² (district polygon) | 78.5 km² (5 km radius circle) | **Alert-corridor area vs assumed district area (geometry, not model skill)** |
 | Warning Specificity | Entire district warned uniformly | Localized 5 km corridor | Surgical targeting for emergency response |
 | Provenance / Measurement | Administrative boundary | Idealized geometric circle ($1 - 78.5/3500$) | *Physical damaging gale winds span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5* |
 
@@ -457,7 +457,7 @@ These constraints are documented so evaluators can assess the work with complete
 
 - **ERA5 Reanalysis**: ECMWF ERA5 via Copernicus Climate Change Service (C3S). DOI: [10.24381/cds.143582cf](https://doi.org/10.24381/cds.143582cf)
 - **IBTrACS Best Track**: NOAA NCEI IBTrACS v04r01 (Agency: IMD New Delhi). Knapp et al. (2018), *BAMS*.
-- **IndiaWeatherBench Dataset** (CC-BY-NC-SA-4.0): Nguyen, Singh, Naharas, Bandarkar, Grover. `github.com/tung-nd/IndiaWeatherBench`
+- **IndiaWeatherBench Dataset** (see docs/DATA_LICENSES.md): Nguyen, Singh, Naharas, Bandarkar, Grover. `github.com/tung-nd/IndiaWeatherBench`
 - **CorrDiff Architecture**: Mardani et al. (2023). "Residual Diffusion Modeling for Km-scale Atmospheric Downscaling." *arXiv:2309.15214*
 - **Graph Attention Network**: Velickovic et al. (2018). "Graph Attention Networks." *ICLR 2018*
 - **MoES Acknowledgement**: *Authors gratefully acknowledge NCMRWF, Ministry of Earth Sciences, Government of India, for IMDAA reanalysis. IMDAA was produced under collaboration between UK Met Office, NCMRWF, and IMD.*

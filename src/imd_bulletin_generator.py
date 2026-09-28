@@ -104,7 +104,7 @@ SUB: SEVERE HEAT WAVE TO EXTREME HEAT DOME CONDITIONS OVER NORTHWEST & CENTRAL I
    • Probed Sector: {loc_name}
    • Resolved Local Max Temperature: {metric_val:.1f}°C (Wet-Bulb Heat Index: Extreme Danger)
    • Pinpoint 5 km Warning Footprint: 78.5 sq. km targeted radius eliminates alert fatigue
-     across 6,200 sq. km broad administrative divisions (98.7% false-alarm area reduction).
+     across 6,200 sq. km broad administrative divisions (alert-corridor area vs assumed district area (geometry, not model skill)).
 
 4. ACTIONABLE PROTOCOLS FOR FIRST RESPONDERS & DISTRICT MAGISTRATES:
    • Outdoor Labor Restrictions: Mandatory suspension of outdoor construction/manual labor
@@ -219,8 +219,8 @@ SUB: SUPER CYCLONIC STORM ‘AMPHAN’ (PRONOUNCED AS UM-PUN) OVER BAY OF BENGAL
    • Alert Classification: {alert_data.get('alert_tier', 'HIGH WARNING')}
    • Action Directive: {alert_data.get('action_directive', 'Execute standard operating procedures.')}
    • Spatial Footprint Refinement: Pinpoint 5 km radius ({refine.get('pinpoint_impact_area_km2', 78.5)} km²) replaces
-     broad district warning ({refine.get('coastal_district_area_km2', 3500)} km²), reducing false-alarm warning
-     area by {refine.get('false_alarm_area_reduction_percent', 97.76)}%."""
+     broad district warning ({refine.get('coastal_district_area_km2', 3500)} km²), alert-corridor area vs assumed district area (geometry, not model skill):
+     corridor area {refine.get('pinpoint_impact_area_km2', 78.5)} km² vs assumed district {refine.get('coastal_district_area_km2', 3500)} km²."""
 
         bulletin += f"""
 

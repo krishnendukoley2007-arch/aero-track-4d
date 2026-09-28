@@ -48,20 +48,23 @@ for step in range(13):
         f"bulletin_step_{step}.json"
     ))
 
+from fastapi.testclient import TestClient
+from src.api import app
+
+client = TestClient(app)
+
 print(f"Exporting {len(ENDPOINTS)} endpoints to {DATA_DIR}...")
 total_bytes = 0
 
 for url_path, filename in ENDPOINTS:
-    full_url = BASE_URL + url_path
     target_path = os.path.join(DATA_DIR, filename)
     try:
-        req = urllib.request.Request(full_url, headers={"User-Agent": "AERO-TRACK-Exporter/1.0"})
-        with urllib.request.urlopen(req) as resp:
-            content = resp.read()
-            with open(target_path, "wb") as f:
-                f.write(content)
-            total_bytes += len(content)
-            print(f"  [OK] {filename} ({len(content):,} bytes)")
+        resp = client.get(url_path)
+        content = resp.content
+        with open(target_path, "wb") as f:
+            f.write(content)
+        total_bytes += len(content)
+        print(f"  [OK] {filename} ({len(content):,} bytes)")
     except Exception as e:
         print(f"  [FAIL] {url_path} -> {filename}: {e}")
 

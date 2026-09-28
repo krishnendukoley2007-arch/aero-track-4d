@@ -154,7 +154,7 @@ class WeatherDataLoader:
             "impact_zones": cfg["impact_zones"],
             "data_source": f"ECMWF ERA5 Hourly Reanalysis + NOAA IBTrACS v04r01 (Agency: {cfg['agency']})",
             "acknowledgement": "Authors gratefully acknowledge NCMRWF, Ministry of Earth Sciences, Government of India, for IMDAA reanalysis. Contains modified Copernicus Climate Change Service information (ERA5).",
-            "license": "CC-BY-NC-SA-4.0",
+            "license": "Copernicus Open Access / MIT (see docs/DATA_LICENSES.md)",
             "timesteps_count": len(self.eval_steps),
         }
 

@@ -12,3 +12,8 @@ env/
 .idea/
 .vscode/
 data/cache/
+data/raw/era5/
+.cdsapirc
+.ecmwfapirc
+.netrc
+*.key
