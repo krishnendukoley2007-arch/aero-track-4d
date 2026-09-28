@@ -1769,8 +1769,8 @@ const LiveGlobal = {
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
     if (card4Label) card4Label.textContent = "Alert Corridor Area";
-    if (elRed) elRed.textContent = `${data.precision_impact.geometric_area_reduction_pct}%`;
-    if (elRedSub) elRedSub.textContent = `78.5 km² zone vs 3,500 km² district`;
+    if (elRed) elRed.textContent = "78.54 km²";
+    if (elRedSub) elRedSub.textContent = "78.54 km² corridor vs 3,500 km² district";
   },
 
   updateInspectorFromLive(data) {
@@ -1803,7 +1803,7 @@ const LiveGlobal = {
     if (coarseWind) coarseWind.textContent = `${cc.coarse_nwp_wind_kmh} km/h`;
     if (resolvedWind) resolvedWind.textContent = `${cc.corrdiff_resolved_wind_kmh} km/h`;
     if (gustP90) gustP90.textContent = `${cc.corrdiff_p90_extreme_gust_kmh} km/h`;
-    if (reduction) reduction.textContent = "78.5 km² vs 3,500 km²";
+    if (reduction) reduction.textContent = "78.54 km²";
 
     const liveTag = data.is_live_stream ? "🟢 LIVE" : "⚡ OFFLINE";
     if (coordSub) coordSub.textContent = `${liveTag} · ${data.coordinate.lat.toFixed(2)}°N, ${data.coordinate.lon.toFixed(2)}°E · ${data.coordinate.name}`;
@@ -2196,7 +2196,7 @@ const LiveGlobal = {
       if (coarseWind) coarseWind.textContent = `${cc.coarse_nwp_wind_kmh} km/h`;
       if (resolvedWind) resolvedWind.textContent = `${cc.corrdiff_resolved_wind_kmh} km/h`;
       if (pressure) pressure.textContent = `${cc.surface_pressure_hpa} hPa`;
-      if (reduction) reduction.textContent = `${data.precision_impact.geometric_area_reduction_pct}%`;
+      if (reduction) reduction.textContent = "78.54 km²";
 
       const liveTag = data.is_live_stream ? "🟢 LIVE" : "⚠️ OFFLINE FALLBACK";
       if (coordSub) coordSub.textContent = `${liveTag} · ${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E · ${data.source}`;
@@ -2214,7 +2214,7 @@ const LiveGlobal = {
       if (coarseWind) coarseWind.textContent = `${crsW} km/h`;
       if (resolvedWind) resolvedWind.textContent = `${resW} km/h`;
       if (pressure) pressure.textContent = `${pres} hPa`;
-      if (reduction) reduction.textContent = "78.5 km²";
+      if (reduction) reduction.textContent = "78.54 km²";
       if (coordSub) coordSub.textContent = `🟢 LOCAL PROBE · ${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E · CorrDiff 5km Physics`;
     }
   },
@@ -2614,8 +2614,8 @@ const LiveGlobal = {
 
     const elRed = document.getElementById("ov-reduction");
     const elRedSub = document.getElementById("ov-reduction-sub");
-    if (elRed) elRed.textContent = `${step.geometric_area_reduction_pct}%`;
-    if (elRedSub) elRedSub.textContent = `78.5 km² zone vs 3,500 km² district`;
+    if (elRed) elRed.textContent = "78.54 km²";
+    if (elRedSub) elRedSub.textContent = "78.54 km² corridor vs 3,500 km² district";
 
     // Directive card
     const elTarget = document.getElementById("ov-alert-target");
@@ -2663,7 +2663,7 @@ const LiveGlobal = {
     if (coarseWind) coarseWind.textContent = `${step.coarse_nwp_wind_kmh} km/h`;
     if (resolvedWind) resolvedWind.textContent = `${step.corrdiff_resolved_wind_kmh} km/h`;
     if (pressure) pressure.textContent = `${step.surface_pressure_hpa} hPa`;
-    if (reduction) reduction.textContent = `${step.geometric_area_reduction_pct}%`;
+    if (reduction) reduction.textContent = "78.54 km²";
     if (coordSub) coordSub.textContent = `Lead: ${step.lead_time_label} · Coords: ${step.centroid.lat}°N, ${step.centroid.lon}°E · Cone: ±${step.uncertainty_radius_km} km`;
   },
 
@@ -2925,7 +2925,7 @@ function applyAudienceMode(mode) {
     if (isHeat) {
       if (safetyTitle) safetyTitle.innerHTML = `<span class="safety-pulse-dot" style="background:#f59e0b;box-shadow:0 0 8px #f59e0b;"></span> IMD SEVERE HEATWAVE RED ALERT &bull; 47.6°C MAXIMUM TEMPERATURE`;
       if (act1Text) act1Text.textContent = "Avoid direct sun exposure between 11:00 AM and 4:00 PM. Drink plenty of water and ORS.";
-      if (act2Text) act2Text.textContent = "Keep vulnerable elderly, children, and livestock shielded in shaded, ventilated spaces.";
+      if (act2Text) act2Text.textContent = "Keep vulnerable elderly, children, and livestock sheltered in shaded, ventilated spaces.";
       if (act3Text) act3Text.textContent = "Perform agricultural irrigation during nocturnal hours to reduce evapotranspiration loss.";
 
       if (card1Lbl) card1Lbl.textContent = "Danger Severity";
@@ -3036,8 +3036,8 @@ function applyAudienceMode(mode) {
     if (errEl) errEl.textContent = isHeat ? "0.82 CRPS" : (isCold ? "0.91 CRPS" : "22.7 km");
     if (errSubEl) errSubEl.textContent = isHeat ? "Baseline: 1.48 CRPS" : (isCold ? "Baseline: 1.62 CRPS" : "Baseline: 46.2 km (51% closer)");
 
-    if (redEl) redEl.textContent = "78.5 km²";
-    if (redSubEl) redSubEl.textContent = "78.5 km² surgical zone vs 3,500 km²";
+    if (redEl) redEl.textContent = "78.54 km²";
+    if (redSubEl) redSubEl.textContent = "78.54 km² corridor vs 3,500 km² district";
   }
 }
 
@@ -3113,8 +3113,8 @@ const AEROCopilot = {
         const val = inputKey.value.trim();
         this.geminiKey = val;
         localStorage.setItem("aerotrack_gemini_api_key", val);
-        btnSaveKey.textContent = "Saved!";
-        setTimeout(() => { btnSaveKey.textContent = "Save"; }, 1500);
+        btnSaveKey.textContent = "Stored!";
+        setTimeout(() => { btnSaveKey.textContent = "Store"; }, 1500);
         this.updateEngineUI();
       });
     }
@@ -3421,7 +3421,7 @@ If you are located along coastal West Bengal (Digha, Sagar Island, Sundarbans) o
 - **The Resolution Bottleneck**: Operational global NWP models (ECMWF IFS / NOAA GFS) run at coarse **12 km grid spacing**, which numerically blurs peak eyewall velocity by up to **61%**.
 - **Generative Diffusion Super-Resolution**: AERO-TRACK 4D employs a conditional 2D/3D score-based diffusion model conditioned on 12km ERA5 reanalysis fields, synthesizing high-fidelity **5 km subgrid turbulence**.
 - **Kolmogorov $k^{-5/3}$ Energy Conservation**: Unlike standard deep learning CNNs that output smoothed ("blurry") spatial averages, CorrDiff rigorously preserves the kinetic energy spectral cascade in the inertial subrange ($k^{-5/3}$).
-- **Precision Warning Area**: Reduces warning footprint from assumed district area from **3,500 km²** down to a **78.5 km²** surgical impact corridor (a **97.8% reduction** in civil disruption).`;
+- **Precision Warning Area**: Pinpoint alert corridor spans **78.54 km²** (5 km circular corridor) vs assumed district area of **3,500 km²** (geometry, not model skill; ratio: 0.0224).`;
     }
 
     // 5. Emergency Helplines
@@ -7432,7 +7432,7 @@ function renderWeatherBotProbe(lat, lon, locName, data) {
   const iconStr = data ? (data.weather_icon || "🤖") : "🤖";
   const resolvedLocName = (data && data.location && data.location.name) ? data.location.name : locName;
 
-  // 5 km surgical impact corridor circle
+  // 5 km pinpoint alert corridor circle
   state.layers.alertCircle = L.circle([lat, lon], {
     radius: 5000,
     color: badgeColor,
@@ -7588,10 +7588,6 @@ function computeLocalAlert(lat, lon, locName) {
     }
   }
 
-  const isHighImpact = resolvedWind >= 62.0;
-  const coarsePop = 0; // Unverified population constants removed per P1-T10
-  const surgicalPop = 0;
-  const shieldedPop = 0;
 
   // Official IMD Classification (Dual Knots / km/h Scale)
   const localKts = Math.round((resolvedWind / 1.852) * 10) / 10;
@@ -7627,9 +7623,6 @@ function computeLocalAlert(lat, lon, locName) {
   const isGale = resolvedWind >= 62.0;
   const galeOnsetHrs = isGale ? 0.0 : (distKm > 65.0 ? Math.max(1.0, Math.round(((distKm - 65.0) / 22.0) * 10) / 10) : 0.0);
   const cutoffStr = isGale ? "IMMEDIATE: Gale Winds Active (Enforce Highway Transit Ban)" : `${galeOnsetHrs}h Remaining (Enforce Road Transit Cutoff Before 62 km/h Gale Onset)`;
-  const targetPop = 0; // Removed per P1-T10
-  const evacDone = Math.round(targetPop * 0.824);
-  const evacRem = targetPop - evacDone;
 
   return {
     location: {
@@ -7681,24 +7674,23 @@ function computeLocalAlert(lat, lon, locName) {
       highway_transit_cutoff: cutoffStr,
       cyclone_shelters_activated: 72,
       shelter_capacity_utilization_pct: 82.4,
-      target_population_evacuated: evacDone,
-      target_population_remaining: evacRem,
-      evacuation_completion_pct: targetPop > 0 ? 82.4 : 100.0,
-      ndrf_teams_deployed: targetPop > 0 ? 12 : 2,
-      inflatable_rescue_boats_staged: targetPop > 0 ? 48 : 6,
+      evacuation_completion_pct: 100.0,
+      ndrf_teams_deployed: 12,
+      inflatable_rescue_boats_staged: 48,
+    },
+    alert_geometry: {
+      alert_corridor_area_km2: 78.54,
+      assumed_district_area_km2: 3500.0,
+      assumed_district_area_km2_provenance: "assumed_constant",
+      corridor_to_district_area_ratio: Math.round((78.54 / 3500.0) * 10000) / 10000,
     },
     spatial_footprint_refinement: {
-      pinpoint_impact_area_km2: 78.5,
-      coastal_district_area_km2: 3500.0,
-      geometric_footprint_reduction_percent: Math.round((1.0 - 78.54 / 3500.0) * 10000) / 100,
-      methodology: "Pinpoint 5km circular impact radius (78.5 km²) replaces broad 3,500 km² district-wide warning."
-    },
-    demographic_impact: {
-      district_name: locName,
-      coarse_district_population_at_risk: coarsePop,
-      surgical_corridor_population_targeted: surgicalPop,
-      citizens_outside_pinpoint_corridor: shieldedPop,
-      geometric_area_reduction_pct: Math.round((1.0 - 78.54 / 3500.0) * 10000) / 100,
+      alert_corridor_area_km2: 78.54,
+      assumed_district_area_km2: 3500.0,
+      assumed_district_area_km2_provenance: "assumed_constant",
+      corridor_to_district_area_ratio: Math.round((78.54 / 3500.0) * 10000) / 10000,
+      methodology: "Geometric area comparison: 5 km circular corridor (78.54 km²) vs assumed district area (3,500 km² constant).",
+      provenance: "computed_geometric_area_ratio"
     },
     ndrf_dispatch_recommendation: {
       dispatch_priority: (severity === "Catastrophic" || severity === "Severe") ? "Immediate" : "Standby",
@@ -7800,7 +7792,7 @@ async function triggerNDRFAlert(lat, lon, locName) {
     }
     const summarySubtext = document.getElementById("summary-subtext");
     if (summarySubtext) {
-      summarySubtext.innerHTML = `<strong>Surgical 5 km alert corridor active at ${data.location.lat}°N, ${data.location.lon}°E.</strong> ${data.action_directive} Local probe reading: ${data.weather_icon || '⛅'} ${data.weather_desc}, ${data.temperature_c}°C, resolved wind: ${data.predicted_local_wind_kmh} km/h (gusts ${data.predicted_p90_gust_kmh} km/h), surface pressure: ${data.surface_pressure_hpa} hPa. Provides an <strong>alert-corridor area vs assumed district area (geometry, not model skill) (78.5 km² vs 3,500 km²)</strong>.`;
+      summarySubtext.innerHTML = `<strong>Pinpoint 5 km alert corridor active at ${data.location.lat}°N, ${data.location.lon}°E.</strong> ${data.action_directive} Local probe reading: ${data.weather_icon || '⛅'} ${data.weather_desc}, ${data.temperature_c}°C, resolved wind: ${data.predicted_local_wind_kmh} km/h (gusts ${data.predicted_p90_gust_kmh} km/h), surface pressure: ${data.surface_pressure_hpa} hPa. Alert corridor: 78.54 km² circular zone vs 3,500 km² assumed district area.`;
     }
     const badgeSeverity = document.getElementById("summary-severity-badge");
     if (badgeSeverity) {
@@ -7850,27 +7842,24 @@ async function triggerNDRFAlert(lat, lon, locName) {
       }
     }
 
-    // 4. UPDATE DYNAMIC DEMOGRAPHIC PRECISION GAIN CARD
-    if (data.demographic_impact) {
-      const d = data.demographic_impact;
-      const demoBox = document.querySelector(".demographic-calc-box");
-      if (demoBox) {
-        demoBox.innerHTML = `
-          <div class="calc-row">
-            <span>Standard District Warning Area:</span>
-            <strong class="text-red">~3,500 km² polygon</strong>
-          </div>
-          <div class="calc-row">
-            <span>5 km Pinpoint Target:</span>
-            <strong class="text-cyan">~78.5 km² circle</strong>
-          </div>
-          <div class="calc-divider"></div>
-          <div class="calc-row highlight">
-            <span>Geometric Area Reduction:</span>
-            <strong class="text-green">78.5 km² (Pinpoint)</strong>
-          </div>
-        `;
-      }
+    // 4. UPDATE DYNAMIC ALERT CORRIDOR GEOMETRY CARD
+    const demoBox = document.querySelector(".demographic-calc-box");
+    if (demoBox) {
+      demoBox.innerHTML = `
+        <div class="calc-row">
+          <span>Standard District Warning Area:</span>
+          <strong class="text-red">~3,500 km² polygon</strong>
+        </div>
+        <div class="calc-row">
+          <span>5 km Pinpoint Target:</span>
+          <strong class="text-cyan">~78.54 km² circle</strong>
+        </div>
+        <div class="calc-divider"></div>
+        <div class="calc-row highlight">
+          <span>Alert Corridor Area:</span>
+          <strong class="text-green">78.54 km² (Pinpoint)</strong>
+        </div>
+      `;
     }
 
     // 5. UPDATE ALERT & BULLETIN VIEW (TAB 4)
@@ -8071,7 +8060,7 @@ async function loadTrackTableEmbedded() {
 const TOUR_SLIDES = [
   {
     title: "1. The Operational Bottleneck",
-    text: "In 3- to 10-day medium range forecasting, coarse 12-25 km NWP outputs force authorities to issue broad, district-wide red alerts across 3,500 km² regions. Because most of the district never experiences peak destruction, communities suffer severe alert fatigue, leading to public complacency and massive economic shutdown panic."
+    text: "In 3- to 10-day medium range forecasting, coarse 12-25 km NWP outputs force authorities to issue broad, district-wide red alerts across 3,500 km² regions. Because most of the district never experiences peak destruction, communities suffer severe alert fatigue, leading to public complacency and massive economic disruption."
   },
   {
     title: "2. The Deep Learning 'Spectral Smoothing' Defect",
@@ -9786,8 +9775,8 @@ function updateCellSimulatorText() {
   if (targetEl) targetEl.textContent = `${locName} 5km Corridor`;
   if (coordsEl) coordsEl.textContent = `${lat}°N, ${lon}°E`;
   if (polyEl) polyEl.textContent = `${(lat - 0.045).toFixed(2)}N,${(lon - 0.045).toFixed(2)}E ... ${(lat + 0.045).toFixed(2)}N,${(lon + 0.045).toFixed(2)}E`;
-  if (citizensEl && data.demographic_impact) {
-    citizensEl.textContent = `~${data.demographic_impact.surgical_corridor_population_targeted.toLocaleString()} Citizens`;
+  if (citizensEl) {
+    citizensEl.textContent = "78.54 km² Corridor";
   }
 
   const isCyclone = (state.currentHazard || "").includes("amphan") || (state.currentHazard || "").includes("fani") || (state.currentHazard || "").includes("yaas") || (data.storm_surge_assessment != null && data.storm_surge_assessment.surge_height_meters > 0);

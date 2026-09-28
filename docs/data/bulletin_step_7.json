@@ -36,12 +36,12 @@ SUB: SUPER CYCLONIC STORM ‘AMPHAN’ (PRONOUNCED AS UM-PUN) OVER BAY OF BENGAL
 4. HYPER-LOCALIZED 5-KM RADIUS DIRECTIVE (ZERO ALERT FATIGUE FOR NDRF):
    • Target Location: Digha Coast (West Bengal) (21.626°N, 87.508°E)
    • Distance to Core Circulation: 693.4 km
-   • Predicted Local Wind at Site: 6.0 km/h (P90 Gusts: 11.7 km/h)
+   • Predicted Local Wind at Site: 6.3 km/h (P90 Gusts: 8.0 km/h)
    • Alert Classification: NOMINAL AMBIENT CONDITIONS [Ensemble Spread: ±4.5 km/h | Conf: HIGH (Narrow Ensemble Spread)]
-   • Action Directive: GREEN NORMAL: Digha Coast (West Bengal) is situated 693 km outside Cyclone Amphan convective zone. Local conditions: Partly Cloudy (28.9°C, wind 6.0 km/h, 1006.5 hPa). Geometric footprint refinement active.
-   • Spatial Footprint Refinement: Pinpoint 5 km radius (78.54 km²) replaces
-     broad district warning (3500.0 km²), alert-corridor area vs assumed district area (geometry, not model skill):
-     corridor area 78.54 km² vs assumed district 3500.0 km².
+   • Action Directive: GREEN NORMAL: Digha Coast (West Bengal) is situated 693 km outside Cyclone Amphan convective zone. Local conditions: Clear Skies (28.8°C, wind 6.3 km/h, 1007.0 hPa). Geometric footprint refinement active.
+   • Spatial Footprint Refinement: Pinpoint 5 km radius (78.5 km²) replaces
+     broad district warning (3500 km²), alert-corridor area vs assumed district area (geometry, not model skill):
+     corridor area 78.5 km² vs assumed district 3500 km².
 
 5. ACTIONABLE DIRECTIVES FOR FIRST RESPONDERS & DISTRICT MAGISTRATES:
    • Fishermen Warning: Total suspension of fishing operations over deep sea and coastal waters.

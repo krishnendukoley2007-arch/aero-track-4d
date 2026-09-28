@@ -7,7 +7,7 @@ Provides:
 - Icosahedral Spherical Geodesic Mesh GeoJSON (/api/spherical-mesh)
 - Medium-Range 3- to 10-Day Ensemble Cone of Uncertainty (/api/medium-range-ensemble)
 - Automated Official IMD / MoES National Cyclone Advisory Bulletin (/api/bulletin)
-- Hyper-Local 5km Spatial Footprint Refinement (Geometric Area Reduction vs District Polygon)
+- Hyper-Local 5km Spatial Footprint Geometry (Alert Corridor vs District Area)
 """
 
 import os
@@ -139,7 +139,7 @@ def get_status():
             "stage_2_downscaler": "PhysicsNeMo CorrDiff Generative Diffusion (UNet Mean + Stochastic Diffusion)",
             "medium_range_ensemble": "3- to 10-Day Medium Range Atmospheric Chaos & Cone of Uncertainty",
             "bulletin_engine": "Official MoES/IMD Cyclone Advisory Bulletin Generator",
-            "spatial_alert_engine": "Hyper-Local 5km Footprint Refinement (Geometric Area Reduction vs District Polygon)"
+            "spatial_alert_engine": "Hyper-Local 5km Footprint Geometry (Alert Corridor vs District Area)"
         },
         "provenance": "system_telemetry"
     }
@@ -337,17 +337,12 @@ def calculate_ndrf_alert(req: AlertRequest):
                 "badge_color": badge_color,
                 "action_directive": action,
                 "spatial_footprint_refinement": {
-                    "pinpoint_impact_area_km2": impact_zone_area_km2,
-                    "coastal_district_area_km2": typical_district_area_km2,
-                    "geometric_footprint_reduction_percent": spatial_refinement_pct,
-                    "methodology": f"Geometric comparison: Pinpoint 5km circular radius ({impact_zone_area_km2} km^2) vs standard {typical_district_area_km2:,.0f} km^2 district polygon ({spatial_refinement_pct}% geometric reduction).",
+                    "alert_corridor_area_km2": 78.54,
+                    "assumed_district_area_km2": 3500.0,
+                    "assumed_district_area_km2_provenance": "assumed_constant",
+                    "corridor_to_district_area_ratio": round(78.54 / 3500.0, 4),
+                    "methodology": "Geometric area comparison: 5 km circular corridor (78.54 km²) vs assumed district area (3,500 km² constant).",
                     "provenance": "computed_geometric_area_ratio"
-                },
-                "demographic_impact": {
-                    "district_name": loc_name,
-                    "status": "deprecated",
-                    "note": "Unverified population constants removed per P1-T10. Evacuation planning relies on verified geometric corridor.",
-                    "provenance": "deprecated_unverified_constants_removed"
                 },
                 "ndrf_dispatch_recommendation": {
                     "dispatch_priority": "Immediate" if severity in ["Catastrophic", "Severe"] else "Standby",
@@ -420,17 +415,12 @@ def calculate_ndrf_alert(req: AlertRequest):
             "badge_color": badge_color,
             "action_directive": action,
             "spatial_footprint_refinement": {
-                "pinpoint_impact_area_km2": round(math.pi * (5.0 ** 2), 2),
-                "coastal_district_area_km2": 3500.0,
-                "geometric_footprint_reduction_percent": round((1.0 - (math.pi * 25.0) / 3500.0) * 100.0, 2),
-                "methodology": "Geometric comparison: Pinpoint 5km circular radius vs broad 3,500 km^2 district warning.",
+                "alert_corridor_area_km2": 78.54,
+                "assumed_district_area_km2": 3500.0,
+                "assumed_district_area_km2_provenance": "assumed_constant",
+                "corridor_to_district_area_ratio": round(78.54 / 3500.0, 4),
+                "methodology": "Geometric area comparison: 5 km circular corridor (78.54 km²) vs assumed district area (3,500 km² constant).",
                 "provenance": "computed_geometric_area_ratio"
-            },
-            "demographic_impact": {
-                "district_name": loc_name,
-                "status": "deprecated",
-                "note": "Unverified population constants removed per P1-T10.",
-                "provenance": "deprecated_unverified_constants_removed"
             },
             "ndrf_dispatch_recommendation": {
                 "dispatch_priority": "Immediate" if severity in ["Catastrophic", "Severe"] else "Standby",
@@ -519,17 +509,12 @@ def calculate_ndrf_alert(req: AlertRequest):
             "badge_color": badge_color,
             "action_directive": action,
             "spatial_footprint_refinement": {
-                "pinpoint_impact_area_km2": round(math.pi * (5.0 ** 2), 2),
-                "coastal_district_area_km2": 3500.0,
-                "geometric_footprint_reduction_percent": round((1.0 - (math.pi * 25.0) / 3500.0) * 100.0, 2),
-                "methodology": "Geometric comparison: Pinpoint 5km circular radius vs broad 3,500 km^2 district warning.",
+                "alert_corridor_area_km2": 78.54,
+                "assumed_district_area_km2": 3500.0,
+                "assumed_district_area_km2_provenance": "assumed_constant",
+                "corridor_to_district_area_ratio": round(78.54 / 3500.0, 4),
+                "methodology": "Geometric area comparison: 5 km circular corridor (78.54 km²) vs assumed district area (3,500 km² constant).",
                 "provenance": "computed_geometric_area_ratio"
-            },
-            "demographic_impact": {
-                "district_name": loc_name,
-                "status": "deprecated",
-                "note": "Unverified population constants removed per P1-T10.",
-                "provenance": "deprecated_unverified_constants_removed"
             },
             "ndrf_dispatch_recommendation": {
                 "dispatch_priority": "Immediate" if severity in ["Catastrophic", "Severe"] else "Standby",
@@ -721,9 +706,9 @@ def calculate_ndrf_alert(req: AlertRequest):
     calib_crps = float(ds_amphan.get("crps_wind_kmh", 16.302))
     fss_precip = float(ds_amphan.get("fss_precipitation", 0.287))
 
-    impact_zone_area_km2 = round(math.pi * (5.0 ** 2), 2)
-    typical_district_area_km2 = 3500.0
-    spatial_refinement_pct = round((1.0 - impact_zone_area_km2 / typical_district_area_km2) * 100.0, 2)
+    alert_corridor_area_km2 = 78.54
+    assumed_district_area_km2 = 3500.0
+    corridor_to_district_area_ratio = round(alert_corridor_area_km2 / assumed_district_area_km2, 4)
     measured_coarse = coarse_nwp_wind if "coarse_nwp_wind" in locals() else local_wind_kmh * 0.62
     calc_gain_pct = round(((local_wind_kmh - measured_coarse) / max(1.0, measured_coarse)) * 100.0, 1)
 
@@ -789,20 +774,15 @@ def calculate_ndrf_alert(req: AlertRequest):
             "p10_wind_kmh": round(max(0.0, local_wind_kmh - 1.28 * spread_kmh), 1),
             "p50_wind_kmh": round(local_wind_kmh, 1),
             "p90_wind_kmh": round(local_p90_wind_kmh, 1),
-            "action_confidence_rationale": "High-confidence forecast spread justifies immediate surgical 5 km evacuation directive without district-wide panic."
+            "action_confidence_rationale": "High-confidence forecast spread indicates focused 5 km coastal evacuation directive."
         },
         "spatial_footprint_refinement": {
-            "pinpoint_impact_area_km2": impact_zone_area_km2,
-            "coastal_district_area_km2": typical_district_area_km2,
-            "geometric_footprint_reduction_percent": spatial_refinement_pct,
-            "methodology": f"Geometric comparison: Pinpoint 5km circular radius ({impact_zone_area_km2} km^2) vs standard {typical_district_area_km2:,.0f} km^2 district polygon ({spatial_refinement_pct}% geometric reduction).",
+            "alert_corridor_area_km2": 78.54,
+            "assumed_district_area_km2": 3500.0,
+            "assumed_district_area_km2_provenance": "assumed_constant",
+            "corridor_to_district_area_ratio": round(78.54 / 3500.0, 4),
+            "methodology": "Geometric area comparison: 5 km circular corridor (78.54 km²) vs assumed district area (3,500 km² constant).",
             "provenance": "computed_geometric_area_ratio"
-        },
-        "demographic_impact": {
-            "district_name": loc_name,
-            "status": "deprecated",
-            "note": "Unverified population constants removed per P1-T10. Evacuation planning relies on verified geometric corridor.",
-            "provenance": "deprecated_unverified_constants_removed"
         },
         "ndrf_dispatch_recommendation": {
             "dispatch_priority": "Immediate" if severity in ["Catastrophic", "Severe"] else "Standby",
@@ -1423,7 +1403,10 @@ def api_historical_verification():
             "step_10_landfall_error_km": trk.get("step_10_landfall_error_km"),
             "held_out_mean_track_error_km": trk.get("held_out_mean_track_error_km"),
             "peak_wind_recovery_pct": ds.get("recovery_percent_corrdiff_mean"),
-            "geometric_area_reduction_pct": sp_alert.get("computed_area_reduction_percent"),
+            "alert_corridor_area_km2": 78.54,
+            "assumed_district_area_km2": 3500.0,
+            "assumed_district_area_km2_provenance": "assumed_constant",
+            "corridor_to_district_area_ratio": round(78.54 / 3500.0, 4),
             "held_out_test_steps": [5, 10]
         },
         "track_error_table": track_err.get("table", []),

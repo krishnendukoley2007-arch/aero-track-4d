@@ -156,8 +156,8 @@ SUB: SEVERE COLD WAVE & GROUND FROST RISK OVER PUNJAB, HARYANA, RAJASTHAN & DELH
 3. HYPER-LOCAL IMPACT AT TARGET SECTOR:
    • Probed Sector: {loc_name}
    • Resolved Local Min Temperature: {metric_val:.1f}°C (Frost Risk: SEVERE / CRITICAL)
-   • Pinpoint 5 km Warning Footprint: 78.5 sq. km targeted radius protects high-risk farms
-     without panic shutdown across 4,500 sq. km district.
+   • Pinpoint 5 km Warning Footprint: 78.54 sq. km targeted corridor
+     focused within 4,500 sq. km district domain.
 
 4. ACTIONABLE PROTOCOLS FOR FARMERS & DISTRICT ADMINISTRATION:
    • Agricultural Frost Defense: Conduct light evening irrigation for Mustard (Sarson), Potato,
@@ -506,10 +506,10 @@ Contact: MoES Emergency Operations Room | SIH 26078 Production System (Language:
 <h4>3. Spatial Impact: 5 km Impact Zone vs District Baseline</h4>
 <div class="census-box">
   <strong>Spatial Footprint Refinement:</strong><br>
-  &bull; Reference Sector: <em>Purba Medinipur Coastal Belt, West Bengal</em> (Census 2011 Area: 4,736 km&sup2;)<br>
+  &bull; Reference Sector: <em>Purba Medinipur Coastal Belt, West Bengal</em> (Area: 4,736 km&sup2;)<br>
   &bull; Broad District Warning Area: ~3,500 km&sup2; division-wide polygon<br>
-  &bull; AERO-TRACK Pinpoint 5 km Footprint: 78.5 km&sup2; circular impact zone (Radius: 5.0 km)<br>
-  &bull; <strong>Geometric Area Footprint Reduction: 78.5 km² pinpoint corridor vs ~3,500 km² broad district polygon</strong>
+  &bull; AERO-TRACK Pinpoint 5 km Footprint: 78.54 km&sup2; circular impact zone (Radius: 5.0 km)<br>
+  &bull; <strong>Alert Corridor Geometry: 78.54 km² circular corridor vs ~3,500 km² assumed district area</strong>
 </div>
 
 <h4>4. Operational Directives for First Responders (NDRF &amp; SDMA)</h4>

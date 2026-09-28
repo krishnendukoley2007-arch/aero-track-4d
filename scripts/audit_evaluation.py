@@ -228,17 +228,18 @@ def run_audit() -> dict:
     }
 
     # --- 6. Spatial Footprint Geometric Comparison ---
-    pinpoint_r = 5.0
-    pinpoint_area = float(np.pi * (pinpoint_r ** 2))
-    typical_district_area = 3500.0
-    area_red_pct = float((1.0 - pinpoint_area / typical_district_area) * 100.0)
+    corridor_r = 5.0
+    corridor_area = float(np.pi * (corridor_r ** 2))
+    assumed_district_area = 3500.0
+    corridor_ratio = float(corridor_area / assumed_district_area)
 
     results["spatial_alert_and_demographics"] = {
-        "pinpoint_radius_km": pinpoint_r,
-        "pinpoint_area_km2": round(pinpoint_area, 2),
-        "typical_district_area_km2": typical_district_area,
-        "computed_area_reduction_percent": round(area_red_pct, 2),
-        "provenance": "Pure geometric area comparison: 5 km circular radius corridor (pi * 5^2 = 78.54 km2) vs assumed 3,500 km2 district area (assumed_constant). Alert-corridor area vs assumed district area (geometry, not model skill)."
+        "alert_corridor_radius_km": corridor_r,
+        "alert_corridor_area_km2": round(corridor_area, 2),
+        "assumed_district_area_km2": assumed_district_area,
+        "assumed_district_area_km2_provenance": "assumed_constant",
+        "corridor_to_district_area_ratio": round(corridor_ratio, 4),
+        "provenance": "Pure geometric area comparison: 5 km circular radius corridor (pi * 5^2 = 78.54 km2) vs assumed 3,500 km2 district area (assumed_constant)."
     }
 
     # Save to results/

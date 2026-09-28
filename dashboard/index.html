@@ -183,8 +183,8 @@
         </div>
         <div class="kpi-box kpi-box-secondary">
           <span class="kpi-tag" id="ov-card4-label">Alert Corridor vs District Area</span>
-          <div class="kpi-value text-green font-mono" id="ov-reduction">78.5 km²</div>
-          <div class="kpi-sub" id="ov-reduction-sub">78.5 km² surgical zone vs 3,500 km²</div>
+          <div class="kpi-value text-green font-mono" id="ov-reduction">78.54 km²</div>
+          <div class="kpi-sub" id="ov-reduction-sub">78.54 km² corridor vs 3,500 km² district</div>
         </div>
       </div>
 
@@ -648,8 +648,8 @@
                 <div class="inspector-stat-val text-amber" id="insp-gust-p90">-- km/h</div>
               </div>
               <div class="inspector-stat-box">
-                <div class="inspector-stat-label">AREA REDUCTION</div>
-                <div class="inspector-stat-val text-green" id="insp-reduction">78.5 km²</div>
+                <div class="inspector-stat-label">ALERT CORRIDOR</div>
+                <div class="inspector-stat-val text-green" id="insp-reduction">78.54 km²</div>
               </div>
             </div>
 
@@ -776,12 +776,12 @@
             </div>
             <div class="calc-divider"></div>
             <div class="calc-row highlight">
-              <span>Geometric Area Reduction:</span>
-              <strong class="text-green">78.5 km² (Pinpoint)</strong>
+              <span>Alert Corridor Area:</span>
+              <strong class="text-green">78.54 km² (Pinpoint)</strong>
             </div>
           </div>
           <div class="demographic-footer">
-            Alert-corridor area vs assumed district area (geometry, not model skill): 78.5 km² circle vs 3,500 km² district polygon (78.5 km² vs 3,500 km²). (Note: Severe cyclone gale winds physically span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5).
+            Alert-corridor area vs assumed district area (geometry, not model skill): 78.54 km² circle vs 3,500 km² district polygon (ratio: 0.0224). (Note: Severe cyclone gale winds physically span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5).
           </div>
         </div>
       </div>
@@ -1119,7 +1119,7 @@
       <div class="panel-header-bar">
         <div class="panel-title-text">
           <h2>Hyper-Local 5 km Alert &amp; Official MoES/IMD Bulletin</h2>
-          <span class="panel-subtitle">Surgical 5 km radius warning provides a 78.5 km² alert-corridor area vs assumed district area (geometry, not model skill), eliminating public complacency for NDRF</span>
+          <span class="panel-subtitle">Pinpoint 5 km radius warning provides a 78.54 km² alert corridor area vs assumed 3,500 km² district area (geometric area comparison, not model skill)</span>
         </div>
         <div class="alert-actions-group">
           <button class="btn-action btn-download" id="btn-download-bulletin-view">
@@ -1367,15 +1367,15 @@
                   <strong class="text-green font-mono" id="geo-towers-count">14 BCF Towers</strong>
                 </div>
                 <div class="geo-stat-row">
-                  <span>Targeted Citizens:</span>
-                  <strong class="text-white font-mono" id="geo-citizens-count">78.5 km² Corridor</strong>
+                  <span>Alert Corridor Area:</span>
+                  <strong class="text-white font-mono" id="geo-citizens-count">78.54 km² Corridor</strong>
                 </div>
                 <div class="geo-stat-row">
-                  <span>Footprint Reduction:</span>
-                  <strong class="text-green font-mono">78.5 km² (Pinpoint)</strong>
+                  <span>Corridor to District Ratio:</span>
+                  <strong class="text-green font-mono">0.0224 (2.2%)</strong>
                 </div>
                 <div class="geo-footer-note">
-                  Geometric area comparison: 78.5 km² circle vs ~3,500 km² district footprint. Selective BTS geofencing targets towers within the 5 km corridor.
+                  Geometric area comparison: 78.54 km² circle vs ~3,500 km² district footprint. Selective BTS geofencing targets towers within the 5 km corridor.
                 </div>
               </div>
             </div>
@@ -1673,7 +1673,7 @@
       <div class="tour-body">
         <h3 class="tour-title" id="tour-title">1. The Operational Bottleneck</h3>
         <p class="tour-text" id="tour-text">
-          In 3- to 10-day medium range forecasting, coarse 12-25 km NWP outputs force authorities to issue broad, district-wide red alerts across 3,500 km² regions. Because most of the district never experiences peak destruction, communities suffer severe alert fatigue, leading to public complacency and massive economic shutdown panic.
+          In 3- to 10-day medium range forecasting, coarse 12-25 km NWP outputs force authorities to issue broad, district-wide red alerts across 3,500 km² regions. Because most of the district never experiences peak destruction, communities suffer severe alert fatigue, leading to public complacency and massive economic disruption.
         </p>
       </div>
       <div class="tour-footer">
@@ -2020,7 +2020,7 @@
               <div class="m-row"><span>Min Central Pressure (P<sub>min</sub>):</span> <strong id="res-mpi-pmin">930.8 hPa</strong> (<span id="res-mpi-delta-p">0.0 hPa</span>)</div>
               <div class="m-row"><span>Carnot Thermal Efficiency (&epsilon;):</span> <strong id="res-mpi-carnot">52.0%</strong></div>
               <div class="m-row"><span>Air-Sea Enthalpy Disequilibrium:</span> <strong id="res-mpi-enthalpy">21,780 J/kg</strong></div>
-              <div class="m-row"><span>10m Surface Reduction Factor:</span> <strong>0.80 (Bister &amp; Emanuel 2002)</strong></div>
+              <div class="m-row"><span>10m Surface Wind Factor:</span> <strong>0.80 (Bister &amp; Emanuel 2002)</strong></div>
             </div>
           </div>
 
@@ -2289,7 +2289,7 @@
           <input type="password" id="input-gemini-api-key" class="input-gemini-key font-mono" placeholder="AIzaSy..." autocomplete="off">
           <button class="btn-save-key" id="btn-save-gemini-key">Save</button>
         </div>
-        <small class="text-muted">Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Saved only in your browser's localStorage.</small>
+        <small class="text-muted">Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Stored only in your browser's localStorage.</small>
       </div>
     </div>
 

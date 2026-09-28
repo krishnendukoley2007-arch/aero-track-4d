@@ -69,11 +69,11 @@ def render_multistorm_table(metrics):
 
 def render_spatial_alert_table(metrics):
     sp = metrics["spatial_alert_and_demographics"]
-    return f"""| Metric | District-Wide Warning | AERO-TRACK 5 km Pinpoint | Reduction / Distinction |
+    return f"""| Metric | District-Wide Warning | AERO-TRACK 5 km Pinpoint | Distinction |
 |---|---|---|---|
-| **Warning Footprint Area** | ~{sp['typical_district_area_km2']:,.0f} km² (district polygon) | {sp['pinpoint_area_km2']:.1f} km² (5 km radius circle) | **{sp['computed_area_reduction_percent']:.1f}% alert-corridor area vs assumed district area (geometry, not model skill)** |
-| **Targeting Specificity** | Entire district alerted uniformly | Localized 5 km strike zone | Surgical guidance for emergency services |
-| **Measurement Grounding** | Administrative boundary polygon | Pure geometric circle area ($1 - 78.5/3500$) | Idealized geometric comparison; physical gale wind envelope spans 100+ km |"""
+| **Warning Footprint Area** | ~{sp['assumed_district_area_km2']:,.0f} km² (assumed district) | {sp['alert_corridor_area_km2']:.2f} km² (5 km radius corridor) | Corridor/District Ratio: **{sp['corridor_to_district_area_ratio']:.4f}** (geometry, not model skill) |
+| **Targeting Specificity** | Entire district alerted uniformly | Localized 5 km corridor | Focused guidance for emergency services |
+| **Measurement Grounding** | Administrative boundary polygon | Pure geometric circle area ($78.54 / 3500 = 0.0224$) | Idealized geometric comparison; physical gale wind envelope spans 100+ km |"""
 
 def main():
     metrics = load_metrics()

@@ -17,7 +17,7 @@
 > 4. **Anomaly Index vs. True EFI**: Anomaly tracking currently utilizes a per-cell $z$-score against a historical May baseline. True ECMWF Extreme Forecast Index (EFI) requires computing the integral over 30-year model re-forecast quantiles ($EFI = \frac{2}{\pi}\int_0^1 \frac{p - F_f(p)}{\sqrt{p(1-p)}}dp$) and is scheduled for Phase 3.
 > 5. **Basemap Tile Streaming (Network Disclosure)**: All neural network inference, GNN tracking, diffusion downscaling, thermodynamic soundings, and 3D WebGL Earth execute 100% locally with zero external API dependencies. However, the Leaflet 2D basemaps stream satellite and street map tiles over HTTPS from ESRI and OpenStreetMap. In a fully air-gapped environment without internet access, 2D satellite imagery tiles will not load, though vector coastlines and geodesic mesh layers remain functional.
 > 6. **Multi-Hazard Data Provenance**: Heat dome and cold wave records are cataloged as `ILLUSTRATIVE — NOT MODEL OUTPUT` to demonstrate system multi-hazard schema compatibility prior to dedicated multi-year training.
-> 7. **Spatial Warning Footprint**: The alert-corridor area comparison refers to the idealized geometric ratio between a $5\text{ km}$ circular radius corridor ($78.5\text{ km}^2$) and an assumed administrative district polygon ($3,500\text{ km}^2$) (geometry, not model skill). It does not represent an empirical reduction in gale-force wind extent (cyclone damage swaths typically exceed $100\text{ km}$).
+> 7. **Spatial Warning Footprint**: The alert-corridor area comparison refers to the idealized geometric ratio between a $5\text{ km}$ circular radius corridor ($78.54\text{ km}^2$) and an assumed administrative district polygon ($3,500\text{ km}^2$) (geometry, not model skill). It does not represent an empirical narrowing in gale-force wind extent (cyclone damage swaths typically exceed $100\text{ km}$).
 
 ## 🌟 Executive Pitch: The Problem & Why Existing Systems Fail
 
@@ -238,16 +238,16 @@ This script is structured around the 5 persistent views. Follow this exact flow 
 ### ⏱️ Minute 3:00 – 4:00 // View 4: Alert & Bulletin (Societal Impact & Real Census Demographics)
 - **What to show**: Click **"Alert & Bulletin"** in the top navigation.
 - **The Talking Point**:
-  > *"Why does high-resolution downscaling matter to the nation? Because today, coarse weather models force NDRF and State Disaster Management Authorities to issue 3,500 km² district-wide red alerts. People experience alert fatigue and ignore warnings. We reduce the threat zone to a surgical 5 km radius."*
+  > *"Why does high-resolution downscaling matter to the nation? Because today, coarse weather models force NDRF and State Disaster Management Authorities to issue 3,500 km² district-wide red alerts. People experience alert fatigue and ignore warnings. We resolve the threat corridor to a 5 km pinpoint radius."*
 - **Action**:
   - Click the **"Digha Coast (West Bengal)"** coastal preset.
   - Show the **Spatial Footprint Refinement Card**:
     - District baseline (Purba Medinipur): **4,736 km² area**.
     - Standard district warning covers the entire **~3,500 km² district footprint**.
-    - Our 5 km pinpoint alert zone (78.5 km² circle) isolates the localized corridor.
-    - Result: **Alert-corridor area vs assumed district area (geometry, not model skill)** ($1 - 78.5/3500$). *(Note: Severe cyclone gale winds physically span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5).*
+    - Our 5 km pinpoint alert zone (78.54 km² circle) isolates the localized corridor.
+    - Result: **Alert-corridor area vs assumed district area (geometry, not model skill)** ($78.54 / 3500 = 0.0224$). *(Note: Severe cyclone gale winds physically span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5).*
   - Click **"Download Official IMD Advisory (.html)"**:
-    - Downloads an authentic, MoES/IMD Cyclone Warning Centre formatted advisory with official crest, metadata box, Census 2011 density metrics, and operational directives.
+    - Downloads an authentic, MoES/IMD Cyclone Warning Centre formatted advisory with official crest, metadata box, and operational directives.
 
 ### ⏱️ Minute 4:00 – 4:45 // View 5: Medium-Range Outlook (EPS Cone of Uncertainty & Chaos)
 - **What to show**: Click **"Medium-Range Outlook"** in the top navigation.
@@ -270,7 +270,7 @@ This script is structured around the 5 persistent views. Follow this exact flow 
 
 ---
 
-## 🛠️ Verification Evidence & Saved Artifacts
+## 🛠️ Verification Evidence & Archived Artifacts
 
 All core functionalities have been verified through automated subagent browser testing:
 - **Operations Walkthrough Video**: `docs/recordings/operations_walkthrough.webp` (automated 6-view recorded tour)

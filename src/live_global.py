@@ -440,10 +440,10 @@ def get_live_point_forecast(lat: float, lon: float, location_name: Optional[str]
             "uncertainty_spread_km": round(sigma * 8.5, 1)
         })
 
-    # Alert-corridor area vs assumed district area (geometry, not model skill)
-    district_area_km2 = 3500.0
-    corrdiff_pinpoint_area_km2 = math.pi * 5.0 * 5.0  # 78.5 km²
-    reduction_pct = round(((district_area_km2 - corrdiff_pinpoint_area_km2) / district_area_km2) * 100.0, 1)
+    # Alert corridor geometry vs assumed district area (geometry, not model skill)
+    assumed_district_area_km2 = 3500.0
+    alert_corridor_area_km2 = 78.54
+    corridor_to_district_area_ratio = round(alert_corridor_area_km2 / assumed_district_area_km2, 4)
 
     timeline_labels = [h["time_label"] for h in hourly_forecast[:16]]
     hourly_forecast_payload = {
@@ -498,10 +498,17 @@ def get_live_point_forecast(lat: float, lon: float, location_name: Optional[str]
             "moisture_convergence_alignment": 0.984,
             "energy_cascade_kolmogorov_slope": "-5/3 (Satisfied)"
         },
+        "alert_geometry": {
+            "alert_corridor_area_km2": alert_corridor_area_km2,
+            "assumed_district_area_km2": assumed_district_area_km2,
+            "assumed_district_area_km2_provenance": "assumed_constant",
+            "corridor_to_district_area_ratio": corridor_to_district_area_ratio
+        },
         "precision_impact": {
-            "standard_district_alert_area_km2": district_area_km2,
-            "corrdiff_pinpoint_impact_area_km2": round(corrdiff_pinpoint_area_km2, 1),
-            "geometric_area_reduction_pct": reduction_pct
+            "alert_corridor_area_km2": alert_corridor_area_km2,
+            "assumed_district_area_km2": assumed_district_area_km2,
+            "assumed_district_area_km2_provenance": "assumed_constant",
+            "corridor_to_district_area_ratio": corridor_to_district_area_ratio
         },
         "amplitude_evaluation": amplitude_eval_payload,
         "hourly_forecast": hourly_forecast_payload,
@@ -926,13 +933,14 @@ def get_active_global_storms() -> Dict[str, Any]:
                 "surface_pressure_hpa": round(raw_press, 1),
                 "precipitation_mmh": round(raw_rain, 1),
                 "uncertainty_radius_km": uncertainty_r_km,
-                "pinpoint_corridor_area_km2": 78.5,
-                "standard_district_area_km2": 3500.0,
-                "geometric_area_reduction_pct": round((1.0 - 78.54 / 3500.0) * 100.0, 2),
+                "alert_corridor_area_km2": 78.54,
+                "assumed_district_area_km2": 3500.0,
+                "assumed_district_area_km2_provenance": "assumed_constant",
+                "corridor_to_district_area_ratio": round(78.54 / 3500.0, 4),
                 "action_directive": (
                     f"NDRF Operational Directive: Immediate pinpoint 5 km coastal readiness for {storm['region']}. "
                     f"CorrDiff resolves {corrdiff_resolved_wind} km/h peak eyewall speed (+61.5% recovered vs {raw_wind:.1f} km/h coarse NWP). "
-                    f"Surface pressure: {raw_press:.1f} hPa. Alert-corridor area vs assumed district area (geometry, not model skill): 78.5 km² corridor vs 3,500 km² district."
+                    f"Surface pressure: {raw_press:.1f} hPa. Alert corridor: 78.54 km² circular corridor vs 3,500 km² assumed district area."
                 )
             })
 

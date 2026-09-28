@@ -26,6 +26,7 @@ from scripts.render_readme_tables import (
     render_downscale_table,
     render_calibration_table,
     render_multistorm_table,
+    render_spatial_alert_table,
 )
 
 
@@ -127,6 +128,7 @@ def test_b_readme_metric_tables_equal_fresh_render():
         ("Downscale Table", render_downscale_table(metrics)),
         ("Calibration Table", render_calibration_table(metrics)),
         ("Multi-storm Table", render_multistorm_table(metrics)),
+        ("Spatial Alert Table", render_spatial_alert_table(metrics)),
     ]
 
     for name, tbl in rendered_tables:

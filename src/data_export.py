@@ -261,9 +261,10 @@ class OperationalDataExporter:
                 "step_index": step_idx,
                 "peak_corrdiff": peak_info.get("corrdiff_resolved", 0.0),
                 "peak_coarse": peak_info.get("coarse_nwp", 0.0),
-                "unit": peak_info.get("unit", "m/s"),
-                "area_reduction_pct": round((1.0 - 78.54 / 3500.0) * 100.0, 2),
-                "alert_fatigue_reduction": "Geometric footprint refinement eliminates unnecessary broad warning area"
+                "alert_corridor_area_km2": 78.54,
+                "assumed_district_area_km2": 3500.0,
+                "assumed_district_area_km2_provenance": "assumed_constant",
+                "corridor_to_district_area_ratio": round(78.54 / 3500.0, 4)
             },
             "features": [
                 {
