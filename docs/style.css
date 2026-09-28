@@ -7908,6 +7908,15 @@ input:focus-visible,
   display: none !important;
 }
 
+/* Slide-in animation when card becomes visible due to nearby threat */
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(-10px) scaleY(0.95); }
+  to   { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+.citizen-safety-card.card-entering {
+  animation: cardSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 .safety-card-header {
   display: flex;
   align-items: center;

@@ -15,18 +15,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="./style.css?v=aerotrack_v6_step6">
+  <link rel="stylesheet" href="/static/style.css?v=aerotrack_v6_step6">
 
   <!-- Leaflet & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Lucide Icons -->
-  <script src="./vendor/lucide.min.js"></script>
+  <script src="/static/vendor/lucide.min.js"></script>
 
   <!-- Three.js & OrbitControls for 3D Earth Monitor -->
-  <script src="./vendor/three.min.js"></script>
-  <script src="./vendor/OrbitControls.js"></script>
+  <script src="/static/vendor/three.min.js"></script>
+  <script src="/static/vendor/OrbitControls.js"></script>
 </head>
 <body>
   <!-- ============================================================== -->
@@ -189,7 +189,7 @@
       </div>
 
       <!-- Citizen Mode Emergency Quick-Action Banner (Shown in Citizen Mode) -->
-      <div class="citizen-safety-card" id="citizen-safety-card">
+      <div class="citizen-safety-card hidden" id="citizen-safety-card">
         <div class="safety-card-header">
           <div class="safety-header-left">
             <span class="safety-pulse-dot"></span>
@@ -1006,19 +1006,19 @@
               <span class="export-badge">CF-1.8 COMPLIANT</span>
             </div>
             <div class="export-buttons-grid">
-              <a id="btn-export-nc" href="https://aero-track-4d.onrender.com/api/export/netcdf" download="aerotrack_corrdiff_5km.nc" class="export-btn export-btn-nc">
+              <a id="btn-export-nc" href="/api/export/netcdf" download="aerotrack_corrdiff_5km.nc" class="export-btn export-btn-nc">
                 <span class="export-icon"><i data-lucide="grid"></i></span>
                 <div class="export-meta"><strong>NetCDF (.nc)</strong><small>CF-1.8 Binary Grid</small></div>
               </a>
-              <a id="btn-export-asc" href="https://aero-track-4d.onrender.com/api/export/asc-grid" download="aerotrack_corrdiff_grid.asc" class="export-btn export-btn-asc">
+              <a id="btn-export-asc" href="/api/export/asc-grid" download="aerotrack_corrdiff_grid.asc" class="export-btn export-btn-asc">
                 <span class="export-icon"><i data-lucide="map"></i></span>
                 <div class="export-meta"><strong>ESRI Grid (.asc)</strong><small>GIS Spatial Layer</small></div>
               </a>
-              <a id="btn-export-geojson" href="https://aero-track-4d.onrender.com/api/export/geojson" download="aerotrack_threat_polygon.geojson" class="export-btn export-btn-geojson">
+              <a id="btn-export-geojson" href="/api/export/geojson" download="aerotrack_threat_polygon.geojson" class="export-btn export-btn-geojson">
                 <span class="export-icon"><i data-lucide="map-pin"></i></span>
                 <div class="export-meta"><strong>GeoJSON 5km</strong><small>97.8% Alert Reduction</small></div>
               </a>
-              <a id="btn-export-agri" href="https://aero-track-4d.onrender.com/api/export/agri-csv" download="kvk_agri_advisory.csv" class="export-btn export-btn-agri">
+              <a id="btn-export-agri" href="/api/export/agri-csv" download="kvk_agri_advisory.csv" class="export-btn export-btn-agri">
                 <span class="export-icon"><i data-lucide="sprout"></i></span>
                 <div class="export-meta"><strong>KVK Agri (.csv)</strong><small>Block-Level Farm Protocols</small></div>
               </a>
@@ -2453,6 +2453,6 @@
   </div>
 
   <!-- Main JavaScript Application Logic -->
-  <script src="./app.js?v=aerotrack_v6_step6"></script>
+  <script src="/static/app.js?v=aerotrack_v6_step6"></script>
 </body>
 </html>
