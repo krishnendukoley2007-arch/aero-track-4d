@@ -99,6 +99,8 @@ class MultiHazardRegistry:
             "pinpoint_warning_area_km2": 78.5,    # 5 km hyper-local microclimate zone
             "area_reduction_pct": 98.7,
             "status": "architectural_roadmap",
+            "provenance": "ILLUSTRATIVE — NOT MODEL OUTPUT",
+            "provenance_note": "Synthetic benchmark for architectural roadmap demonstration; operational deployment requires regional IMDAA T2m reanalysis",
             "data_source": "Roadmap (Requires regional IMDAA high-resolution temperature reanalysis)",
             "description": "Intense anticyclonic subsidence causing multi-day Tmax > 47°C across Churu, Palam, and Vidarbha. Standard models smoothed out urban asphalt heating and hyper-localized heat mortality risk zones."
         },
@@ -120,6 +122,8 @@ class MultiHazardRegistry:
             "pinpoint_warning_area_km2": 78.5,    # 5 km topographically sheltered frost zone
             "area_reduction_pct": 98.3,
             "status": "architectural_roadmap",
+            "provenance": "ILLUSTRATIVE — NOT MODEL OUTPUT",
+            "provenance_note": "Synthetic benchmark for architectural roadmap demonstration; operational deployment requires regional IMDAA T2m reanalysis",
             "data_source": "Roadmap (Requires regional IMDAA high-resolution temperature reanalysis)",
             "description": "Post-Western Disturbance cold advection combined with nocturnal radiational cooling. Standard coarse NWP (12-25 km) failed to resolve low-lying agrarian frost depressions and highway fog pockets."
         }
@@ -291,6 +295,8 @@ class MultiHazardRegistry:
             "total_steps": len(tracked_steps),
             "mean_track_error_km": 56.3,
             "tracked_steps": tracked_steps,
+            "provenance": "ILLUSTRATIVE — NOT MODEL OUTPUT",
+            "disclaimer": "ILLUSTRATIVE — NOT MODEL OUTPUT. Prototype synthetic data for architectural roadmap demonstration; operational deployment requires multi-year regional IMDAA high-resolution reanalysis.",
             "spectral_smoothing_note": "Standard U-Net smoothed urban core temperatures by 3.3°C, failing to capture deadly 47.6°C asphalt microclimates. CorrDiff recovered the localized peak within 0.1°C."
         }
 
@@ -351,6 +357,8 @@ class MultiHazardRegistry:
             "total_steps": len(tracked_steps),
             "mean_track_error_km": 58.7,
             "tracked_steps": tracked_steps,
+            "provenance": "ILLUSTRATIVE — NOT MODEL OUTPUT",
+            "disclaimer": "ILLUSTRATIVE — NOT MODEL OUTPUT. Prototype synthetic data for architectural roadmap demonstration; operational deployment requires multi-year regional IMDAA high-resolution reanalysis.",
             "spectral_smoothing_note": "Standard U-Net predicted minimum temperature of 4.8°C (over-smoothed by +2.9°C), completely missing sub-2°C ground frost in low-lying agricultural zones. CorrDiff resolved cold air pooling down to 2.0°C."
         }
 
@@ -398,6 +406,8 @@ class MultiHazardRegistry:
             return {
                 "hazard_id": "heat_dome_2020",
                 "hazard_name": "Northwest India Severe Heat Dome",
+                "provenance": "ILLUSTRATIVE — NOT MODEL OUTPUT",
+                "disclaimer": "ILLUSTRATIVE — NOT MODEL OUTPUT (Roadmap: requires high-resolution regional IMDAA T2m reanalysis)",
                 "variable_name": "Maximum Temperature Tmax",
                 "unit": "°C",
                 "colormap": "heat",
@@ -475,6 +485,8 @@ class MultiHazardRegistry:
             return {
                 "hazard_id": "cold_wave_2021",
                 "hazard_name": "North India Severe Cold Wave & Dense Fog",
+                "provenance": "ILLUSTRATIVE — NOT MODEL OUTPUT",
+                "disclaimer": "ILLUSTRATIVE — NOT MODEL OUTPUT (Roadmap: requires high-resolution regional IMDAA T2m reanalysis)",
                 "variable_name": "Minimum Temperature Tmin",
                 "unit": "°C",
                 "colormap": "cold",

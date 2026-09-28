@@ -9494,14 +9494,14 @@ function updateTwoGapBreakdown(hazardId) {
     elCoarse.textContent = "44.0°C (Regional Coarse NWP)";
     elUnet.style.width = "42%";
     elUnet.innerHTML = `42.1°C <span class="tag-smoothed">-5.5°C UHI Smoothing</span>`;
-    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Recovers 47.6°C Asphalt Thermal Hotspot)`;
+    if (elExpl1) elExpl1.innerHTML = `<span style="color:#f59e0b;font-weight:700;">[ILLUSTRATIVE — NOT MODEL OUTPUT]</span> Architectural roadmap prototype for urban asphalt downscaling`;
     elCorrdiff.style.width = "48%";
     elCorrdiff.innerHTML = `47.6°C <span class="tag-preserved">Preserved Peak</span>`;
     if (elTarget) {
       elTarget.style.width = "45%";
       elTarget.textContent = "45.2°C (Regional Baseline)";
     }
-    if (elExpl2) elExpl2.innerHTML = `&rarr; Standard reanalysis blurs urban asphalt core. Resolved by 5.0 km downscaling.`;
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Standard reanalysis blurs urban asphalt core. Operational deployment requires regional IMDAA T2m reanalysis.`;
     if (elGtLbl) elGtLbl.textContent = "IMD Churu / Palam AWS Ground Truth";
     if (elGtBar) {
       elGtBar.style.width = "48%";
@@ -9512,14 +9512,14 @@ function updateTwoGapBreakdown(hazardId) {
     elCoarse.textContent = "5.1°C (Averaged Regional NWP)";
     elUnet.style.width = "48%";
     elUnet.innerHTML = `4.8°C <span class="tag-smoothed">+2.9°C Ridge Bias</span>`;
-    if (elExpl1) elExpl1.innerHTML = `&rarr; CLOSED BY CORRDIFF (Resolves 1.9°C Nocturnal Frost Valley)`;
+    if (elExpl1) elExpl1.innerHTML = `<span style="color:#f59e0b;font-weight:700;">[ILLUSTRATIVE — NOT MODEL OUTPUT]</span> Architectural roadmap prototype for nocturnal frost downscaling`;
     elCorrdiff.style.width = "19%";
     elCorrdiff.innerHTML = `1.9°C <span class="tag-preserved">Ground Frost Inversion</span>`;
     if (elTarget) {
       elTarget.style.width = "35%";
       elTarget.textContent = "3.5°C (Reconstruction Baseline)";
     }
-    if (elExpl2) elExpl2.innerHTML = `&rarr; Broad grid misses cold air drainage in topographic hollows.`;
+    if (elExpl2) elExpl2.innerHTML = `&rarr; Broad grid misses cold air drainage in valleys. Operational deployment requires regional IMDAA T2m reanalysis.`;
     if (elGtLbl) elGtLbl.textContent = "IMD Sikar / Narnaul AWS Ground Truth";
     if (elGtBar) {
       elGtBar.style.width = "19%";
