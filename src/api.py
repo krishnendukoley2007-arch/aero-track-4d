@@ -320,14 +320,17 @@ def calculate_ndrf_alert(req: AlertRequest):
                     "pinpoint_impact_area_km2": impact_zone_area_km2,
                     "coastal_district_area_km2": typical_district_area_km2,
                     "false_alarm_area_reduction_percent": spatial_refinement_pct,
-                    "methodology": "Pinpoint 5km circular impact radius (78.5 km^2) replaces broad 3,500 km^2 district-wide warning, reducing false-alarm area by 97.8% and eliminating public alert fatigue."
+                    "geometric_footprint_reduction_percent": spatial_refinement_pct,
+                    "methodology": "Geometric comparison: Pinpoint 5km circular radius (78.5 km^2) vs standard 3,500 km^2 district polygon (97.8% area reduction). Note: Damaging cyclone gale winds span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5."
                 },
                 "demographic_impact": {
                     "district_name": loc_name,
                     "coarse_district_population_at_risk": 3766000 if wind_kmh >= 62 else 0,
                     "surgical_corridor_population_targeted": 84500 if wind_kmh >= 62 else 0,
-                    "citizens_shielded_from_panic": 3681500 if wind_kmh >= 62 else 0,
+                    "citizens_shielded_from_panic": 0,
+                    "status_note": "DEPRECATED (F7): Fabricated citizen count removed. Evaluated via geometric area footprint reduction.",
                     "false_alarm_reduction_pct": 97.8,
+                    "geometric_area_reduction_pct": 97.8,
                 },
                 "ndrf_dispatch_recommendation": {
                     "dispatch_priority": "Immediate" if severity in ["Catastrophic", "Severe"] else "Standby",
@@ -402,14 +405,17 @@ def calculate_ndrf_alert(req: AlertRequest):
                 "pinpoint_impact_area_km2": 78.5,
                 "coastal_district_area_km2": 3500.0,
                 "false_alarm_area_reduction_percent": 97.8,
-                "methodology": "Pinpoint 5km circular impact radius (78.5 km^2) replaces broad 3,500 km^2 district-wide warning, reducing false-alarm area by 97.8% and eliminating public alert fatigue."
+                "geometric_footprint_reduction_percent": 97.8,
+                "methodology": "Geometric comparison: Pinpoint 5km circular radius (78.5 km^2) vs broad 3,500 km^2 district warning (97.8% area reduction)."
             },
             "demographic_impact": {
                 "district_name": loc_name,
                 "coarse_district_population_at_risk": 4200000 if local_t >= 42.0 else 0,
                 "surgical_corridor_population_targeted": 92000 if local_t >= 42.0 else 0,
-                "citizens_shielded_from_panic": 4108000 if local_t >= 42.0 else 0,
+                "citizens_shielded_from_panic": 0,
+                "status_note": "DEPRECATED (F7): Fabricated citizen count removed. Evaluated via geometric area footprint reduction.",
                 "false_alarm_reduction_pct": 97.8,
+                "geometric_area_reduction_pct": 97.8,
             },
             "ndrf_dispatch_recommendation": {
                 "dispatch_priority": "Immediate" if severity in ["Catastrophic", "Severe"] else "Standby",
@@ -500,14 +506,17 @@ def calculate_ndrf_alert(req: AlertRequest):
                 "pinpoint_impact_area_km2": 78.5,
                 "coastal_district_area_km2": 3500.0,
                 "false_alarm_area_reduction_percent": 97.8,
-                "methodology": "Pinpoint 5km circular impact radius (78.5 km^2) replaces broad 3,500 km^2 district-wide warning, reducing false-alarm area by 97.8% and eliminating public alert fatigue."
+                "geometric_footprint_reduction_percent": 97.8,
+                "methodology": "Geometric comparison: Pinpoint 5km circular radius (78.5 km^2) vs broad 3,500 km^2 district warning (97.8% area reduction)."
             },
             "demographic_impact": {
                 "district_name": loc_name,
                 "coarse_district_population_at_risk": 2900000 if local_t <= 6.0 else 0,
                 "surgical_corridor_population_targeted": 65000 if local_t <= 6.0 else 0,
-                "citizens_shielded_from_panic": 2835000 if local_t <= 6.0 else 0,
+                "citizens_shielded_from_panic": 0,
+                "status_note": "DEPRECATED (F7): Fabricated citizen count removed. Evaluated via geometric area footprint reduction.",
                 "false_alarm_reduction_pct": 97.8,
+                "geometric_area_reduction_pct": 97.8,
             },
             "ndrf_dispatch_recommendation": {
                 "dispatch_priority": "Immediate" if severity in ["Catastrophic", "Severe"] else "Standby",
@@ -772,14 +781,17 @@ def calculate_ndrf_alert(req: AlertRequest):
             "pinpoint_impact_area_km2": impact_zone_area_km2,
             "coastal_district_area_km2": typical_district_area_km2,
             "false_alarm_area_reduction_percent": spatial_refinement_pct,
-            "methodology": "Pinpoint 5km circular impact radius (78.5 km^2) replaces broad 3,500 km^2 district-wide warning, reducing false-alarm area by 97.8% and eliminating public alert fatigue."
+            "geometric_footprint_reduction_percent": spatial_refinement_pct,
+            "methodology": "Geometric comparison: Pinpoint 5km circular radius (78.5 km^2) vs standard 3,500 km^2 district polygon (97.8% area reduction). Note: Damaging cyclone gale winds span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5."
         },
         "demographic_impact": {
             "district_name": loc_name,
             "coarse_district_population_at_risk": 3766000 if ("dist_km" in locals() and dist_km < 180) else (1200000 if ("dist_km" in locals() and dist_km < 350) else 0),
             "surgical_corridor_population_targeted": 84500 if ("dist_km" in locals() and dist_km < 180) else (25000 if ("dist_km" in locals() and dist_km < 350) else 0),
-            "citizens_shielded_from_panic": 3681500 if ("dist_km" in locals() and dist_km < 180) else (1175000 if ("dist_km" in locals() and dist_km < 350) else 0),
+            "citizens_shielded_from_panic": 0,
+            "status_note": "DEPRECATED (F7): Fabricated citizen count removed. Evaluated via geometric area footprint reduction.",
             "false_alarm_reduction_pct": 97.8,
+            "geometric_area_reduction_pct": 97.8,
         },
         "ndrf_dispatch_recommendation": {
             "dispatch_priority": "Immediate" if severity in ["Catastrophic", "Severe"] else "Standby",

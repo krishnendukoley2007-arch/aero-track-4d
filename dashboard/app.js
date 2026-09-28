@@ -7856,17 +7856,17 @@ async function triggerNDRFAlert(lat, lon, locName) {
       if (demoBox) {
         demoBox.innerHTML = `
           <div class="calc-row">
-            <span>District Alert Disrupted:</span>
-            <strong class="text-red">~${d.coarse_district_population_at_risk > 0 ? d.coarse_district_population_at_risk.toLocaleString() : '0'} citizens</strong>
+            <span>Standard District Warning Area:</span>
+            <strong class="text-red">~3,500 km² polygon</strong>
           </div>
           <div class="calc-row">
             <span>5 km Pinpoint Target:</span>
-            <strong class="text-cyan">~${d.surgical_corridor_population_targeted > 0 ? d.surgical_corridor_population_targeted.toLocaleString() : '0'} citizens</strong>
+            <strong class="text-cyan">~78.5 km² circle</strong>
           </div>
           <div class="calc-divider"></div>
           <div class="calc-row highlight">
-            <span>Citizens Shielded from Panic:</span>
-            <strong class="text-green">${d.citizens_shielded_from_panic > 0 ? d.citizens_shielded_from_panic.toLocaleString() + ' (' + d.false_alarm_reduction_pct + '%)' : '100% Panic Shielded'}</strong>
+            <span>Geometric Area Reduction:</span>
+            <strong class="text-green">97.8% (Geometric)</strong>
           </div>
         `;
       }

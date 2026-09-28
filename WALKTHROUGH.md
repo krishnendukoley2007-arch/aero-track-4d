@@ -228,11 +228,11 @@ This script is structured around the 5 persistent views. Follow this exact flow 
   > *"Why does high-resolution downscaling matter to the nation? Because today, coarse weather models force NDRF and State Disaster Management Authorities to issue 3,500 km² district-wide red alerts. People experience alert fatigue and ignore warnings. We reduce the threat zone to a surgical 5 km radius."*
 - **Action**:
   - Click the **"Digha Coast (West Bengal)"** coastal preset.
-  - Show the **Census 2011 Projected Demographic Impact Card**:
-    - District baseline (Purba Medinipur): **4,736 km² area, 5,095,875 citizens**.
-    - A standard district alert disrupts **3,766,000 citizens**.
-    - Our 5 km pinpoint alert zone (78.5 km²) covers only **84,500 citizens**.
-    - Result: **3,681,500 citizens are shielded from panic and unnecessary curfew**—a **97.8% reduction in false-alarm footprint**.
+  - Show the **Spatial Footprint Refinement Card**:
+    - District baseline (Purba Medinipur): **4,736 km² area**.
+    - Standard district warning covers the entire **~3,500 km² district footprint**.
+    - Our 5 km pinpoint alert zone (78.5 km² circle) isolates the localized corridor.
+    - Result: **97.8% geometric area footprint reduction** ($1 - 78.5/3500$). *(Note: Severe cyclone gale winds physically span 100+ km; threshold-exceedance polygon evaluation planned for Phase 5).*
   - Click **"Download Official IMD Advisory (.html)"**:
     - Downloads an authentic, MoES/IMD Cyclone Warning Centre formatted advisory with official crest, metadata box, Census 2011 density metrics, and operational directives.
 
