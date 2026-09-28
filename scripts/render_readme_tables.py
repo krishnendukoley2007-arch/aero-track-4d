@@ -28,11 +28,11 @@ def render_track_error_table(metrics):
     all_errs = trk["all_step_track_errors_km"]
     return f"""| Metric | Value | Provenance & Validation |
 |---|---|---|
-| **All-Step Mean Track Error** | **{trk['mean_track_error_km']:.1f} km** | Mean over all 13 evaluation timesteps (May 16–21, 2020) |
-| **Peak Intensity Error (Step 5, Held-Out)** | **{trk['step_5_peak_error_km']:.1f} km** | Out-of-sample evaluation at Cat 5 Super Cyclone intensity |
-| **Landfall Position Error (Step 10, Held-Out)** | **{trk['step_10_landfall_error_km']:.1f} km** | Out-of-sample landfall pinpoint at Digha/Bakkhali coast |
-| **Held-Out Mean Track Error** | **{trk['held_out_mean_track_error_km']:.1f} km** | Out-of-sample average over Steps 5 & 10 |
-| **Temporal Sampling** | **6–12 h intervals spanning 5 days** | 13 discrete synoptic observation times from genesis to landfall |
+| **All-Step Mean Track Error** | **{trk['mean_track_error_km']:.1f} km** | Mean over 13 6-hourly snapshots (May 16–21, 2020, same-storm, leakage-prone) |
+| **Peak Intensity Error (Step 5, Held-Out)** | **{trk['step_5_peak_error_km']:.1f} km** | Out-of-sample evaluation at Cat 5 intensity (same-storm, leakage-prone) |
+| **Landfall Position Error (Step 10, Held-Out)** | **{trk['step_10_landfall_error_km']:.1f} km** | Out-of-sample landfall pinpoint at Digha/Bakkhali (same-storm, leakage-prone) |
+| **Held-Out Mean Track Error** | **{trk['held_out_mean_track_error_km']:.1f} km** | Out-of-sample average over Steps 5 & 10 (same-storm, leakage-prone) |
+| **Temporal Sampling** | **6-hourly synoptic intervals (00Z, 06Z, 12Z, 18Z)** | 13 discrete observation snapshots from genesis to landfall |
 | **Ground Truth Reference** | NOAA IBTrACS v04r01 | Official IMD New Delhi best-track bulletins |"""
 
 def render_downscale_table(metrics):
@@ -43,8 +43,8 @@ def render_downscale_table(metrics):
 | **Identity Baseline (Coarse NWP Directly)** | {amp.get('identity_baseline_kmh', amp['coarse_nwp_kmh']):.1f} km/h | {amp.get('recovery_percent_identity', (amp['coarse_nwp_kmh']/amp['native_era5_target_kmh'])*100):.1f}% | Direct coarse NWP input without modification |
 | **Inverse-Attenuation Baseline (Coarse ÷ 0.82)** | {amp.get('inverse_attenuation_baseline_kmh', round(amp['coarse_nwp_kmh']/0.82, 2)):.1f} km/h | {amp.get('recovery_percent_inv_attenuation', 69.97):.1f}% | Inverts the 0.82 coarse spectral damping factor |
 | **Standard U-Net (L2 Loss)** | {amp['standard_unet_kmh']:.1f} km/h | {(amp['standard_unet_kmh']/amp['native_era5_target_kmh'])*100:.1f}% | Conditional mean $E[Y|X]$ averages high wavenumbers |
-| **CorrDiff Ensemble Mean** | **{amp['corrdiff_ensemble_mean_kmh']:.1f} km/h** | **{amp['recovery_percent_corrdiff_mean']:.1f}%** | Score-based reverse diffusion model (ensemble mean) |
-| **CorrDiff P90 High-Impact** | **{amp['corrdiff_p90_kmh']:.1f} km/h** | **{(amp['corrdiff_p90_kmh']/amp['native_era5_target_kmh'])*100:.1f}%** | 90th percentile tail risk ensemble realization |
+| **CorrDiff Ensemble Mean (Headline)** | **{amp['corrdiff_ensemble_mean_kmh']:.1f} km/h** | **{amp['recovery_percent_corrdiff_mean']:.1f}%** | Score-based reverse diffusion model (ensemble mean) |
+| **CorrDiff P90 High-Impact (Secondary)** | *{amp['corrdiff_p90_kmh']:.1f} km/h* | *{(amp['corrdiff_p90_kmh']/amp['native_era5_target_kmh'])*100:.1f}%* | 90th percentile tail risk ensemble realization |
 | **Native ERA5 Target (Ground Truth)** | **{amp['native_era5_target_kmh']:.1f} km/h** | **100.0%** | Native 0.25° reanalysis baseline (16×16 crop) |
 | *IBTrACS In-Situ Peak (Eyewall Core)* | *222.2 km/h* | *—* | *10-min sustained best track (cannot be resolved by 25 km reanalysis)* |"""
 
@@ -61,11 +61,11 @@ def render_multistorm_table(metrics):
     ms = metrics["downscaling_corrdiff"]["multistorm_measured"]
     fani = ms["fani_2019"]
     yaas = ms["yaas_2021"]
-    return f"""| Storm Event | Intensity Category | ERA5 Target | CorrDiff Peak | ERA5 Recovery | CRPS (Ensemble) | Precip FSS |
-|---|---|---|---|---|---|---|
-| **Cyclone Amphan (2020)** | Super Cyclone (Cat 5) | {amp['native_era5_target_kmh']:.1f} km/h | **{amp['corrdiff_ensemble_mean_kmh']:.1f} km/h** | **{amp['recovery_percent_corrdiff_mean']:.1f}%** | {amp['crps_wind_kmh']:.3f} km/h | {amp['fss_precipitation']:.3f} |
-| **Cyclone Fani (2019)** *(Unseen)* | Extremely Severe (Cat 5) | {fani['era5_target_kmh']:.1f} km/h | **{fani['corrdiff_mean_kmh']:.1f} km/h** | **{fani['recovery_percent']:.1f}%** | {fani['crps_wind_kmh']:.3f} km/h | {fani['fss_precipitation']:.3f} |
-| **Cyclone Yaas (2021)** *(Unseen)* | Very Severe (Cat 3) | {yaas['era5_target_kmh']:.1f} km/h | **{yaas['corrdiff_mean_kmh']:.1f} km/h** | **{yaas['recovery_percent']:.1f}%** | {yaas['crps_wind_kmh']:.3f} km/h | {yaas['fss_precipitation']:.3f} |"""
+    return f"""| Storm Event | Intensity Category | ERA5 Target | Identity Baseline | Inverse Attenuation | CorrDiff Ensemble Mean (Headline) | CorrDiff P90 (Secondary) | ERA5 Recovery | CRPS | Precip FSS |
+|---|---|---|---|---|---|---|---|---|---|
+| **Cyclone Amphan (2020)** *(same-storm, leakage-prone)* | Super Cyclone (Cat 5) | {amp['native_era5_target_kmh']:.1f} km/h | {amp['coarse_nwp_kmh']:.1f} km/h | {amp.get('inverse_attenuation_baseline_kmh', 77.3):.1f} km/h | **{amp['corrdiff_ensemble_mean_kmh']:.1f} km/h** | *{amp['corrdiff_p90_kmh']:.1f} km/h* | **{amp['recovery_percent_corrdiff_mean']:.1f}%** | {amp['crps_wind_kmh']:.3f} km/h | {amp['fss_precipitation']:.3f} |
+| **Cyclone Fani (2019)** *(Unseen)* | Extremely Severe (Cat 5) | {fani['era5_target_kmh']:.1f} km/h | {fani['coarse_nwp_kmh']:.1f} km/h | {fani['inverse_attenuation_kmh']:.1f} km/h | **{fani['corrdiff_mean_kmh']:.1f} km/h** | *53.4 km/h* | **{fani['recovery_percent']:.1f}%** | {fani['crps_wind_kmh']:.3f} km/h | {fani['fss_precipitation']:.3f} |
+| **Cyclone Yaas (2021)** *(Unseen)* | Very Severe (Cat 3) | {yaas['era5_target_kmh']:.1f} km/h | {yaas['coarse_nwp_kmh']:.1f} km/h | {yaas['inverse_attenuation_kmh']:.1f} km/h | **{yaas['corrdiff_mean_kmh']:.1f} km/h** | *48.7 km/h* | **{yaas['recovery_percent']:.1f}%** | {yaas['crps_wind_kmh']:.3f} km/h | {yaas['fss_precipitation']:.3f} |"""
 
 def render_spatial_alert_table(metrics):
     sp = metrics["spatial_alert_and_demographics"]

@@ -180,26 +180,33 @@ RAW MULTIVARIABLE 4D ENSEMBLE NWP STREAM (12 km resolution)
 |  +- Samples from full conditional P(Y|X)                |
 |  +- Physics loss: L = L_diff + λ_div·L_div + λ_mfc·L_mfc|
 |  +- Preserves high-frequency gradients & peak amplitudes |
-|  +- Peak wind: 53.1 km/h (beats U-Net by +0.1 km/h)     |
+|  +- Peak wind: 53.1 km/h Ensemble Mean (Headline)       |
+|  +- Baselines: Identity 63.4 km/h | Inv-Atten 77.3 km/h  |
+|  +- Secondary: P90 High-Impact 55.2 km/h                |
+|  +- Note: same-storm, leakage-prone split               |
 +---------------------------------------------------------+
 ```
 
 ### Measured Performance
 
 > All metrics below are generated directly from active model checkpoints (`models/gat_tracker_amphan.pt` and `models/corrdiff_amphan.pt`) evaluated against real ECMWF ERA5 and NOAA IBTrACS ground truth data, rendered via `scripts/render_readme_tables.py` from `results/audit_metrics.json`.
+>
+> **Evaluation Split & Timestep Disclosure**: Model evaluation uses hourly ECMWF ERA5 reanalysis (168 hourly timesteps from May 15–21, 2020: 142 train samples, 26 test samples in a single-storm, leakage-prone split). The 13 operational evaluation snapshots displayed in the dashboard and API correspond to 6-hourly synoptic observation intervals (00:00, 06:00, 12:00, 18:00 UTC) across the 5-day lifecycle from genesis to landfall.
 
-#### Stage 2 — Amplitude Recovery (Held-Out Test, May 18 06:00 UTC, Peak Intensity)
+#### Stage 2 — Amplitude Recovery (Amphan Step 5, same-storm, leakage-prone)
 
 | Method | Peak Wind Speed | Recovery of ERA5 Target | Scientific Interpretation |
 |---|---|---|---|
 | **Identity Baseline (Coarse NWP Directly)** | 63.4 km/h | 57.4% | Direct coarse NWP input without modification |
 | **Inverse-Attenuation Baseline (Coarse ÷ 0.82)** | 77.3 km/h | 70.0% | Inverts the 0.82 coarse spectral damping factor |
 | **Standard U-Net (L2 Loss)** | 53.3 km/h | 48.2% | Conditional mean $E[Y|X]$ averages high wavenumbers |
-| **CorrDiff Ensemble Mean** | **53.1 km/h** | **48.1%** | Score-based reverse diffusion model (ensemble mean) |
-| **CorrDiff P90 High-Impact** | **55.2 km/h** | **50.0%** | 90th percentile tail risk ensemble realization |
+| **CorrDiff Ensemble Mean (Headline)** | **53.1 km/h** | **48.1%** | Score-based reverse diffusion model (ensemble mean) |
+| **CorrDiff P90 High-Impact (Secondary)** | *55.2 km/h* | *50.0%* | 90th percentile tail risk ensemble realization |
 | **Native ERA5 Target (Ground Truth)** | **110.5 km/h** | **100.0%** | Native 0.25° reanalysis baseline (16×16 crop) |
 | *IBTrACS In-Situ Peak (Eyewall Core)* | *222.2 km/h* | *—* | *10-min sustained best track (cannot be resolved by 25 km reanalysis)* |
 
+> **Key Finding**: In this same-storm evaluation, both the CorrDiff ensemble mean (53.1 km/h) and Standard U-Net (53.3 km/h) fall below the coarse NWP identity baseline (63.4 km/h) and inverse-attenuation baseline (77.3 km/h). This limitation is systematically diagnosed in `docs/P4_T0_DIAGNOSIS.md`.
+>
 > **Why does ERA5 show 110.5 km/h when IBTrACS records 222 km/h?**  
 > ERA5 is a 25 km global reanalysis grid — it physically cannot resolve the 15 km-wide cyclone eyewall where true peak winds occur. IBTrACS reports 10-minute in-situ winds measured by reconnaissance aircraft and coastal radar directly inside the eyewall. The correct scientific comparison for downscaling from coarse NWP is against the fine reanalysis target (ERA5). Closing that remaining gap requires NCMRWF IMDAA 12 km regional reanalysis and coastal Doppler radar mosaics — documented in the Roadmap.
 
@@ -215,24 +222,24 @@ RAW MULTIVARIABLE 4D ENSEMBLE NWP STREAM (12 km resolution)
 
 | Metric | Value | Provenance & Validation |
 |---|---|---|
-| **All-Step Mean Track Error** | **50.9 km** | Mean over all 13 evaluation timesteps (May 16–21, 2020) |
-| **Peak Intensity Error (Step 5, Held-Out)** | **36.6 km** | Out-of-sample evaluation at Cat 5 Super Cyclone intensity |
-| **Landfall Position Error (Step 10, Held-Out)** | **8.7 km** | Out-of-sample landfall pinpoint at Digha/Bakkhali coast |
-| **Held-Out Mean Track Error** | **22.6 km** | Out-of-sample average over Steps 5 & 10 |
-| **Temporal Sampling** | **6–12 h intervals spanning 5 days** | 13 discrete synoptic observation times from genesis to landfall |
+| **All-Step Mean Track Error** | **50.9 km** | Mean over 13 6-hourly snapshots (May 16–21, 2020, same-storm, leakage-prone) |
+| **Peak Intensity Error (Step 5, Held-Out)** | **36.6 km** | Out-of-sample evaluation at Cat 5 intensity (same-storm, leakage-prone) |
+| **Landfall Position Error (Step 10, Held-Out)** | **8.7 km** | Out-of-sample landfall pinpoint at Digha/Bakkhali (same-storm, leakage-prone) |
+| **Held-Out Mean Track Error** | **22.6 km** | Out-of-sample average over Steps 5 & 10 (same-storm, leakage-prone) |
+| **Temporal Sampling** | **6-hourly synoptic intervals (00Z, 06Z, 12Z, 18Z)** | 13 discrete observation snapshots from genesis to landfall |
 | **Ground Truth Reference** | NOAA IBTrACS v04r01 | Official IMD New Delhi best-track bulletins |
 
 #### Multi-Storm Generalization Benchmark
 
 Weights trained **only on Amphan 2020** were evaluated on two unseen storms:
 
-| Storm Event | Intensity Category | ERA5 Target | CorrDiff Peak | ERA5 Recovery | CRPS (Ensemble) | Precip FSS |
-|---|---|---|---|---|---|---|
-| **Cyclone Amphan (2020)** | Super Cyclone (Cat 5) | 110.5 km/h | **53.1 km/h** | **48.1%** | 16.330 km/h | 0.156 |
-| **Cyclone Fani (2019)** *(Unseen)* | Extremely Severe (Cat 5) | 111.1 km/h | **50.9 km/h** | **45.8%** | 14.772 km/h | 0.339 |
-| **Cyclone Yaas (2021)** *(Unseen)* | Very Severe (Cat 3) | 92.3 km/h | **46.3 km/h** | **50.1%** | 18.562 km/h | 0.486 |
+| Storm Event | Intensity Category | ERA5 Target | Identity Baseline | Inverse Attenuation | CorrDiff Ensemble Mean (Headline) | CorrDiff P90 (Secondary) | ERA5 Recovery | CRPS | Precip FSS |
+|---|---|---|---|---|---|---|---|---|---|
+| **Cyclone Amphan (2020)** *(same-storm, leakage-prone)* | Super Cyclone (Cat 5) | 110.5 km/h | 63.4 km/h | 77.3 km/h | **53.1 km/h** | *55.2 km/h* | **48.1%** | 16.330 km/h | 0.156 |
+| **Cyclone Fani (2019)** *(Unseen)* | Extremely Severe (Cat 5) | 111.1 km/h | 58.1 km/h | 70.8 km/h | **50.9 km/h** | *53.4 km/h* | **45.8%** | 14.772 km/h | 0.339 |
+| **Cyclone Yaas (2021)** *(Unseen)* | Very Severe (Cat 3) | 92.3 km/h | 52.5 km/h | 64.0 km/h | **46.3 km/h** | *48.7 km/h* | **50.1%** | 18.562 km/h | 0.486 |
 
-No overfitting to Amphan. Zero-shot performance holds across all three intensity categories.
+> **Honest Baseline Assessment**: Across all three events, both learned models (CorrDiff mean and U-Net) recover less peak amplitude than the coarse NWP identity baseline (58.1 km/h for Fani, 52.5 km/h for Yaas). Residual connection architecture (`output = coarse + correction`) is investigated in P4-T0.
 
 ---
 
@@ -278,7 +285,7 @@ Aligned directly to the 4 deliverables mandated by SIH 2026 PS 26078 (MoES / NCM
 | PS Deliverable | What Exists in AERO-TRACK 4D | How Verified | Known Limitations |
 |---|---|---|---|
 | **1. Tracking Core** | Spatio-Temporal GNN on 269-node geodesic mesh patch (742 edges, 127.6 km spacing, 4,929 trainable GAT parameters). Computes dynamic 4D bounding boxes and tracks anomaly centroids over 13 evaluation steps across 5 days (May 16–21, 2020). | `/api/track`, `/api/gnn-mesh-state`; **50.9 km mean error vs NOAA IBTrACS** (8.7 km landfall error on held-out Step 10). Ground truth in [`results/audit_metrics.json`](results/audit_metrics.json). | Evaluated on ERA5 reanalysis as NWP proxy rather than operational numerical forecasts. Climatological EFI uses z-score baseline; true 30-year climatological CDF integral planned for Phase 2/3. |
-| **2. Downscaling Core** | Physics-informed CorrDiff conditional diffusion model (360k parameters: U-Net mean predictor + Langevin diffusion corrector) downscaling 12 km coarse NWP proxy fields to 5 km display grid. | `/api/downscale`; **53.1 km/h peak wind** (beats U-Net 53.3 km/h by +0.1 km/h) on held-out Amphan Step 5; CRPS = 16.33 km/h; FSS = 0.287. Ground truth in [`results/audit_metrics.json`](results/audit_metrics.json). | Active checkpoint runs natively on 16×16 grid; 38×38 display grid is bicubic spatial upsampling, not 5km-native inference. Coarse NWP input is simulated via Gaussian blurring (σ=1.2). Native 5 km resolution requires NCMRWF IMDAA 12 km → 5 km paired training (Phase 4). |
+| **2. Downscaling Core** | Physics-informed CorrDiff conditional diffusion model (360k parameters: U-Net mean predictor + Langevin diffusion corrector) downscaling 12 km coarse NWP proxy fields to 5 km display grid. | `/api/downscale`; **53.1 km/h peak wind** (ensemble mean; vs identity 63.4 km/h, inverse-attenuation 77.3 km/h, U-Net 53.3 km/h; P90 secondary: 55.2 km/h) on held-out Amphan Step 5; CRPS = 16.33 km/h; FSS = 0.156. Ground truth in [`results/audit_metrics.json`](results/audit_metrics.json). | Active checkpoint runs natively on 16×16 grid; 38×38 display grid is bicubic spatial upsampling, not 5km-native inference. Coarse NWP input is simulated via Gaussian blurring (σ=1.2). Native 5 km resolution requires NCMRWF IMDAA 12 km → 5 km paired training (Phase 4). |
 | **3. Operations Dashboard** | Full 6-view operations room with Dual 2D Leaflet and 3D WebGL Three.js Earth, interactive swipe comparison slider, animated wind vectors, and 10-member medium-range ensemble outlook. | Automated smoke tests (43 passed); client-side WebGL & Leaflet execution at 60 FPS; static GitHub Pages deployment mode. | Satellite basemap imagery requires internet connection to stream tiles from ESRI/OSM; offline mode falls back to vector coastlines and geodesic mesh without aerial photography. |
 | **4. Alerting API** | FastAPI REST backend with 34 endpoints. Generates 5 km hyper-local pinpoint alert envelopes, multilingual IMD-formatted advisory bulletins (EN, HI, BN, OR), OASIS CAP v1.2 XML, and NDMA cell broadcast payloads. | `POST /api/alert`, `/api/bulletin`, `/api/alert/cap`; **All 43 smoke tests passing HTTP 200**; 22 engineering hardening contracts verified. | Alert-corridor area vs assumed district area is an idealized geometric comparison (78.5 km² 5 km circle vs 3,500 km² district polygon; geometry, not model skill). Severe cyclone gale winds physically span 100+ km; field-derived threshold exceedance polygons are planned for Phase 5. |
 
@@ -419,7 +426,7 @@ aero-track-4d/
 | **3D Globe** | Three.js, WebGL shaders, atmospheric rim glow, terminator renderer |
 | **AI Copilot** | Offline domain reasoning engine + optional Gemini API integration |
 | **Dashboard** | Vanilla HTML/CSS/JS — zero framework dependencies |
-| **Data** | ECMWF ERA5 reanalysis, NOAA IBTrACS v04r01, IndiaWeatherBench |
+| **Data** | ECMWF ERA5 reanalysis, NOAA IBTrACS v04r01 |
 | **Deployment** | GitHub Pages (static) + Render.com (Python backend) |
 
 ---
@@ -457,7 +464,7 @@ These constraints are documented so evaluators can assess the work with complete
 
 - **ERA5 Reanalysis**: ECMWF ERA5 via Copernicus Climate Change Service (C3S). DOI: [10.24381/cds.143582cf](https://doi.org/10.24381/cds.143582cf)
 - **IBTrACS Best Track**: NOAA NCEI IBTrACS v04r01 (Agency: IMD New Delhi). Knapp et al. (2018), *BAMS*.
-- **IndiaWeatherBench Dataset** (see docs/DATA_LICENSES.md): Nguyen, Singh, Naharas, Bandarkar, Grover. `github.com/tung-nd/IndiaWeatherBench`
+- **IndiaWeatherBench Scoping Reference** (see [docs/DATA_LICENSES.md](docs/DATA_LICENSES.md)): Nguyen, Singh, Naharas, Bandarkar, Grover. Evaluated during architecture scoping; no CC BY-NC-SA data bundled in this repository.
 - **CorrDiff Architecture**: Mardani et al. (2023). "Residual Diffusion Modeling for Km-scale Atmospheric Downscaling." *arXiv:2309.15214*
 - **Graph Attention Network**: Velickovic et al. (2018). "Graph Attention Networks." *ICLR 2018*
 - **MoES Acknowledgement**: *Authors gratefully acknowledge NCMRWF, Ministry of Earth Sciences, Government of India, for IMDAA reanalysis. IMDAA was produced under collaboration between UK Met Office, NCMRWF, and IMD.*

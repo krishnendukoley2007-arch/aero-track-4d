@@ -1754,9 +1754,9 @@ const LiveGlobal = {
     const card2Label = document.getElementById("ov-card2-label");
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (card2Label) card2Label.textContent = "CorrDiff Resolved Wind";
-    if (elWind) elWind.textContent = `${cc.corrdiff_resolved_wind_kmh} km/h`;
-    if (elWindSub) elWindSub.innerHTML = `Coarse NWP: ${cc.coarse_nwp_wind_kmh} km/h <span class="text-amber">(+${cc.amplitude_recovery_gain_pct}% recovered)</span>`;
+    if (card2Label) card2Label.textContent = "CorrDiff Wind (Ensemble Mean)";
+    if (elWind) elWind.textContent = `${cc.corrdiff_resolved_wind_kmh || 53.1} km/h`;
+    if (elWindSub) elWindSub.innerHTML = `Identity: ${cc.coarse_nwp_wind_kmh || 63.4} km/h &bull; Inv-Atten: ${Math.round((cc.coarse_nwp_wind_kmh || 63.4)/0.82*10)/10} km/h &bull; P90: ${cc.corrdiff_p90_extreme_gust_kmh || 55.2} km/h`;
 
     const card3Label = document.getElementById("ov-card3-label");
     const elError = document.getElementById("ov-error");
@@ -1930,9 +1930,9 @@ const LiveGlobal = {
     const card2Label = document.getElementById("ov-card2-label");
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (card2Label) card2Label.textContent = "Resolved Eyewall Wind";
-    if (elWind) elWind.textContent = "102.1 km/h";
-    if (elWindSub) elWindSub.innerHTML = `Coarse NWP: 63.4 km/h <span class="text-amber">(+61% recovered)</span>`;
+    if (card2Label) card2Label.textContent = "CorrDiff Wind (Ensemble Mean)";
+    if (elWind) elWind.textContent = "53.1 km/h";
+    if (elWindSub) elWindSub.innerHTML = "Identity: 63.4 km/h &bull; Inv-Atten: 77.3 km/h &bull; P90: 55.2 km/h";
 
     const card3Label = document.getElementById("ov-card3-label");
     const elError = document.getElementById("ov-error");
@@ -2604,8 +2604,8 @@ const LiveGlobal = {
 
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (elWind) elWind.textContent = `${step.corrdiff_resolved_wind_kmh} km/h`;
-    if (elWindSub) elWindSub.innerHTML = `Coarse NWP: ${step.coarse_nwp_wind_kmh} km/h <span class="text-amber">(+61.5% recovered)</span>`;
+    if (elWind) elWind.textContent = `${step.corrdiff_resolved_wind_kmh} km/h (Mean)`;
+    if (elWindSub) elWindSub.innerHTML = `Identity: ${step.coarse_nwp_wind_kmh} km/h &bull; Inv-Atten: ${Math.round(step.coarse_nwp_wind_kmh / 0.82 * 10) / 10} km/h &bull; P90: ${step.corrdiff_p90_extreme_gust_kmh} km/h`;
 
     const elError = document.getElementById("ov-error");
     const elErrorSub = document.getElementById("ov-error-sub");
@@ -7766,10 +7766,11 @@ async function triggerNDRFAlert(lat, lon, locName) {
     const elCard2 = document.getElementById("ov-card2-label");
     const elWind = document.getElementById("ov-wind");
     const elWindSub = document.getElementById("ov-wind-sub");
-    if (elCard2) elCard2.textContent = "CorrDiff Resolved Wind";
-    if (elWind) elWind.textContent = `${data.predicted_local_wind_kmh} km/h`;
+    if (elCard2) elCard2.textContent = "CorrDiff Wind (Ensemble Mean)";
+    if (elWind) elWind.textContent = `${data.predicted_local_wind_kmh} km/h (Mean)`;
     if (elWindSub) {
-      elWindSub.innerHTML = `Coarse NWP: ${data.coarse_nwp_wind_kmh || (data.predicted_local_wind_kmh * 0.62).toFixed(1)} km/h <span class="text-amber">(+${data.corrdiff_gain_pct || 61.5}% peak recovered)</span>`;
+      const cVal = Number(data.coarse_nwp_wind_kmh || (data.predicted_local_wind_kmh * 0.62).toFixed(1));
+      elWindSub.innerHTML = `Identity: ${cVal} km/h &bull; Inv-Atten: ${(cVal/0.82).toFixed(1)} km/h &bull; P90: ${data.predicted_p90_gust_kmh} km/h`;
     }
 
     const elCard3 = document.getElementById("ov-card3-label");

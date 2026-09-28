@@ -242,6 +242,30 @@ class WeatherDataLoader:
                 return rec
         return self.ibtracs_data[len(self.ibtracs_data) // 2]
 
+    def extract_step_tensors(self, t_idx: int) -> Tuple[np.ndarray, np.ndarray]:
+        """Extracts normalized coarse input and fine target tensors for a single hourly timestep."""
+        wind = np.zeros(self.shape, dtype=np.float32)
+        pres = np.zeros(self.shape, dtype=np.float32)
+        rain = np.zeros(self.shape, dtype=np.float32)
+        temp = np.zeros(self.shape, dtype=np.float32)
+
+        for i in range(self.shape[0]):
+            for j in range(self.shape[1]):
+                idx = i * self.shape[1] + j
+                pt = self.era5_data["grid_points"][idx]["hourly"]
+                wind[i, j] = pt["wind_speed_10m"][t_idx] / 3.6
+                pres[i, j] = (pt["surface_pressure"][t_idx] - 1000.0) / 25.0
+                rain[i, j] = pt["precipitation"][t_idx] / 20.0
+                temp[i, j] = (pt["temperature_2m"][t_idx] - 25.0) / 10.0
+
+        fine_target = np.stack([wind, pres, rain, temp])
+        w_c = gaussian_filter(wind, sigma=1.2) * 0.82
+        p_c = gaussian_filter(pres, sigma=1.2) * 0.85
+        r_c = gaussian_filter(rain, sigma=1.0) * 0.75
+        t_c = gaussian_filter(temp, sigma=1.2)
+        coarse_inp = np.stack([w_c, p_c, r_c, t_c])
+        return coarse_inp, fine_target
+
     def build_training_dataset(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Builds genuine coarse-to-fine pairs across ERA5 data with held-out test splits."""
         X_train, Y_train = [], []
@@ -249,26 +273,7 @@ class WeatherDataLoader:
         test_hour_ranges = set(range(72, 85)) | set(range(120, 133))
 
         for t_idx in range(len(self.timestamps)):
-            wind = np.zeros(self.shape, dtype=np.float32)
-            pres = np.zeros(self.shape, dtype=np.float32)
-            rain = np.zeros(self.shape, dtype=np.float32)
-            temp = np.zeros(self.shape, dtype=np.float32)
-
-            for i in range(self.shape[0]):
-                for j in range(self.shape[1]):
-                    idx = i * self.shape[1] + j
-                    pt = self.era5_data["grid_points"][idx]["hourly"]
-                    wind[i, j] = pt["wind_speed_10m"][t_idx] / 3.6
-                    pres[i, j] = (pt["surface_pressure"][t_idx] - 1000.0) / 25.0
-                    rain[i, j] = pt["precipitation"][t_idx] / 20.0
-                    temp[i, j] = (pt["temperature_2m"][t_idx] - 25.0) / 10.0
-
-            fine_target = np.stack([wind, pres, rain, temp])
-            w_c = gaussian_filter(wind, sigma=1.2) * 0.82
-            p_c = gaussian_filter(pres, sigma=1.2) * 0.85
-            r_c = gaussian_filter(rain, sigma=1.0) * 0.75
-            t_c = gaussian_filter(temp, sigma=1.2)
-            coarse_inp = np.stack([w_c, p_c, r_c, t_c])
+            coarse_inp, fine_target = self.extract_step_tensors(t_idx)
 
             if t_idx in test_hour_ranges:
                 X_test.append(coarse_inp)
@@ -283,3 +288,83 @@ class WeatherDataLoader:
             np.array(X_test, dtype=np.float32),
             np.array(Y_test, dtype=np.float32),
         )
+
+    @classmethod
+    def build_loso_splits(
+        cls,
+        test_storm_id: str = "amphan_2020",
+        val_block_hours: int = 24,
+        val_gap_hours: int = 24,
+    ) -> Dict[str, Any]:
+        """
+        Builds rigorous Leave-One-Storm-Out (LOSO) splits across Amphan, Fani, and Yaas.
+        - Training: 2 development storms (excluding test_storm_id)
+        - Validation: Time-blocked window of val_block_hours within development storms
+        - Temporal Buffer: Enforces a strictly enforced buffer of >= val_gap_hours (default 24h)
+          between training timesteps and validation timesteps to prevent temporal autocorrelation leakage.
+        - Testing: 100% of test_storm_id samples (0% in train/val).
+        """
+        all_storms = ["amphan_2020", "fani_2019", "yaas_2021"]
+        if test_storm_id not in all_storms:
+            raise ValueError(f"Unknown test_storm_id: {test_storm_id}. Must be one of {all_storms}")
+
+        train_storm_ids = [s for s in all_storms if s != test_storm_id]
+
+        X_train, Y_train = [], []
+        X_val, Y_val = [], []
+        X_test, Y_test = [], []
+
+        train_manifest: List[Tuple[str, int]] = []
+        val_manifest: List[Tuple[str, int]] = []
+        test_manifest: List[Tuple[str, int]] = []
+
+        # Load training/val storms
+        for storm_id in train_storm_ids:
+            loader = cls(storm_id)
+            n_t = len(loader.timestamps)
+            # Use trailing block for validation, preceded by gap buffer
+            # Val: [n_t - val_block_hours, n_t)
+            # Gap: [n_t - val_block_hours - val_gap_hours, n_t - val_block_hours) -> Excluded!
+            # Train: [0, n_t - val_block_hours - val_gap_hours)
+            val_start = max(0, n_t - val_block_hours)
+            gap_start = max(0, val_start - val_gap_hours)
+
+            for t in range(n_t):
+                coarse_inp, fine_tgt = loader.extract_step_tensors(t)
+                if t >= val_start:
+                    X_val.append(coarse_inp)
+                    Y_val.append(fine_tgt)
+                    val_manifest.append((storm_id, t))
+                elif t < gap_start:
+                    X_train.append(coarse_inp)
+                    Y_train.append(fine_tgt)
+                    train_manifest.append((storm_id, t))
+                else:
+                    # In temporal buffer gap! Excluded to prevent autocorrelation leakage.
+                    pass
+
+        # Load test storm
+        test_loader = cls(test_storm_id)
+        for t in range(len(test_loader.timestamps)):
+            coarse_inp, fine_tgt = test_loader.extract_step_tensors(t)
+            X_test.append(coarse_inp)
+            Y_test.append(fine_tgt)
+            test_manifest.append((test_storm_id, t))
+
+        return {
+            "test_storm_id": test_storm_id,
+            "train_storm_ids": train_storm_ids,
+            "val_block_hours": val_block_hours,
+            "val_gap_hours": val_gap_hours,
+            "X_train": np.array(X_train, dtype=np.float32),
+            "Y_train": np.array(Y_train, dtype=np.float32),
+            "X_val": np.array(X_val, dtype=np.float32),
+            "Y_val": np.array(Y_val, dtype=np.float32),
+            "X_test": np.array(X_test, dtype=np.float32),
+            "Y_test": np.array(Y_test, dtype=np.float32),
+            "train_manifest": train_manifest,
+            "val_manifest": val_manifest,
+            "test_manifest": test_manifest,
+            "provenance": "leave_one_storm_out_with_24h_time_blocked_gap"
+        }
+

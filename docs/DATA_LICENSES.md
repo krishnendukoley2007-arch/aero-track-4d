@@ -42,12 +42,10 @@ This document formally records the terms of use, licensing, and attribution for 
   - *"Authors gratefully acknowledge National Centre for Medium Range Weather Forecasting (NCMRWF), Ministry of Earth Sciences, Government of India, for providing IMDAA regional reanalysis. IMDAA was produced under the collaborative project between UK Met Office, NCMRWF, and IMD."*
 - **Repository Usage**: Target dataset for high-resolution 12 km regional downscaling (Phase 2 and Phase 4).
 
-### D. IndiaWeatherBench
+### D. IndiaWeatherBench (Scoped Reference Only — No Data Used or Bundled)
 - **Provider**: Stanford University / Nguyen et al.
-- **License**: **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)**.
-- **Citation**:
-  - Nguyen, T. D., Singh, R., Naharas, S., Bandarkar, S., & Grover, A. (2023). *IndiaWeatherBench: Benchmarking Medium-Range Weather Forecasting in India*.
-- **Repository Usage**: Historical baseline reference and multi-decade evaluation protocols.
+- **License**: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0).
+- **Status in this Repository**: **NOT USED, REDISTRIBUTED, OR BUNDLED**. IndiaWeatherBench was evaluated during initial project scoping, but all training and evaluation data in `data/` is sourced strictly from Copernicus ERA5 (C3S Licence) and NOAA IBTrACS (Public Domain). No datasets governed by CC BY-NC-SA are distributed or incorporated in this repository. All code and model weights in this repository are 100% under the MIT License.
 
 ---
 

@@ -283,4 +283,16 @@ class CorrDiffInferenceEngine:
                 "psd_coarse": [round(float(p), 1) for p in psd_c[:10]],
             },
             "physics_diagnostics": phys_diagnostics,
+            "headline_peak_metric": {
+                "definition": "corrdiff_ensemble_mean",
+                "corrdiff_ensemble_mean_kmh": round(peak_corrdiff, 1),
+                "identity_baseline_kmh": round(peak_coarse, 1),
+                "inverse_attenuation_baseline_kmh": peak_inv_atten,
+                "corrdiff_p90_secondary_kmh": round(peak_corrdiff_p90, 1),
+                "standard_unet_kmh": round(peak_unet, 1),
+                "native_era5_target_kmh": round(peak_target, 1),
+                "evaluation_split": "same-storm, leakage-prone"
+            },
+            "evaluation_split": "same-storm, leakage-prone",
+            "provenance": "computed_pytorch_corrdiff_checkpoint"
         }

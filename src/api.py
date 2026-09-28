@@ -616,7 +616,7 @@ def calculate_ndrf_alert(req: AlertRequest):
             local_rain_mmh = float(downscale_data["fields"]["corrdiff_ensemble_mean"]["precip_mmh"][i_closest][j_closest])
         else:
             # Physical Rankine / Holland cyclone decay field
-            v_peak = 102.1 if req.step_index == 5 else (85.0 if req.step_index == 10 else 70.0)
+            v_peak = float(downscale_data["fields"]["corrdiff_ensemble_mean"]["peak_wind_kmh"])
             r_max = 28.0  # radius of maximum wind in km
             if dist_km <= r_max:
                 local_wind_kmh = 20.0 + (v_peak - 20.0) * (dist_km / r_max)
@@ -867,14 +867,17 @@ def get_gnn_mesh_state(step_index: int = Query(5, description="Evaluation step i
         "timestamp": step_data["timestamp"],
         "centroid": step_data["centroid"],
         "gnn_stage1": gnn_stage1,
-        "explainability_overlay": explainability_overlay
+        "explainability_overlay": explainability_overlay,
+        "provenance": "computed_gat_message_passing_checkpoint"
     }
 
 
 @app.get("/api/medium-range-ensemble")
 def get_medium_range_ensemble():
     """Returns 3- to 10-day Medium Range Ensemble forecast spread and cone of uncertainty."""
-    return ensemble_engine.generate_medium_range_ensemble()
+    res = dict(ensemble_engine.generate_medium_range_ensemble())
+    res["provenance"] = "synthetic_perturbation_10_member"
+    return res
 
 
 @app.get("/api/bulletin", response_class=PlainTextResponse)
@@ -1285,6 +1288,7 @@ def api_radar_dwr_metadata(station: str = "DWR_KOLKATA"):
         "available_stations": list(stations.keys()),
         "network_stations": unique_stations,
         "network_coverage_km": 1500,
+        "provenance": "imd_doppler_weather_radar_network_spec",
         "reflectivity_scale_dbz": [
             {"dbz_min": 10, "dbz_max": 20, "label": "Light Mist / Rain", "color": "#00bcd4", "rain_rate_mmh": "0.1 - 1.0"},
             {"dbz_min": 20, "dbz_max": 30, "label": "Moderate Rain", "color": "#22c55e", "rain_rate_mmh": "1.0 - 5.0"},
@@ -1486,7 +1490,9 @@ def api_export_asc_grid(hazard_id: str = "amphan_2020", step_idx: int = 5):
 @app.get("/api/export/geojson")
 def api_export_geojson(hazard_id: str = "amphan_2020", step_idx: int = 5):
     """Generates GeoJSON FeatureCollection of 5km pinpoint threat polygon vs 12km broad zone."""
-    return OperationalDataExporter.export_geojson_footprint(hazard_id, step_idx)
+    res = dict(OperationalDataExporter.export_geojson_footprint(hazard_id, step_idx))
+    res["provenance"] = "computed_geojson_alert_corridor"
+    return res
 
 
 @app.get("/api/export/agri-csv")

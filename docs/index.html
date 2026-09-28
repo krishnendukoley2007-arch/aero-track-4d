@@ -172,9 +172,9 @@
           <div class="kpi-sub" id="ov-stage-sub">Cat 5 &bull; 920 hPa</div>
         </div>
         <div class="kpi-box kpi-box-primary">
-          <span class="kpi-tag" id="ov-card2-label">Eyewall Wind (5km)</span>
-          <div class="kpi-value" id="ov-wind">102.1 km/h</div>
-          <div class="kpi-sub" id="ov-wind-sub">Coarse NWP: 63.4 km/h <span class="text-amber">(+61% recovered)</span></div>
+          <span class="kpi-tag" id="ov-card2-label">Eyewall Wind (Ensemble Mean)</span>
+          <div class="kpi-value" id="ov-wind">53.1 km/h</div>
+          <div class="kpi-sub" id="ov-wind-sub">Identity: 63.4 km/h &bull; Inv-Atten: 77.3 km/h &bull; P90: 55.2 km/h <span class="text-amber">(same-storm, leakage-prone)</span></div>
         </div>
         <div class="kpi-box kpi-box-secondary">
           <span class="kpi-tag" id="ov-card3-label">Held-out Track Error</span>
@@ -750,7 +750,7 @@
           </div>
           <div class="intel-footer-stats font-mono">
             <div>IMD Cat: <strong id="ov-stat-imd-cat" class="text-cyan">SuCS (125 kt)</strong></div>
-            <div>Local Wind: <strong id="ov-stat-wind">102.1 km/h</strong></div>
+            <div>Local Wind: <strong id="ov-stat-wind">53.1 km/h (Mean)</strong></div>
             <div>P90 Gust: <strong id="ov-stat-gust">108.4 km/h</strong></div>
             <div>Rain: <strong id="ov-stat-rain">18.4 mm/h</strong></div>
           </div>
@@ -921,7 +921,7 @@
             </div>
             <div class="live-inspection-readout">
               <span id="stat-cd-label">CorrDiff Resolved Peak:</span>
-              <strong id="stat-corrdiff-wind" class="font-mono text-white">102.1 km/h</strong>
+              <strong id="stat-corrdiff-wind" class="font-mono text-white">53.1 km/h (Mean)</strong>
               <span class="text-muted">(Coarse NWP: <span id="stat-coarse-wind" class="font-mono">63.4 km/h</span>)</span>
             </div>
           <!-- CorrDiff Generative Reverse Diffusion Scrubber Card -->
@@ -960,8 +960,8 @@
                   <strong class="diff-m-val text-white" id="diff-m-sigma">0.000 (Clean)</strong>
                 </div>
                 <div class="diff-m-box">
-                  <span class="diff-m-lbl">Resolved Peak:</span>
-                  <strong class="diff-m-val text-cyan" id="diff-m-peak">102.1 km/h</strong>
+                  <span class="diff-m-lbl">CorrDiff Ensemble Mean:</span>
+                  <strong class="diff-m-val text-cyan" id="diff-m-peak">53.1 km/h (Mean)</strong>
                 </div>
                 <div class="diff-m-box">
                   <span class="diff-m-lbl">Kolmogorov Slope:</span>
@@ -974,7 +974,7 @@
               </div>
 
               <div class="diff-desc-box" id="diff-m-desc">
-                Score-based reverse diffusion complete. Authentic -5/3 Kolmogorov turbulence spectrum and true 102.1 km/h peak restored.
+                Score-based reverse diffusion output. Ensemble mean: 53.1 km/h (P90: 55.2 km/h; same-storm, leakage-prone; below identity baseline 63.4 km/h).
               </div>
             </div>
           </div>
@@ -1036,24 +1036,28 @@
             </div>
             <div class="two-gaps-diagram font-mono" id="two-gaps-diagram">
               <div class="gap-tier tier-coarse">
-                <div class="tier-label" id="tier-lbl-coarse">Coarse NWP Input</div>
-                <div class="tier-bar" id="tier-bar-coarse" style="width: 28%;">63.4 km/h</div>
+                <div class="tier-label" id="tier-lbl-coarse">Coarse NWP Input (Identity Baseline)</div>
+                <div class="tier-bar" id="tier-bar-coarse" style="width: 28%;">63.4 km/h (57.4% recovery)</div>
+              </div>
+              <div class="gap-tier tier-coarse" style="border-left: 3px solid var(--accent-amber);">
+                <div class="tier-label">Inverse-Attenuation Baseline (Coarse &divide; 0.82)</div>
+                <div class="tier-bar" style="width: 35%; background: rgba(245, 158, 11, 0.25);">77.3 km/h (70.0% recovery)</div>
               </div>
               <div class="gap-tier tier-unet">
                 <div class="tier-label" id="tier-lbl-unet">Standard U-Net (L2 Loss)</div>
-                <div class="tier-bar" id="tier-bar-unet" style="width: 25%;">56.5 km/h <span class="tag-smoothed">-49.1% Loss</span></div>
-              </div>
-              <div class="gap-callout gap-1-callout">
-                <span class="gap-badge" id="gap-badge-1">GAP 1: SPECTRAL SMOOTHING</span>
-                <span class="gap-expl" id="gap-expl-1">&rarr; CLOSED BY CORRDIFF (Recovers 102.1 km/h; P90: 108.4 km/h)</span>
+                <div class="tier-bar" id="tier-bar-unet" style="width: 24%;">53.3 km/h <span class="tag-smoothed">48.3%</span></div>
               </div>
               <div class="gap-tier tier-corrdiff">
-                <div class="tier-label" id="tier-lbl-corrdiff">CorrDiff Diffusion (Ours)</div>
-                <div class="tier-bar" id="tier-bar-corrdiff" style="width: 46%;">102.1 km/h <span class="tag-preserved">Preserved Peak</span></div>
+                <div class="tier-label" id="tier-lbl-corrdiff">CorrDiff Ensemble Mean (Headline)</div>
+                <div class="tier-bar" id="tier-bar-corrdiff" style="width: 24%; background: rgba(6, 182, 212, 0.3);">53.1 km/h (48.1%) &bull; P90: 55.2 km/h (Secondary)</div>
+              </div>
+              <div class="gap-callout gap-1-callout">
+                <span class="gap-badge" id="gap-badge-1">EVALUATION SPLIT NOTICE</span>
+                <span class="gap-expl" id="gap-expl-1">&rarr; Same-storm, leakage-prone split. Both models currently fall below the identity baseline (63.4 km/h).</span>
               </div>
               <div class="gap-tier tier-target">
                 <div class="tier-label" id="tier-lbl-target">Native ERA5 Target</div>
-                <div class="tier-bar" id="tier-bar-target" style="width: 50%;">111.0 km/h (Reconstruction Baseline)</div>
+                <div class="tier-bar" id="tier-bar-target" style="width: 50%;">110.5 km/h (Reconstruction Baseline)</div>
               </div>
               <div class="gap-callout gap-2-callout">
                 <span class="gap-badge" id="gap-badge-2">GAP 2: GLOBAL REANALYSIS RESOLUTION LIMIT</span>
@@ -1152,7 +1156,7 @@
             <div class="alert-metrics-banner">
               <div class="banner-item banner-item-primary">
                 <span class="b-lbl">Predicted Wind:</span>
-                <span class="b-val font-mono" id="alert-wind">102.1 km/h</span>
+                <span class="b-val font-mono" id="alert-wind">53.1 km/h (Mean)</span>
               </div>
               <div class="banner-item">
                 <span class="b-lbl">P90 Gusts:</span>
@@ -1336,7 +1340,7 @@
                       </div>
                       
                       <div class="phone-alert-body" id="cell-alert-body">
-                        MANDATORY EVACUATION: Extreme eyewall winds (102.1 km/h) & 4.8m storm surge expected in Digha coastal corridor within 5 km. Move to nearest cyclone shelter immediately.
+                        MANDATORY EVACUATION: Extreme eyewall winds (53.1 km/h Mean, P90 55.2 km/h) & 4.8m storm surge expected in Digha coastal corridor within 5 km. Move to nearest cyclone shelter immediately.
                       </div>
 
                       <div class="phone-alert-meta font-mono">
@@ -2333,7 +2337,7 @@
         <div class="ai-msg-avatar"><i data-lucide="bot"></i></div>
         <div class="ai-msg-content">
           <p><strong>Namaste! I am AERO-AI, your 24/7 meteorological copilot.</strong></p>
-          <p>I am actively monitoring <strong>Super Cyclone Amphan</strong>. Current eyewall winds are <strong>102.1 km/h</strong> with central pressure at <strong>920 hPa</strong>. The storm eye is <strong>86 km</strong> from the selected Digha coastal sector moving <strong>NNE at 18 km/h</strong>.</p>
+          <p>I am actively monitoring <strong>Super Cyclone Amphan</strong>. Current eyewall winds are <strong>53.1 km/h (Ensemble Mean)</strong> with central pressure at <strong>920 hPa</strong>. The storm eye is <strong>86 km</strong> from the selected Digha coastal sector moving <strong>NNE at 18 km/h</strong>.</p>
           <p>How can I assist you today? You can ask about danger zones, evacuation advice, landfall ETA, or the underlying CorrDiff AI downscaling physics.</p>
           <span class="ai-msg-time font-mono" id="ai-init-time">Ready • Offline Mode</span>
         </div>
@@ -2384,7 +2388,7 @@
       <div class="pointer-hud-matrix">
         <div class="hud-matrix-cell">
           <span class="hud-m-lbl">Current Wind</span>
-          <strong class="hud-m-val text-amber font-mono" id="ptr-wind-val">102.1 km/h</strong>
+          <strong class="hud-m-val text-amber font-mono" id="ptr-wind-val">53.1 km/h</strong>
           <span class="hud-m-sub font-mono" id="ptr-wind-sub">Gust: 136.8 km/h</span>
         </div>
         <div class="hud-matrix-cell">
