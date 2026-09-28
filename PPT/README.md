@@ -30,7 +30,7 @@
 
 ### [Slide 2: Proposed Solution & Innovation](slide_previews/slide_2.png)
 - **Left Column:** Operational Challenge & Root Causes (Atmospheric Chaos in 3–10d NWP, Spectral Smoothing Trap, Severe Public Alert Fatigue) and Two-Stage Hybrid AI Solution Architecture.
-- **Right Column:** Operational Proof featuring NASA 3D Earth Photorealism over Bay of Bengal, $102.1\text{ km/h}$ eyewall wind recovery, and 3 key innovation badges ($0.439\%$ Mesh Variance, Kolmogorov $k^{-5/3}$ cascade, $97.8\%$ False-Alarm Reduction).
+- **Right Column:** Operational Proof featuring NASA 3D Earth Photorealism over Bay of Bengal, eyewall wind recovery, and 3 key innovation badges ($0.439\%$ Mesh Variance, Kolmogorov $k^{-5/3}$ cascade, alert-corridor area vs assumed district area (geometry, not model skill)).
 
 ### [Slide 3: Technical Approach & Pipeline Architecture](slide_previews/slide_3.png)
 - **Top Section:** Publication-grade, web-rendered End-to-End Hybrid AI Architecture Diagram ([`assets/clean_architecture_pipeline.png`](assets/clean_architecture_pipeline.png)) showing Stage 00 (4D Ingestion) $\rightarrow$ Stage 01 (Spherical GNN) $\rightarrow$ Stage 02 (CorrDiff Physics Diffusion) $\rightarrow$ Stage 03 (Operational Impact).
@@ -46,7 +46,7 @@
 ### [Slide 5: Empirical Benchmarks & Quantified Societal Impact](slide_previews/slide_5.png)
 - **Top:** Multi-Storm Generalization Table across Cyclone Amphan (2020), Cyclone Fani (2019) [Unseen], and Cyclone Yaas (2021) [Unseen].
 - **Bottom Left:** Actual working screenshot of the hyper-local $5\text{ km}$ alert and automated Ministry of Earth Sciences / IMD National Cyclone Warning Bulletin.
-- **Bottom Right:** 4 Quantified Societal Benefits ($97.8\%$ alert area reduction, $+14.2\text{ km}$ accuracy over IMD, 3–10 day structural lead time, democratized supercomputing).
+- **Bottom Right:** 4 Quantified Societal Benefits (alert-corridor area vs assumed district area (geometry, not model skill), $+14.2\text{ km}$ accuracy over IMD, 3–10 day structural lead time, democratized supercomputing).
 
 ### [Slide 6: Research References, Citations & Data Acknowledgment](slide_previews/slide_6.png)
 - **Peer-Reviewed Foundations:** CorrDiff (ICML 2024 / NVIDIA), GraphCast (Science 2023 / DeepMind), EFI (ECMWF 2003), IndiaWeatherBench (Stanford 2023), Score SDE (ICLR 2021).
