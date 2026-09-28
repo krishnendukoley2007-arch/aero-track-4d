@@ -1803,7 +1803,7 @@ const LiveGlobal = {
     if (coarseWind) coarseWind.textContent = `${cc.coarse_nwp_wind_kmh} km/h`;
     if (resolvedWind) resolvedWind.textContent = `${cc.corrdiff_resolved_wind_kmh} km/h`;
     if (gustP90) gustP90.textContent = `${cc.corrdiff_p90_extreme_gust_kmh} km/h`;
-    if (reduction) reduction.textContent = `${data.precision_impact ? data.precision_impact.false_alarm_area_reduction_pct : 97.8}%`;
+    if (reduction) reduction.textContent = "78.5 km² vs 3,500 km²";
 
     const liveTag = data.is_live_stream ? "🟢 LIVE" : "⚡ OFFLINE";
     if (coordSub) coordSub.textContent = `${liveTag} · ${data.coordinate.lat.toFixed(2)}°N, ${data.coordinate.lon.toFixed(2)}°E · ${data.coordinate.name}`;
