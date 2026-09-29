@@ -40,7 +40,7 @@ class CorrDiffInferenceEngine:
             except Exception as e:
                 print(f"Warning: could not load {ckpt} ({e}), using initialized weights.")
 
-    def run_downscale(self, step_idx: int = 5, n_ensemble_members: int = 5, event_id: str = "amphan_2020") -> Dict[str, Any]:
+    def run_downscale(self, step_idx: int = 5, n_ensemble_members: int = 5, event_id: str = "amphan_2020", seed: int = 42) -> Dict[str, Any]:
         """
         Executes genuine downscaling inference on the requested storm evaluation step:
         - Coarse NWP input (physically filtered)
@@ -50,6 +50,7 @@ class CorrDiffInferenceEngine:
         - NOAA IBTrACS official observation record
         - CRPS calibration for 5-member ensemble
         - Precipitation Fractions Skill Score (FSS)
+        - Uses deterministic seed (default 42) for reproducible stochastic ensemble evaluations.
         """
         dl = WeatherDataLoader(event_id=event_id)
         step_data = dl.get_real_era5_step(step_idx)
@@ -70,7 +71,7 @@ class CorrDiffInferenceEngine:
 
         # ---------------- Model Inference (100% Raw & Unscaled) ----------------
         with torch.no_grad():
-            ens_res = self.model.sample_ensemble(input_tensor, n_members=n_ensemble_members)
+            ens_res = self.model.sample_ensemble(input_tensor, n_members=n_ensemble_members, seed=seed)
 
             # Stage 1 Mean Predictor (Standard U-Net output)
             unet_out = ens_res["stage1_mean"][0].cpu().numpy()

@@ -205,9 +205,11 @@ class PhysicsNeMoCorrDiff(nn.Module):
         self.posterior_variance = self.posterior_variance.to(dev)
 
     @torch.no_grad()
-    def sample_ensemble(self, coarse_input: torch.Tensor, n_members: int = 5) -> Dict[str, Any]:
+    def sample_ensemble(self, coarse_input: torch.Tensor, n_members: int = 5, seed: int = 42) -> Dict[str, Any]:
         """
         Samples N stochastic diffusion ensemble members.
+        Uses a deterministic torch.Generator seeded with `seed` (default 42) for
+        reproducible stochastic Monte Carlo evaluation across test runs.
         Returns:
         - stage1_mean: deterministic U-Net baseline prediction
         - ensemble_members: list of N stochastic generated realizations
@@ -219,12 +221,16 @@ class PhysicsNeMoCorrDiff(nn.Module):
         b, c, h, w = coarse_input.shape
         coarse_input = coarse_input.to(self.device)
 
+        gen = torch.Generator(device=self.device)
+        if seed is not None:
+            gen.manual_seed(seed)
+
         # Stage 1: Deterministic Mean Prediction (Standard U-Net output)
         y_mean = self.mean_predictor(coarse_input)
 
         members = []
         for m in range(n_members):
-            z_t = torch.randn_like(y_mean)
+            z_t = torch.randn(y_mean.shape, generator=gen, device=self.device, dtype=y_mean.dtype)
             step_indices = list(reversed(range(0, self.num_timesteps)))
 
             for t_idx in step_indices:
@@ -235,7 +241,11 @@ class PhysicsNeMoCorrDiff(nn.Module):
                 alpha_cumprod = self.alphas_cumprod[t_idx]
                 beta = self.betas[t_idx]
 
-                noise = torch.randn_like(z_t) if t_idx > 0 else torch.zeros_like(z_t)
+                noise = (
+                    torch.randn(z_t.shape, generator=gen, device=self.device, dtype=z_t.dtype)
+                    if t_idx > 0
+                    else torch.zeros_like(z_t)
+                )
                 z_t = (1.0 / torch.sqrt(alpha)) * (z_t - (beta / torch.sqrt(1.0 - alpha_cumprod)) * eps) + \
                       torch.sqrt(self.posterior_variance[t_idx]) * noise
 
