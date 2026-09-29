@@ -198,7 +198,7 @@ def get_downscale(step_index: int = Query(5, description="Timestep index (0 to 1
     """
     if step_index not in _downscale_cache:
         try:
-            res = downscaler.run_downscale(step_index)
+            res = downscaler.run_downscale(step_index, seed=42)
             _downscale_cache[step_index] = res
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
@@ -546,7 +546,7 @@ def calculate_ndrf_alert(req: AlertRequest):
         }
 
     # CYCLONE AMPHAN (May 2020) with true continuous Rankine/Holland vortex:
-    downscale_data = downscaler.run_downscale(req.step_index)
+    downscale_data = downscaler.run_downscale(req.step_index, seed=42)
     track_data = tracker.detect_and_track_step(req.step_index)
     c_lat = float(track_data["centroid"]["lat"])
     c_lon = float(track_data["centroid"]["lon"])
@@ -958,7 +958,7 @@ def get_hazard_timesteps(hazard_id: str):
 def get_hazard_downscale(hazard_id: str, step_index: int = Query(2, description="Timestep index")):
     """Returns 2D spatial downscaled fields for hazard."""
     if hazard_id in ["amphan_2020", "fani_2019", "yaas_2021"]:
-        res = downscaler.run_downscale(step_idx=step_index, event_id=hazard_id)
+        res = downscaler.run_downscale(step_idx=step_index, event_id=hazard_id, seed=42)
         if isinstance(res, dict):
             res["provenance"] = "computed_pytorch_corrdiff_checkpoint"
         return res
