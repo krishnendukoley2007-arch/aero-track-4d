@@ -280,6 +280,9 @@ def evaluate_perturbation(
             "surge_formula": "Jelesnianski SLOSH Quadratic Velocity Scaling: Delta_S ~ (V_pert / V_base)^2"
         },
         "humanitarian_impact": {
+            "module_type": "PROTOTYPE",
+            "status": "SIMULATED_TOY_MODEL_EXTRAPOLATION",
+            "disclaimer": "Demographic multiplier based on SLOSH surge scaling; illustrative research sandbox parameter",
             "baseline_population_at_risk": base["population_at_risk_base"],
             "perturbed_population_at_risk": perturbed_pop,
             "delta_population": delta_pop

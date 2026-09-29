@@ -1,0 +1,76 @@
+# AERO-TRACK 4D Downscaling Configuration (SIH 26078)
+# Coarse-to-Fine Paired Supervised Resolution Experiment (1.0 deg -> 0.25 deg)
+# Leave-One-Storm-Out (LOSO) Split Strategy
+
+dataset:
+  train_storms:
+    - "fani_2019"
+    - "yaas_2021"
+  validation_block_hours: 24
+  validation_buffer_gap_hours: 24
+  held_out_test_storm: "amphan_2020"
+  tensor_paths:
+    X_train: "data/processed/X_train.npy"
+    Y_train: "data/processed/Y_train.npy"
+    X_val: "data/processed/X_val.npy"
+    Y_val: "data/processed/Y_val.npy"
+    X_test: "data/processed/X_test.npy"
+    Y_test: "data/processed/Y_test.npy"
+    manifest: "data/processed/dataset_manifest.json"
+
+models:
+  baseline_1_bicubic:
+    name: "Bicubic Interpolation"
+    type: "deterministic_interpolation"
+    learnable_parameters: 0
+  baseline_2_unet:
+    name: "Standard U-Net"
+    type: "deterministic_deep_learning"
+    loss: "L2_MSE"
+  model_3_corrdiff_no_physics:
+    name: "CorrDiff (No Physics Loss)"
+    type: "conditional_score_based_diffusion"
+    loss: "MSE_diffusion_residual"
+    lambda_div: 0.0
+    lambda_mfc: 0.0
+    lambda_tail: 0.0
+  model_4_corrdiff_physics:
+    name: "Physics-Informed CorrDiff (Proposed)"
+    type: "physics_constrained_score_based_diffusion"
+    loss: "multi_objective_physics_conservation"
+    lambda_mse: 1.0
+    lambda_l1: 0.30
+    lambda_div: 0.15
+    lambda_mfc: 0.20
+    lambda_tail: 0.25
+    dx_meters: 28000.0
+
+training:
+  epochs: 20
+  batch_size: 16
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  diffusion_timesteps: 15
+  random_seed: 42
+  device: "auto"
+
+evaluation:
+  test_storm: "amphan_2020"
+  n_ensemble_members: 5
+  fss_precip_threshold_mmh: 2.0
+  fss_window_size: 5
+  seed: 42
+
+checkpoints:
+  save_dir: "models/checkpoints"
+  checkpoint_filename: "corrdiff_loso.pt"
+  run_log_dir: "results/training_runs"
+  benchmark_file: "results/downscaling_benchmark.json"
+  ablation_file: "results/ablation_matrix.json"
+
+provenance:
+  data_source_type: "ERA5_REANALYSIS"
+  coarse_resolution: "1.0 deg (~111 km) Gaussian NWP proxy"
+  fine_target_resolution: "0.25 deg (~28 km) ERA5 regional grid"
+  operational_target: "12 km global NEPS-G -> 5 km regional IMDAA (Future / Cluster Roadmap)"
+  training_protocol: "Leave-One-Storm-Out (Fani + Yaas -> Amphan)"

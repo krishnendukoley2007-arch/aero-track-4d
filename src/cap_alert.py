@@ -84,14 +84,22 @@ class CAPAlertGenerator:
         ET.SubElement(info, "description").text = description
         ET.SubElement(info, "instruction").text = alert_data.get("action_directive", "Follow NDRF and district disaster management instructions.")
 
-        # Area block
+        # Area block: derived strictly from model contour polygon
         area = ET.SubElement(info, "area")
-        ET.SubElement(area, "areaDesc").text = f"5.0 km Pinpoint Strike Corridor around {alert_data.get('location', {}).get('name')}"
-        
-        lat = alert_data.get("location", {}).get("lat", 0.0)
-        lon = alert_data.get("location", {}).get("lon", 0.0)
-        circle_str = f"{lat:.4f},{lon:.4f} 5.0"
-        ET.SubElement(area, "circle").text = circle_str
+        area_desc = alert_data.get("area_desc") or f"Model-Derived Impact Contour Corridor around {alert_data.get('location', {}).get('name')}"
+        ET.SubElement(area, "areaDesc").text = area_desc
+
+        poly_coords = alert_data.get("model_contour_coords")
+        if poly_coords and len(poly_coords) >= 3:
+            # OASIS CAP format: space-delimited list of "lat,lon" pairs
+            poly_str = " ".join([f"{p[1]:.4f},{p[0]:.4f}" for p in poly_coords])
+            ET.SubElement(area, "polygon").text = poly_str
+        else:
+            lat = alert_data.get("location", {}).get("lat", 0.0)
+            lon = alert_data.get("location", {}).get("lon", 0.0)
+            circle_str = f"{lat:.4f},{lon:.4f} 5.0"
+            ET.SubElement(area, "circle").text = circle_str
+
 
         # Parameter tags for NDMA cell broadcast & NDRF
         ndrf_info = alert_data.get("ndrf_dispatch_recommendation", {})

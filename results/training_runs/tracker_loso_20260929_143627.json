@@ -1,0 +1,330 @@
+{
+  "run_id": "tracker_loso_20260929_143627",
+  "timestamp_utc": "2026-09-29T14:36:27.939892+00:00",
+  "model_architecture": "SpatioTemporalSphericalGAT (GAT + Temporal GRU)",
+  "parameter_count": 17060,
+  "seed": 42,
+  "optimizer": "AdamW (lr=0.002, weight_decay=1e-4)",
+  "epochs": 40,
+  "elapsed_seconds": 26.26,
+  "splits": {
+    "strategy": "leave_one_storm_out",
+    "train_storms": [
+      "fani_2019",
+      "yaas_2021"
+    ],
+    "val_temporal_buffer_hours": 24,
+    "test_storm": "amphan_2020",
+    "train_samples": 120,
+    "val_samples": 24,
+    "test_samples": 78
+  },
+  "baseline_comparison": {
+    "baseline_1_threshold_cc": {
+      "name": "Threshold Connected Components",
+      "mean_track_error_km": 469.65,
+      "median_track_error_km": 388.92,
+      "mean_footprint_iou": 0.123,
+      "precision": 0.153,
+      "recall": 0.349,
+      "f1_score": 0.212
+    },
+    "baseline_2_const_velocity": {
+      "name": "Constant Velocity Kinematic Extrapolator",
+      "mean_track_error_km": 500.33,
+      "median_track_error_km": 388.92
+    },
+    "proposed_spatiotemporal_gat": {
+      "mean_track_error_km": 68.09,
+      "median_track_error_km": 13.31,
+      "footprint_iou": 0.085,
+      "precision": 0.104,
+      "recall": 0.307,
+      "f1_score": 0.155,
+      "track_error_reduction_pct_vs_baseline_1": 85.5
+    }
+  },
+  "best_checkpoint": "C:\\weather\\models\\checkpoints\\gat_tracker_loso.pt",
+  "training_curve": [
+    {
+      "epoch": 1,
+      "train_loss": 0.7109,
+      "val_loss": 4.5877,
+      "val_track_error_km": 115.13,
+      "lr": 0.002
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.6257,
+      "val_loss": 4.5604,
+      "val_track_error_km": 119.25,
+      "lr": 0.002
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.5607,
+      "val_loss": 4.4669,
+      "val_track_error_km": 117.56,
+      "lr": 0.002
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.4988,
+      "val_loss": 4.4182,
+      "val_track_error_km": 115.84,
+      "lr": 0.002
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.4432,
+      "val_loss": 4.378,
+      "val_track_error_km": 116.3,
+      "lr": 0.002
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.4138,
+      "val_loss": 4.3638,
+      "val_track_error_km": 113.88,
+      "lr": 0.002
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.3974,
+      "val_loss": 4.326,
+      "val_track_error_km": 110.64,
+      "lr": 0.002
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.3805,
+      "val_loss": 4.4072,
+      "val_track_error_km": 120.88,
+      "lr": 0.002
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.3662,
+      "val_loss": 4.4034,
+      "val_track_error_km": 120.67,
+      "lr": 0.002
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.3499,
+      "val_loss": 4.3874,
+      "val_track_error_km": 117.09,
+      "lr": 0.002
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.3326,
+      "val_loss": 4.409,
+      "val_track_error_km": 118.76,
+      "lr": 0.002
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.3119,
+      "val_loss": 4.4201,
+      "val_track_error_km": 120.0,
+      "lr": 0.002
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.292,
+      "val_loss": 4.4326,
+      "val_track_error_km": 121.71,
+      "lr": 0.002
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.2708,
+      "val_loss": 4.4266,
+      "val_track_error_km": 121.45,
+      "lr": 0.002
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.2572,
+      "val_loss": 4.4166,
+      "val_track_error_km": 119.33,
+      "lr": 0.001
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.2352,
+      "val_loss": 4.4449,
+      "val_track_error_km": 123.32,
+      "lr": 0.001
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.2239,
+      "val_loss": 4.4395,
+      "val_track_error_km": 122.92,
+      "lr": 0.001
+    },
+    {
+      "epoch": 18,
+      "train_loss": 0.2162,
+      "val_loss": 4.4037,
+      "val_track_error_km": 117.57,
+      "lr": 0.001
+    },
+    {
+      "epoch": 19,
+      "train_loss": 0.2075,
+      "val_loss": 4.4366,
+      "val_track_error_km": 123.49,
+      "lr": 0.001
+    },
+    {
+      "epoch": 20,
+      "train_loss": 0.1985,
+      "val_loss": 4.4063,
+      "val_track_error_km": 120.48,
+      "lr": 0.001
+    },
+    {
+      "epoch": 21,
+      "train_loss": 0.1938,
+      "val_loss": 4.4044,
+      "val_track_error_km": 119.26,
+      "lr": 0.001
+    },
+    {
+      "epoch": 22,
+      "train_loss": 0.1866,
+      "val_loss": 4.4112,
+      "val_track_error_km": 119.79,
+      "lr": 0.001
+    },
+    {
+      "epoch": 23,
+      "train_loss": 0.1849,
+      "val_loss": 4.4391,
+      "val_track_error_km": 122.97,
+      "lr": 0.001
+    },
+    {
+      "epoch": 24,
+      "train_loss": 0.1803,
+      "val_loss": 4.4126,
+      "val_track_error_km": 120.61,
+      "lr": 0.001
+    },
+    {
+      "epoch": 25,
+      "train_loss": 0.1763,
+      "val_loss": 4.4109,
+      "val_track_error_km": 120.14,
+      "lr": 0.001
+    },
+    {
+      "epoch": 26,
+      "train_loss": 0.1734,
+      "val_loss": 4.4275,
+      "val_track_error_km": 122.1,
+      "lr": 0.001
+    },
+    {
+      "epoch": 27,
+      "train_loss": 0.1697,
+      "val_loss": 4.4191,
+      "val_track_error_km": 121.03,
+      "lr": 0.001
+    },
+    {
+      "epoch": 28,
+      "train_loss": 0.1668,
+      "val_loss": 4.4109,
+      "val_track_error_km": 120.14,
+      "lr": 0.001
+    },
+    {
+      "epoch": 29,
+      "train_loss": 0.1658,
+      "val_loss": 4.3999,
+      "val_track_error_km": 118.77,
+      "lr": 0.001
+    },
+    {
+      "epoch": 30,
+      "train_loss": 0.1657,
+      "val_loss": 4.4266,
+      "val_track_error_km": 121.48,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 31,
+      "train_loss": 0.167,
+      "val_loss": 4.4183,
+      "val_track_error_km": 120.91,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 32,
+      "train_loss": 0.1625,
+      "val_loss": 4.4024,
+      "val_track_error_km": 119.16,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 33,
+      "train_loss": 0.165,
+      "val_loss": 4.4121,
+      "val_track_error_km": 120.75,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 34,
+      "train_loss": 0.1599,
+      "val_loss": 4.4208,
+      "val_track_error_km": 121.54,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 35,
+      "train_loss": 0.1601,
+      "val_loss": 4.4107,
+      "val_track_error_km": 120.09,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 36,
+      "train_loss": 0.1587,
+      "val_loss": 4.4101,
+      "val_track_error_km": 119.62,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 37,
+      "train_loss": 0.1578,
+      "val_loss": 4.4181,
+      "val_track_error_km": 120.18,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 38,
+      "train_loss": 0.1571,
+      "val_loss": 4.4191,
+      "val_track_error_km": 120.9,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 39,
+      "train_loss": 0.1572,
+      "val_loss": 4.4108,
+      "val_track_error_km": 120.32,
+      "lr": 0.0005
+    },
+    {
+      "epoch": 40,
+      "train_loss": 0.1563,
+      "val_loss": 4.4187,
+      "val_track_error_km": 121.0,
+      "lr": 0.0005
+    }
+  ]
+}

@@ -189,6 +189,9 @@ class CorrDiffInferenceEngine:
             "is_held_out_test": step_data["is_held_out_test"],
             "grid_shape": [len(sub_lats), len(sub_lons)],
             "resolution_km": 5.0,
+            "grid_type": "display_interpolated_grid",
+            "native_model_grid_shape": [16, 16],
+            "native_model_resolution_note": "Trained models execute natively at 16x16 (~28 km ERA5 crop); 38x38 is bicubic display interpolation (~5 km grid spacing), not native 5km model inference.",
             "coordinates": {
                 "lats": sub_lats,
                 "lons": sub_lons,
@@ -203,6 +206,8 @@ class CorrDiffInferenceEngine:
                     "min_mslp_hpa": round(min_coarse_p, 1),
                     "grid_shape": [16, 16],
                     "resolution_km": 12.0,
+                    "grid_type": "era5_derived_coarse_proxy",
+                    "coarsening_filter": "gaussian_filter(sigma=1.2) * 0.82",
                 },
                 "standard_unet": {
                     "wind_speed_kmh": [[round(float(v), 1) for v in row] for row in unet_wind_5km],
@@ -211,6 +216,8 @@ class CorrDiffInferenceEngine:
                     "min_mslp_hpa": round(min_unet_p, 1),
                     "grid_shape": [38, 38],
                     "resolution_km": 5.0,
+                    "grid_type": "display_interpolated",
+                    "native_resolution": [16, 16],
                 },
                 "corrdiff_ensemble_mean": {
                     "wind_speed_kmh": [[round(float(v), 1) for v in row] for row in cd_wind_mean_5km],
@@ -220,17 +227,23 @@ class CorrDiffInferenceEngine:
                     "min_mslp_hpa": round(min_corrdiff_p, 1),
                     "grid_shape": [38, 38],
                     "resolution_km": 5.0,
+                    "grid_type": "display_interpolated",
+                    "native_resolution": [16, 16],
                 },
                 "corrdiff_high_impact_p90": {
                     "wind_speed_kmh": [[round(float(v), 1) for v in row] for row in cd_wind_high_5km],
                     "peak_wind_kmh": round(peak_corrdiff_p90, 1),
                     "grid_shape": [38, 38],
                     "resolution_km": 5.0,
+                    "grid_type": "display_interpolated",
+                    "native_resolution": [16, 16],
                 },
                 "corrdiff_spread_uncertainty": {
                     "wind_spread_kmh": [[round(float(v), 1) for v in row] for row in cd_wind_spread_5km],
                     "max_spread_kmh": round(float(cd_wind_spread_5km.max()), 1),
                     "grid_shape": [38, 38],
+                    "grid_type": "display_interpolated",
+                    "native_resolution": [16, 16],
                 },
                 "native_era5_target": {
                     "wind_speed_kmh": [[round(float(v), 1) for v in row] for row in target_wind_5km],
@@ -239,6 +252,8 @@ class CorrDiffInferenceEngine:
                     "min_mslp_hpa": round(min_target_p, 1),
                     "grid_shape": [38, 38],
                     "resolution_km": 5.0,
+                    "grid_type": "display_interpolated",
+                    "native_resolution": [16, 16],
                 },
             },
             "ibtracs_observation": {

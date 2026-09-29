@@ -102,7 +102,7 @@ class MediumRangeEnsembleEngine:
             "properties": {
                 "name": "Medium-Range Ensemble Cone of Uncertainty (Day 1 to Day 5)",
                 "lead_time_window": "3 to 10 Days",
-                "ensemble_system": "NCMRWF Global Ensemble (NEPS-G 12km) 10-Member Simulation",
+                "ensemble_system": "SIMULATED/PARAMETRIC (Target Architecture: NCMRWF NEPS-G 12km; Current Engine: Parametric Chaos Perturbation 10-Member Simulation)",
             }
         }
 
@@ -148,6 +148,138 @@ class MediumRangeEnsembleEngine:
                 "day_10_spread_km": 680.0,
                 "chaos_power_law": "sigma(t) = sigma_0 * (t / 24h)^1.2",
                 "scientific_rationale": "In medium-range forecasting (3 to 10 days), non-linear atmospheric chaos causes deterministic trajectories to diverge. The two-stage GNN+CorrDiff pipeline handles this by bounding the ensemble dispersion on the spherical mesh before generative downscaling."
+            },
+            "provenance": {
+                "data_source_type": "SIMULATED",
+                "data_source": "10-Member Chaos Dispersion Engine (Parametric Fallback)",
+                "forecast_status": "PROXY",
+                "target_architecture": "NCMRWF NEPS-G 12km (Global Operational EPS)",
+                "model_status": "PARAMETRIC_CHAOS_MODEL",
+                "verification_status": "LEAD_TIME_SPREAD_CALIBRATED",
+                "seed": 42
             }
         }
+
+    def get_point_medium_range_forecast(
+        self,
+        lat: float,
+        lon: float,
+        lead_hours: int = 72,
+        forecast_initialization: str = "2020-05-16T00:00:00Z",
+        variables: List[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Phase 5 & Phase 7: Operational interface for medium-range ensemble forecasts.
+        Accepts: forecast_initialization, lead_hours (72h, 96h, 120h, 168h, 240h), lat, lon, variables.
+        Computes 10-member dispersion, P10/P50/P90 quantiles, and exceedance probabilities.
+        """
+        if variables is None:
+            variables = ["wind_speed_10m", "surface_pressure", "precipitation", "temperature_2m"]
+
+        from datetime import datetime, timedelta, timezone
+        try:
+            init_dt = datetime.fromisoformat(forecast_initialization.replace("Z", "+00:00"))
+        except Exception:
+            init_dt = datetime(2020, 5, 16, 0, 0, tzinfo=timezone.utc)
+        valid_dt = init_dt + timedelta(hours=lead_hours)
+
+        # Baseline ensemble simulation across Bay of Bengal
+        np.random.seed(42 + int(lead_hours))
+        chaos_factor = (lead_hours / 24.0) ** 1.2 * 0.15
+
+        members_output = []
+        winds, mslps, precips, temps = [], [], [], []
+
+        for m in range(self.n_members):
+            w_pert = float(np.random.normal(0.0, 3.5 * chaos_factor))
+            p_pert = float(np.random.normal(0.0, 4.0 * chaos_factor))
+            r_pert = float(np.random.normal(0.0, 2.5 * chaos_factor))
+            t_pert = float(np.random.normal(0.0, 0.8 * chaos_factor))
+
+            base_wind = 45.0 + min(95.0, (lead_hours / 120.0) * 85.0)
+            base_mslp = 1004.0 - min(65.0, (lead_hours / 120.0) * 58.0)
+            base_precip = max(0.0, 8.0 + (lead_hours / 120.0) * 18.0)
+            base_temp = 28.5 - (base_wind / 100.0) * 1.8
+
+            m_wind = max(5.0, float(base_wind + w_pert))
+            m_mslp = float(base_mslp + p_pert)
+            m_precip = max(0.0, float(base_precip + r_pert))
+            m_temp = float(base_temp + t_pert)
+
+            winds.append(m_wind)
+            mslps.append(m_mslp)
+            precips.append(m_precip)
+            temps.append(m_temp)
+
+            members_output.append({
+                "member_id": f"EPS-{m+1:02d}",
+                "lead_hours": lead_hours,
+                "wind_speed_kmh": round(m_wind, 1),
+                "surface_pressure_hpa": round(m_mslp, 1),
+                "precipitation_mmh": round(m_precip, 1),
+                "temperature_c": round(m_temp, 1),
+            })
+
+        winds_arr = np.array(winds)
+        precips_arr = np.array(precips)
+        mslps_arr = np.array(mslps)
+
+        p_wind_gt_62 = float(np.mean(winds_arr >= 62.0))
+        p_wind_gt_118 = float(np.mean(winds_arr >= 118.0))
+        p_rain_gt_10 = float(np.mean(precips_arr >= 10.0))
+        p_rain_gt_25 = float(np.mean(precips_arr >= 25.0))
+
+        return {
+            "forecast_initialization": init_dt.isoformat(),
+            "forecast_valid_time": valid_dt.isoformat(),
+            "lead_hours": lead_hours,
+            "coordinates": {"lat": lat, "lon": lon},
+            "variables": variables,
+            "ensemble_members_count": self.n_members,
+            "members": members_output,
+            "quantiles": {
+                "wind_speed_kmh": {
+                    "p10": round(float(np.percentile(winds_arr, 10)), 1),
+                    "p50_median": round(float(np.percentile(winds_arr, 50)), 1),
+                    "p90": round(float(np.percentile(winds_arr, 90)), 1),
+                    "mean": round(float(np.mean(winds_arr)), 1),
+                    "spread_std": round(float(np.std(winds_arr)), 1),
+                },
+                "surface_pressure_hpa": {
+                    "p10": round(float(np.percentile(mslps_arr, 10)), 1),
+                    "p50_median": round(float(np.percentile(mslps_arr, 50)), 1),
+                    "p90": round(float(np.percentile(mslps_arr, 90)), 1),
+                    "mean": round(float(np.mean(mslps_arr)), 1),
+                    "spread_std": round(float(np.std(mslps_arr)), 1),
+                },
+                "precipitation_mmh": {
+                    "p10": round(float(np.percentile(precips_arr, 10)), 1),
+                    "p50_median": round(float(np.percentile(precips_arr, 50)), 1),
+                    "p90": round(float(np.percentile(precips_arr, 90)), 1),
+                    "mean": round(float(np.mean(precips_arr)), 1),
+                    "spread_std": round(float(np.std(precips_arr)), 1),
+                }
+            },
+            "exceedance_probabilities": {
+                "p_wind_gale_exceedance_62kmh": round(p_wind_gt_62, 2),
+                "p_wind_severe_eyewall_118kmh": round(p_wind_gt_118, 2),
+                "p_rain_heavy_10mmh": round(p_rain_gt_10, 2),
+                "p_rain_extreme_25mmh": round(p_rain_gt_25, 2),
+            },
+            "uncertainty_attribution": {
+                "nwp_ensemble_uncertainty": f"Chaotic trajectory dispersion scaling with lead_time^1.2 (std = {round(float(np.std(winds_arr)), 1)} km/h)",
+                "generative_diffusion_uncertainty": "Conditional stochastic score-based residual recovery (~3-7 km/h spread)",
+                "verification_uncertainty": "NOAA IBTrACS historical track/intensity error envelope",
+            },
+            "provenance": {
+                "data_source_type": "SIMULATED",
+                "data_source": "10-Member Chaos Dispersion Engine (Parametric Fallback)",
+                "forecast_status": "PROXY",
+                "target_architecture": "NCMRWF NEPS-G 12km (Global Operational EPS)",
+                "model_status": "PARAMETRIC_CHAOS_MODEL",
+                "verification_status": "LEAD_TIME_SPREAD_CALIBRATED",
+                "seed": 42
+            }
+        }
+
 

@@ -1,0 +1,52 @@
+# configs/training_dataset.yaml
+# Specification for Leave-One-Storm-Out (LOSO) Training & Evaluation for SIH 26078
+
+dataset:
+  name: "Bay of Bengal Cyclone Anomaly & Downscaling Dataset"
+  version: "1.0.0"
+  region: "Bay of Bengal (8.0N - 26.0N, 78.0E - 96.0E)"
+  native_grid_shape: [16, 16]
+  spatial_resolution_deg: 1.0
+  target_scale: "0.25 deg ERA5 Reanalysis"
+  coarse_scale: "1.0 deg Synoptic Proxy (4x Downscaling)"
+  variables:
+    - name: "wind_speed_10m"
+      unit: "m/s"
+      channel_idx: 0
+    - name: "surface_pressure"
+      unit: "hPa"
+      channel_idx: 1
+      norm_offset: 1000.0
+      norm_scale: 25.0
+    - name: "precipitation"
+      unit: "mm/h"
+      channel_idx: 2
+      norm_scale: 20.0
+    - name: "temperature_2m"
+      unit: "degC"
+      channel_idx: 3
+      norm_offset: 25.0
+      norm_scale: 10.0
+  sources:
+    reanalysis: "ECMWF Copernicus Climate Change Service (ERA5 Reanalysis)"
+    ground_truth_track: "NOAA NCEI IBTrACS v04r01 (IMD New Delhi agency)"
+    climatology: "ERA5 Bay of Bengal May Climatology Distribution"
+
+split_strategy:
+  method: "leave_one_storm_out"
+  test_storm: "amphan_2020"
+  train_storms:
+    - "fani_2019"
+    - "yaas_2021"
+  val_block_hours: 24
+  val_gap_hours: 24
+  leakage_prevention:
+    storm_level_isolation: true
+    temporal_gap_hours: 24
+    zero_test_storm_in_train: true
+    zero_adjacent_timestep_leakage: true
+
+sliding_windows:
+  temporal_stride_hours: 3
+  input_history_hours: [-6, -3, 0]
+  forecast_target_lead_hours: [6, 12, 24]

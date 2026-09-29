@@ -1,0 +1,47 @@
+# configs/tracker.yaml
+# Spherical Graph Attention Network (GAT) Anomaly Tracker Configuration for SIH 26078
+
+model:
+  name: "SpatioTemporalSphericalGAT"
+  architecture: "Spherical 6-Subdivision Icosahedron + Multi-Head GAT + Temporal GRU"
+  in_features: 4         # u10, v10, mslp anomaly, t2m
+  hidden_dim: 32
+  heads: 4
+  temporal_dim: 32
+  temporal_layers: 1
+  dropout: 0.1
+  subdivisions: 6        # 269 nodes, 742 geodesic edges over Bay of Bengal
+  domain:
+    lat_min: 8.0
+    lat_max: 26.0
+    lon_min: 78.0
+    lon_max: 96.0
+
+training:
+  epochs: 40
+  batch_size: 16
+  learning_rate: 0.002
+  weight_decay: 0.0001
+  lr_decay_step: 15
+  lr_decay_gamma: 0.5
+  seed: 42
+  loss_weights:
+    lambda_centroid: 1.0       # Geodesic centroid displacement MSE
+    lambda_anomaly_bce: 0.5     # Node-level vortex classification BCE
+    lambda_attention_reg: 0.05  # Attention concentration entropy penalty
+
+data:
+  dataset_manifest: "data/processed/dataset_manifest.json"
+  train_storms: ["fani_2019", "yaas_2021"]
+  validation_storms: ["fani_2019", "yaas_2021"]  # with 24h temporal separation buffer
+  test_storm: "amphan_2020"                      # 100% held-out unseen test storm
+  history_window_steps: 3                        # T-6h, T-3h, T
+  forecast_lead_steps: 2                         # T+6h ahead
+
+baselines:
+  - name: "ThresholdConnectedComponents"
+    type: "classical_image_processing"
+    description: "Thresholds extreme wind/mslp gradient and computes connected component centroid"
+  - name: "ConstantVelocityKalman"
+    type: "kinematic_extrapolation"
+    description: "Linear kinematic displacement extrapolation from previous two positions"

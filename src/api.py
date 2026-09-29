@@ -33,6 +33,7 @@ from src.multihazard_anomalies import MultiHazardRegistry
 from src.coastal_districts import CoastalDistrictsEngine
 from src.wind_vectors import WindVectorEngine
 from src.cap_alert import CAPAlertGenerator
+from src.alert_contour import compute_model_alert_polygon
 from src.scientific_audit import ScientificMeteorologicalAudit
 from src.agri_advisory import AgriAdvisoryEngine
 from src.data_export import OperationalDataExporter
@@ -48,6 +49,38 @@ from src.live_global import (
     get_global_wind_vectors,
     get_live_pressure_field,
 )
+
+
+def make_provenance_schema(
+    data_source_type: str = "ERA5_REANALYSIS",
+    data_source: str = "ECMWF ERA5 Reanalysis",
+    forecast_status: str = "NOT_A_FORECAST",
+    lead_hours: Optional[int] = None,
+    ensemble_members: Optional[int] = None,
+    model_name: str = "AERO-TRACK 4D Neural Suite",
+    model_version: str = "2.6.0",
+    checkpoint: Optional[str] = "models/checkpoints/corrdiff_loso.pt",
+    native_grid: str = "0.25 deg (~28 km) ERA5 grid (16x16)",
+    display_grid: str = "38x38 display interpolation",
+    verification_status: str = "VERIFIED_AGAINST_OBSERVATION",
+    seed: int = 42
+) -> Dict[str, Any]:
+    """Phase 10: Standardized Provenance Schema across all public API responses."""
+    return {
+        "data_source_type": data_source_type,
+        "data_source": data_source,
+        "forecast_status": forecast_status,
+        "lead_hours": lead_hours,
+        "ensemble_members": ensemble_members,
+        "model_name": model_name,
+        "model_version": model_version,
+        "checkpoint": checkpoint,
+        "seed": seed,
+        "native_grid": native_grid,
+        "display_grid": display_grid,
+        "verification_status": verification_status
+    }
+
 
 app = FastAPI(
     title="NCMRWF AI Extreme Weather Tracking & CorrDiff Downscaling API",
@@ -135,9 +168,9 @@ def get_status():
             "license": "MIT (Code) / Copernicus Open Access (Data) — see docs/DATA_LICENSES.md",
         },
         "modules": {
-            "stage_1_tracker": "EFI-Inspired z-Score + Icosahedral Spherical Geodesic Propagation Mesh",
+            "stage_1_tracker": "Spherical Geodesic Mesh + GAT Inference (fixed checkpoint; training provenance not in repository)",
             "stage_2_downscaler": "PhysicsNeMo CorrDiff Generative Diffusion (UNet Mean + Stochastic Diffusion)",
-            "medium_range_ensemble": "3- to 10-Day Medium Range Atmospheric Chaos & Cone of Uncertainty",
+            "medium_range_ensemble": "SIMULATED/PARAMETRIC 10-Member Chaos Dispersion (Target Architecture: NCMRWF NEPS-G 12km)",
             "bulletin_engine": "Official MoES/IMD Cyclone Advisory Bulletin Generator",
             "spatial_alert_engine": "Hyper-Local 5km Footprint Geometry (Alert Corridor vs District Area)"
         },
@@ -205,6 +238,39 @@ def get_downscale(step_index: int = Query(5, description="Timestep index (0 to 1
     res = dict(_downscale_cache[step_index])
     res["provenance"] = "computed_pytorch_corrdiff_checkpoint"
     return res
+
+
+@app.get("/api/efi/true-ensemble")
+def get_true_ensemble_efi(
+    lead_hours: int = Query(72, description="Forecast lead time in hours (72, 96, 120, etc.)"),
+    step_index: int = Query(5, description="Timestep index (0 to 12)"),
+    n_members: int = Query(20, description="Ensemble members count")
+):
+    """
+    Phase 4: Computes official non-parametric Extreme Forecast Index (EFI)
+    by numerically integrating empirical forecast ensemble CDF against historical ERA5 climatology:
+    EFI = (2 / pi) * integral_0^1 [ (p - F_ensemble(Q_c(p))) / sqrt(p*(1-p)) ] dp
+    Calculates both wind speed and precipitation EFI plus Shift-of-Tails (SOT).
+    """
+    import torch
+    step_data = data_loader.get_real_era5_step(step_index)
+    c_inp, _ = data_loader.extract_step_tensors(step_data["step_index"])
+    coarse_tensor = torch.tensor(c_inp[None, ...], dtype=torch.float32)
+    with torch.no_grad():
+        ens_res = downscaler.model.sample_ensemble(coarse_tensor, n_members=n_members, seed=42)
+
+    members = ens_res["ensemble_members"]
+    wind_members = np.array([m[0, 0].cpu().numpy() * 3.6 for m in members])
+    precip_members = np.array([np.maximum(0.0, m[0, 2].cpu().numpy() * 20.0) for m in members])
+
+    efi_res = tracker.compute_true_ensemble_efi(
+        ensemble_wind_members=wind_members,
+        ensemble_precip_members=precip_members,
+        lead_hours=lead_hours,
+        forecast_source="CorrDiff Stochastic Diffusion 20-Member Proxy Ensemble"
+    )
+    return efi_res
+
 
 
 MAJOR_GEO_LOOKUP = [
@@ -442,8 +508,6 @@ def calculate_ndrf_alert(req: AlertRequest):
                 "highway_transit_cutoff": "Daytime Transit Restrictions (12:00–16:00 IST for Labor & Open Vehicles)",
                 "cyclone_shelters_activated": 48,
                 "shelter_capacity_utilization_pct": 74.0,
-                "target_population_evacuated": 22000,
-                "target_population_remaining": 3000,
                 "evacuation_completion_pct": 88.0,
                 "ndrf_teams_deployed": 6,
                 "inflatable_rescue_boats_staged": 0
@@ -536,8 +600,6 @@ def calculate_ndrf_alert(req: AlertRequest):
                 "highway_transit_cutoff": "Dense Fog Transit Advisory (<50m Visibility Speed Capped at 30 km/h)",
                 "cyclone_shelters_activated": 64,
                 "shelter_capacity_utilization_pct": 89.5,
-                "target_population_evacuated": 18500,
-                "target_population_remaining": 2100,
                 "evacuation_completion_pct": 89.8,
                 "ndrf_teams_deployed": 4,
                 "inflatable_rescue_boats_staged": 0
@@ -620,7 +682,7 @@ def calculate_ndrf_alert(req: AlertRequest):
             tier = "SEVERE / EVACUATION DIRECTIVE"
             severity = "Catastrophic"
             badge_color = "#ef4444"
-            action = f"MANDATORY EVACUATION: Eye wall gale ({local_wind_kmh:.1f} km/h, gust {local_p90_wind_kmh:.1f} km/h) active within {dist_km:.1f} km of eye. Immediate evacuation of vulnerable structures within 5 km. Move population to cyclone relief shelters."
+            action = f"MANDATORY EVACUATION: Eye wall gale ({local_wind_kmh:.1f} km/h, gust {local_p90_wind_kmh:.1f} km/h) active within {dist_km:.1f} km of eye. Immediate evacuation of vulnerable structures within 5 km. Move residents to cyclone relief shelters."
         elif local_p90_wind_kmh >= 62.0 or dist_km <= 140.0:
             tier = "HIGH WARNING (LIFE THREATENING)"
             severity = "Severe"
@@ -712,6 +774,18 @@ def calculate_ndrf_alert(req: AlertRequest):
     measured_coarse = coarse_nwp_wind if "coarse_nwp_wind" in locals() else local_wind_kmh * 0.62
     calc_gain_pct = round(((local_wind_kmh - measured_coarse) / max(1.0, measured_coarse)) * 100.0, 1)
 
+    # Phase 8: Model-derived alert polygon from predicted 2D field
+    fine_wind_grid = np.array(downscale_data["fields"]["corrdiff_ensemble_mean"]["wind_speed_kmh"])
+    contour_alert = compute_model_alert_polygon(
+        fine_field=fine_wind_grid,
+        lats=np.array(data_loader.lats),
+        lons=np.array(data_loader.lons),
+        threshold_val=62.0,
+        event_type="cyclone",
+        lead_hours=req.step_index * 6 + 24,
+        severity=severity.lower()
+    )
+
     return {
         "location": {
             "name": loc_name,
@@ -737,6 +811,8 @@ def calculate_ndrf_alert(req: AlertRequest):
         "severity": severity,
         "badge_color": badge_color,
         "action_directive": action,
+        "model_derived_alert_polygon": contour_alert,
+        "model_contour_coords": contour_alert["contour_coordinates_lonlat"],
         "imd_classification": {
             "stage_name": imd_stage,
             "code": imd_code,
@@ -759,7 +835,7 @@ def calculate_ndrf_alert(req: AlertRequest):
             "is_gale_active": is_gale,
             "gale_onset_hours_remaining": gale_onset_hrs,
             "highway_transit_cutoff": cutoff_str,
-            "action_directive": "Enforce immediate transit restrictions and shelter directives within 5 km impact zone" if is_gale else "Standby advisory",
+            "action_directive": "Enforce immediate transit restrictions and shelter directives within model contour polygon" if is_gale else "Standby advisory",
             "provenance": "computed_kinematic_onset"
         },
         "confidence_aware_assessment": {
@@ -774,23 +850,46 @@ def calculate_ndrf_alert(req: AlertRequest):
             "p10_wind_kmh": round(max(0.0, local_wind_kmh - 1.28 * spread_kmh), 1),
             "p50_wind_kmh": round(local_wind_kmh, 1),
             "p90_wind_kmh": round(local_p90_wind_kmh, 1),
-            "action_confidence_rationale": "High-confidence forecast spread indicates focused 5 km coastal evacuation directive."
+            "p_wind_gale_exceedance_62kmh": round(float(np.mean(fine_wind_grid >= 62.0)), 2),
+            "p_wind_severe_eyewall_118kmh": round(float(np.mean(fine_wind_grid >= 118.0)), 2),
+            "uncertainty_attribution": {
+                "nwp_ensemble_uncertainty": f"Chaotic trajectory dispersion across 10-member ensemble (spread = ±{spread_kmh} km/h)",
+                "generative_diffusion_uncertainty": "Score-based diffusion residual stochastic sampling (N=5 members)",
+                "verification_uncertainty": "NOAA IBTrACS historical observation validation envelope"
+            },
+            "action_confidence_rationale": "High-confidence forecast spread indicates focused coastal evacuation directive."
         },
         "spatial_footprint_refinement": {
             "alert_corridor_area_km2": 78.54,
             "assumed_district_area_km2": 3500.0,
             "assumed_district_area_km2_provenance": "assumed_constant",
             "corridor_to_district_area_ratio": round(78.54 / 3500.0, 4),
+            "model_contour_polygon_area_km2": contour_alert["area_km2"],
             "methodology": "Geometric area comparison: 5 km circular corridor (78.54 km²) vs assumed district area (3,500 km² constant).",
             "provenance": "computed_geometric_area_ratio"
         },
+
         "ndrf_dispatch_recommendation": {
             "dispatch_priority": "Immediate" if severity in ["Catastrophic", "Severe"] else "Standby",
             "target_battalions": "NDRF 2nd Battalion (Haringhata) / 9th Battalion (Cuttack)" if ("dist_km" in locals() and dist_km < 350) else "Regional Standby Battalion",
             "equipment": ["Inflatable Boats (IRB)", "Tree Cutting Chainsaws", "Satellite Comm Terminals"] if severity in ["Catastrophic", "Severe"] else ["Standard Monitoring"],
         },
-        "provenance": "computed_continuous_vortex_and_ensemble"
+        "provenance": make_provenance_schema(
+            data_source_type="ERA5_REANALYSIS",
+            data_source="ECMWF ERA5 Reanalysis + CorrDiff Diffusion",
+            forecast_status="PROXY",
+            lead_hours=req.step_index * 6 + 24,
+            ensemble_members=5,
+            model_name="CorrDiff Diffusion Alert Model",
+            model_version="2.6.0",
+            checkpoint="models/checkpoints/corrdiff_loso.pt",
+            native_grid="0.25 deg (~28 km) ERA5 grid (16x16)",
+            display_grid="38x38 display interpolation",
+            verification_status="POLYGON_CONTOUR_DERIVED",
+            seed=42
+        )
     }
+
 
 
 @app.get("/api/spherical-mesh")
@@ -852,8 +951,56 @@ def get_gnn_mesh_state(step_index: int = Query(5, description="Evaluation step i
 def get_medium_range_ensemble():
     """Returns 3- to 10-day Medium Range Ensemble forecast spread and cone of uncertainty."""
     res = dict(ensemble_engine.generate_medium_range_ensemble())
-    res["provenance"] = "synthetic_perturbation_10_member"
+    res["provenance"] = "simulated_parametric_10_member"
     return res
+
+
+@app.get("/api/medium-range/forecast")
+def get_medium_range_point_forecast(
+    lat: float = Query(21.62, description="Target latitude"),
+    lon: float = Query(87.51, description="Target longitude"),
+    lead_hours: int = Query(72, description="Lead hours (72, 96, 120, 168, 240)"),
+    forecast_initialization: str = Query("2020-05-16T00:00:00Z", description="Forecast init timestamp")
+):
+    """
+    Phase 5 & Phase 7: Operational medium-range point ensemble forecast interface.
+    Returns 10-member dispersion, P10/P50/P90 quantiles, exceedance probabilities,
+    and three-level uncertainty attribution (NWP vs Diffusion vs Verification).
+    """
+    return ensemble_engine.get_point_medium_range_forecast(
+        lat=lat,
+        lon=lon,
+        lead_hours=lead_hours,
+        forecast_initialization=forecast_initialization
+    )
+
+
+@app.get("/api/alert/model-polygon")
+def get_model_alert_polygon(
+    step_index: int = Query(5, description="Timestep index (0 to 12)"),
+    threshold_kmh: float = Query(62.0, description="Wind threshold in km/h for contour extraction"),
+    hazard_id: str = Query("amphan_2020", description="Hazard ID")
+):
+    """
+    Phase 8: Derives alert polygon strictly from the predicted continuous model field:
+    fine field -> threshold exceedance -> probability map -> connected region -> polygon -> severity -> lead time.
+    """
+    step_data = data_loader.get_real_era5_step(step_index)
+    fine_wind = np.array(step_data["native_era5_fine"]["wind_speed_kmh"])
+    lats = np.array(data_loader.lats)
+    lons = np.array(data_loader.lons)
+    lead_hours = step_data["step_index"] * 6 + 24
+    severity = "severe" if float(np.max(fine_wind)) >= 100.0 else ("moderate" if float(np.max(fine_wind)) >= 62.0 else "advisory")
+    return compute_model_alert_polygon(
+        fine_field=fine_wind,
+        lats=lats,
+        lons=lons,
+        threshold_val=threshold_kmh,
+        event_type="cyclone",
+        lead_hours=lead_hours,
+        severity=severity
+    )
+
 
 
 @app.get("/api/bulletin", response_class=PlainTextResponse)
@@ -1497,7 +1644,7 @@ def api_climate_perturbation(
     - Kerry Emanuel Maximum Potential Intensity (MPI)
     - Kaplan-DeMaria SHIPS Rapid Intensification (RI) Probability
     - SLOSH quadratic storm surge amplification
-    - Humanitarian coastal population risk exposure
+    - Coastal physical storm surge and hydrodynamic risk exposure
     """
     from src.climate_sandbox import evaluate_perturbation
     res = evaluate_perturbation(hazard_id=hazard_id, delta_sst=delta_sst, delta_vws=delta_vws)
@@ -1527,7 +1674,7 @@ def api_cell_broadcast(
     lang: str = Query("en", description="Language code: en, hi, bn, or")
 ):
     """
-    Simulates cellular cell-broadcast transmission across regional BTS towers
+    Simulates cellular cell-broadcast transmission across regional coastal sectors
     with multi-lingual text-to-speech scripts and OASIS CAP v1.2 XML payload.
     """
     from src.cell_broadcast import CellBroadcastEngine
@@ -1548,6 +1695,174 @@ def api_diffusion_trajectory():
     if isinstance(res, dict):
         res["provenance"] = "computed_diffusion_reverse_steps"
     return res
+
+
+
+# ---------------------------------------------------------------------------
+# NEW: Probabilistic Calibration Suite
+# ---------------------------------------------------------------------------
+
+@app.get("/api/calibration")
+def api_calibration():
+    """
+    Phase improvement — Probabilistic calibration suite for the CorrDiff ensemble.
+
+    Returns:
+      - Reliability diagram data (predicted prob vs. observed frequency) for 3 thresholds
+      - Brier Score and Brier Skill Score at 60 / 80 / 100 km/h thresholds
+      - Spread-Skill relationship across 7 lead times (T+24h to T+240h)
+      - CRPS decomposition (reliability + resolution + uncertainty)
+      - Rank histogram (Talagrand diagram) shape diagnosis
+
+    All metrics are grounded in the Amphan 2020 LOSO test set (168 samples).
+    Provenance: ERA5_REANALYSIS, ensemble: CorrDiff 5-member stochastic (seed=42).
+    """
+    from src.calibration import run_calibration_suite
+    result = run_calibration_suite(seed=42)
+    result["provenance"] = make_provenance_schema(
+        data_source_type="ERA5_REANALYSIS",
+        forecast_status="PROTOTYPE",
+        model_name="CorrDiff 5-Member Stochastic Ensemble",
+        verification_status="CALIBRATION_VERIFIED_AMPHAN_LOSO",
+    )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# NEW: Bred Vector Ensemble (replaces naive Gaussian perturbation)
+# ---------------------------------------------------------------------------
+
+@app.get("/api/bred-vector-ensemble")
+def api_bred_vector_ensemble(
+    genesis_lat: float = Query(10.4, description="Cyclone genesis latitude"),
+    genesis_lon: float = Query(86.4, description="Cyclone genesis longitude"),
+    landfall_lat: float = Query(21.8, description="Predicted landfall latitude"),
+    landfall_lon: float = Query(88.3, description="Predicted landfall longitude"),
+):
+    """
+    Phase improvement — Bred Vector ensemble replacing naive Gaussian perturbations.
+
+    Bred vectors are the fastest-growing perturbation modes of the atmosphere
+    (Toth & Kalnay 1993). Unlike Gaussian noise, BV perturbations concentrate
+    energy along physically unstable atmospheric modes — baroclinic instability
+    and vortex tilt — producing a statistically and physically superior ensemble.
+
+    Returns 10-member BV ensemble trajectories, wind intensity quantiles (P10/P50/P90),
+    track spread statistics, and a full provenance record.
+
+    This is still a PROTOTYPE — the breeding uses the GAT linear proxy, not a full NWP model.
+    """
+    from src.bred_vectors import BredVectorEnsemble
+    bve = BredVectorEnsemble(n_members=10, breeding_cycles=5, seed=42)
+    result = bve.generate(
+        genesis_lat=genesis_lat,
+        genesis_lon=genesis_lon,
+        landfall_lat=landfall_lat,
+        landfall_lon=landfall_lon,
+    )
+    result["api_provenance"] = make_provenance_schema(
+        data_source_type="ERA5_DERIVED_PROXY",
+        forecast_status="PROTOTYPE_BRED_VECTOR",
+        model_name="BredVectorEnsemble (SpatioTemporalSphericalGAT background)",
+        verification_status="PROTOTYPE_NOT_OPERATIONAL",
+    )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# NEW: ERA5 Pressure-Level Field (upper-air)
+# ---------------------------------------------------------------------------
+
+@app.get("/api/era5-pressure-levels")
+def api_era5_pressure_levels(
+    hazard_id: str = Query("amphan_2020", description="Storm identifier"),
+    step_index: int = Query(5, ge=0, le=12, description="Timestep index"),
+    level_hpa: int = Query(850, description="Pressure level in hPa (850, 500, or 250)"),
+):
+    """
+    Phase improvement — ERA5 upper-air pressure-level fields.
+
+    Returns geopotential height, temperature, u-wind, v-wind, and specific humidity
+    at the requested pressure level. These fields enable:
+      - True vector divergence: ∂u/∂x + ∂v/∂y  (not the scalar proxy)
+      - True moisture flux convergence: -∇·(q·V)  (requires specific humidity q)
+      - Gradient wind balance check (physical defensibility)
+
+    Data is sourced from the ECMWF ERA5 reanalysis via the Copernicus CDS API.
+    If the pressure-level NetCDF has not been downloaded, returns a diagnostic
+    message with the exact CDS API call needed to obtain the data.
+
+    Supported levels: 850 hPa (low-level jet / moisture), 500 hPa (steering flow),
+                      250 hPa (upper-level divergence / outflow).
+    """
+    supported_levels = [250, 500, 850]
+    if level_hpa not in supported_levels:
+        raise HTTPException(
+            status_code=400,
+            detail=f"level_hpa must be one of {supported_levels}. Got {level_hpa}."
+        )
+
+    import os, json
+
+    # Check if the downloaded pressure-level file exists
+    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+    plevel_path = os.path.join(data_dir, f"{hazard_id}_plevel_{level_hpa}hpa.nc")
+    plevel_json_path = os.path.join(data_dir, f"{hazard_id}_plevel_{level_hpa}hpa.json")
+
+    if os.path.exists(plevel_json_path):
+        # Serve cached JSON version
+        with open(plevel_json_path, "r") as f:
+            cached = json.load(f)
+        cached["provenance"] = make_provenance_schema(
+            data_source_type="ERA5_REANALYSIS_PRESSURE_LEVELS",
+            forecast_status="NOT_A_FORECAST",
+            verification_status="REAL_REANALYSIS_DATA",
+        )
+        return cached
+
+    # Not downloaded yet — return diagnostic with exact CDS download script
+    cds_script = f"""
+import cdsapi
+c = cdsapi.Client()
+c.retrieve(
+    'reanalysis-era5-pressure-levels',
+    {{
+        'product_type': 'reanalysis',
+        'variable': ['geopotential', 'temperature', 'u_component_of_wind',
+                     'v_component_of_wind', 'specific_humidity'],
+        'pressure_level': ['{level_hpa}'],
+        'year': '2020',        # adjust for hazard_id
+        'month': '05',
+        'day': [f'{{d:02d}}' for d in range(16, 22)],
+        'time': ['00:00', '06:00', '12:00', '18:00'],
+        'area': [26, 78, 8, 96],    # Bay of Bengal domain
+        'format': 'netcdf',
+    }},
+    '{plevel_path}'
+)
+"""
+
+    return {
+        "status": "DATA_NOT_DOWNLOADED",
+        "message": (
+            f"ERA5 pressure-level data for {hazard_id} at {level_hpa} hPa has not been "
+            f"downloaded yet. Run the CDS download script below to fetch it. "
+            f"Set CDSAPI_KEY in your .env file before running."
+        ),
+        "download_script": cds_script.strip(),
+        "download_to": plevel_path,
+        "physics_enabled_after_download": [
+            "True vector divergence: ∂u/∂x + ∂v/∂y",
+            "True moisture flux convergence: -∇·(q·V)",
+            "Gradient wind balance check (pressure vs. wind field)",
+            "Upper-level divergence at 250 hPa (outflow layer)",
+        ],
+        "provenance": make_provenance_schema(
+            data_source_type="ERA5_REANALYSIS_PRESSURE_LEVELS",
+            forecast_status="NOT_A_FORECAST",
+            verification_status="DATA_PENDING_DOWNLOAD",
+        ),
+    }
 
 
 DASHBOARD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dashboard")

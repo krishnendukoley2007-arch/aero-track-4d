@@ -1,0 +1,110 @@
+{
+  "dataset_name": "Bay of Bengal Cyclone Anomaly & Downscaling Dataset",
+  "version": "1.0.0",
+  "created_at_utc": "2026-09-29T14:26:28.133368+00:00",
+  "split_strategy": "leave_one_storm_out",
+  "held_out_test_storm": "amphan_2020",
+  "development_train_storms": [
+    "fani_2019",
+    "yaas_2021"
+  ],
+  "temporal_buffer_gap_hours": 24,
+  "sample_counts": {
+    "train_samples": 216,
+    "validation_samples": 48,
+    "test_samples": 168,
+    "total_samples": 432,
+    "tracking_sequences": 148
+  },
+  "tensor_shapes": {
+    "X_train": [
+      216,
+      4,
+      16,
+      16
+    ],
+    "Y_train": [
+      216,
+      4,
+      16,
+      16
+    ],
+    "X_val": [
+      48,
+      4,
+      16,
+      16
+    ],
+    "Y_val": [
+      48,
+      4,
+      16,
+      16
+    ],
+    "X_test": [
+      168,
+      4,
+      16,
+      16
+    ],
+    "Y_test": [
+      168,
+      4,
+      16,
+      16
+    ],
+    "tracking_sequence_inputs": [
+      148,
+      3,
+      4,
+      16,
+      16
+    ],
+    "tracking_sequence_targets": [
+      148,
+      2
+    ]
+  },
+  "channels": [
+    {
+      "idx": 0,
+      "name": "wind_speed_10m",
+      "unit": "m/s",
+      "scaling": "norm / 3.6"
+    },
+    {
+      "idx": 1,
+      "name": "surface_pressure",
+      "unit": "hPa",
+      "scaling": "(mslp - 1000) / 25"
+    },
+    {
+      "idx": 2,
+      "name": "precipitation",
+      "unit": "mm/h",
+      "scaling": "precip / 20"
+    },
+    {
+      "idx": 3,
+      "name": "temperature_2m",
+      "unit": "degC",
+      "scaling": "(temp - 25) / 10"
+    }
+  ],
+  "checksums_sha256": {
+    "X_train.npy": "2607199c97af3035ac5d01b51620d23022e6ffdc226faae3906c452d3e1287ef",
+    "Y_train.npy": "7f250ac9e2e7269ab76582f92bf0e1f069caabb3f025d253bd9505539403a06c",
+    "X_val.npy": "42a4a2ccd2af15129460883d972426f16e9ea47f1c007b6fd8a612a104706881",
+    "Y_val.npy": "2136dc7c015126d2ff3ff94353dfea93d9c4f7aef7999386913f88a27ad9124e",
+    "X_test.npy": "8bf1b686dde964dc5c36fa3ca897b2e3239b08427e188f8b6ff196c7f875c17d",
+    "Y_test.npy": "8f5065be82e9c08e6dcd79906caac9dec0340111e0b826a4707ea57377a6e9e0",
+    "tracking_sequences.npz": "85ff8bcaa7f87602b5ea0e303805e1c466ccd19da87469b02ddeee7cb30ae515"
+  },
+  "anti_leakage_audit": {
+    "zero_test_storm_in_train": true,
+    "zero_test_storm_in_val": true,
+    "temporal_gap_enforced": true,
+    "gap_hours": 24,
+    "audit_passed": true
+  }
+}

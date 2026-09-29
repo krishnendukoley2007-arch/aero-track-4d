@@ -746,7 +746,7 @@
             </div>
           </div>
           <div class="intel-directive-text" id="ov-alert-text">
-            MANDATORY EVACUATION: Immediate evacuation of vulnerable structures within 5 km impact radius. Move population to cyclone relief shelters. Suspend all marine, port, and coastal operations.
+            MANDATORY EVACUATION: Immediate evacuation of vulnerable structures within 5 km impact radius. Move residents to cyclone relief shelters. Suspend all marine, port, and coastal operations.
           </div>
           <div class="intel-footer-stats font-mono">
             <div>IMD Cat: <strong id="ov-stat-imd-cat" class="text-cyan">SuCS (125 kt)</strong></div>
@@ -759,11 +759,11 @@
         <!-- Demographic Precision Card -->
         <div class="intel-card demographic-card">
           <div class="demographic-title">
-            <span><i data-lucide="users"></i> Demographic Precision Gain</span>
-            <span class="census-tag">Census 2011 Projected Est.</span>
+            <span><i data-lucide="target"></i> Spatial Alert Targeting Precision</span>
+            <span class="census-tag">Geometric Area Footprint</span>
           </div>
           <p class="demographic-desc">
-            Based on Census 2011 density (1,076/km²) for East Midnapore, projected to district population:
+            Geometric area comparison between administrative district warning footprint and 5 km corridor:
           </p>
           <div class="demographic-calc-box font-mono">
             <div class="calc-row">
@@ -1173,7 +1173,7 @@
             </div>
 
             <div class="action-directive-box" id="alert-directive">
-              <strong>MANDATORY EVACUATION:</strong> Immediate evacuation of all vulnerable populations living in kutcha structures within the 5 km threat corridor. Deploy NDRF swift-water rescue equipment at designated block shelters.
+              <strong>MANDATORY EVACUATION:</strong> Immediate evacuation of all vulnerable residents living in kutcha structures within the 5 km threat corridor. Deploy NDRF swift-water rescue equipment at designated block shelters.
             </div>
 
             <!-- SLOSH Storm Surge Assessment Box -->
@@ -1375,7 +1375,7 @@
                   <strong class="text-green font-mono">0.0224 (2.2%)</strong>
                 </div>
                 <div class="geo-footer-note">
-                  Geometric area comparison: 78.54 km² circle vs ~3,500 km² district footprint. Selective BTS geofencing targets towers within the 5 km corridor.
+                  Geometric area comparison: 78.54 km² circle vs ~3,500 km² district footprint. Selective geofencing targets the 5 km threat corridor.
                 </div>
               </div>
             </div>
@@ -1391,7 +1391,7 @@
       <div class="panel-header-bar">
         <div class="panel-title-text">
           <h2>Medium-Range (3- to 10-Day) Ensemble Outlook &amp; Atmospheric Chaos</h2>
-          <span class="panel-subtitle">Multi-member trajectory dispersion (NCMRWF NEPS-G 12km) and probability-weighted landfall impact corridor</span>
+          <span class="panel-subtitle">Multi-member trajectory dispersion (SIMULATED/PARAMETRIC 10-member ensemble; Target Architecture: NCMRWF NEPS-G 12km) and probability-weighted landfall impact corridor</span>
         </div>
         <div class="lead-time-filter-group">
           <span class="filter-label">Lead Time:</span>
@@ -1433,7 +1433,7 @@
               <span class="section-title">10-Member Ensemble Trajectory Fan &amp; Cone of Uncertainty</span>
             </div>
             <div class="font-mono text-dim" style="font-size: 0.72rem;">
-              NCMRWF NEPS-G 12 km Perturbations &bull; T+24h to T+240h
+              SIMULATED / PARAMETRIC Ensemble &bull; T+24h to T+240h (Target Architecture: NCMRWF NEPS-G 12km)
             </div>
           </div>
           <div class="ensemble-map-wrapper">
@@ -1483,7 +1483,7 @@
           <div class="intel-card">
             <div class="intel-card-header">
               <span class="section-title" style="font-size: 0.85rem;"><i data-lucide="users"></i> 10-Member EPS Roster</span>
-              <span class="font-mono text-dim" style="font-size: 0.7rem;">NEPS-G Runs</span>
+              <span class="font-mono text-dim" style="font-size: 0.7rem;">Simulated Members</span>
             </div>
             <div class="member-roster-scroll">
               <table class="member-roster-table font-mono" id="member-roster-table">
@@ -2053,8 +2053,8 @@
             </div>
             <div class="mpi-metrics-list font-mono text-xs">
               <div class="m-row"><span>Quadratic Surge Velocity Scaling:</span> <strong>&Delta;S &sim; (V<sub>pert</sub> / V<sub>base</sub>)&sup2;</strong></div>
-              <div class="m-row"><span>Population in Inundation Zone:</span> <strong id="res-pop-total">4.20 Million</strong></div>
-              <div class="m-row"><span>Additional Exposed Population:</span> <strong class="text-amber" id="res-pop-delta">+0</strong></div>
+              <div class="m-row"><span>Illustrative Baseline Inundation Exposure:</span> <strong id="res-pop-total">Synthetic Index</strong></div>
+              <div class="m-row"><span>Additional Perturbed Exposure:</span> <strong class="text-amber" id="res-pop-delta">+0</strong></div>
               <div class="m-row"><span>Evacuation Mandate:</span> <strong id="res-evac-mandate">Red Alert (Sector 1 to 4)</strong></div>
             </div>
           </div>
@@ -2097,7 +2097,7 @@
           <span class="broadcast-tag font-mono">NDMA SACHET GATEWAY &bull; 3GPP TS 23.041 CELL BROADCAST SERVICE</span>
           <h2 class="broadcast-title"><i data-lucide="radio"></i> Emergency Siren &amp; Spoken Voice Cell Broadcast Dispatcher</h2>
           <div class="broadcast-sub-info font-mono">
-            Direct Telecom BTS Tower Injection &bull; Sector D-4 (Bengal/Odisha Littoral) &bull; Zero Delay Push
+            Simulated Emergency Cell Broadcast &bull; Sector D-4 (Bengal/Odisha Littoral) &bull; Protocol Demonstration
           </div>
         </div>
         <button class="btn-close-modal" id="btn-close-cell-broadcast">&times;</button>
@@ -2107,23 +2107,23 @@
         <!-- Top Status Banner -->
         <div class="broadcast-status-card">
           <div class="bts-metric">
-            <span class="bts-num font-mono text-cyan" id="cb-towers-count">4,820</span>
-            <span class="bts-lbl">Target BTS Towers</span>
+            <span class="bts-num font-mono text-cyan" id="cb-towers-count">Sector D-4</span>
+            <span class="bts-lbl">Target Coastal Sector</span>
           </div>
           <div class="bts-divider"></div>
           <div class="bts-metric">
-            <span class="bts-num font-mono text-amber" id="cb-pop-count">4.28M</span>
-            <span class="bts-lbl">Population in Envelope</span>
+            <span class="bts-num font-mono text-amber" id="cb-pop-count">5.0 km</span>
+            <span class="bts-lbl">Threat Corridor Radius</span>
           </div>
           <div class="bts-divider"></div>
           <div class="bts-metric">
-            <span class="bts-num font-mono text-emerald" id="cb-ack-pct">98.6%</span>
-            <span class="bts-lbl">BTS Handshake Rate</span>
+            <span class="bts-num font-mono text-emerald" id="cb-ack-pct">3GPP CBS</span>
+            <span class="bts-lbl">Transmission Protocol</span>
           </div>
           <div class="bts-divider"></div>
           <div class="bts-metric">
             <span class="bts-num font-mono text-rose" id="cb-latency-val">340ms</span>
-            <span class="bts-lbl">Propagation Latency</span>
+            <span class="bts-lbl">Simulated Latency</span>
           </div>
         </div>
 
@@ -2201,13 +2201,13 @@
 
             <div class="broadcast-action-box">
               <button class="btn-dispatch-towers" id="btn-dispatch-towers">
-                <i data-lucide="zap"></i> Dispatch Cell Broadcast to 4,820 Towers
+                <i data-lucide="zap"></i> Dispatch Simulated Cell Broadcast (Sector D-4)
               </button>
               <div class="broadcast-progress-bar" id="cb-progress-wrap" style="display: none;">
                 <div class="cb-progress-fill" id="cb-progress-fill"></div>
               </div>
               <div class="dispatch-result-banner font-mono text-xs" id="cb-result-banner" style="display: none;">
-                <i data-lucide="check-circle"></i> Cell Broadcast Transmitted to 4,820 Towers &bull; 98.6% Handshake Confirmed
+                <i data-lucide="check-circle"></i> Cell Broadcast Simulated Dispatch &bull; 3GPP TS 23.041 CBS Protocol Validated
               </div>
             </div>
 

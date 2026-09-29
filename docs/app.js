@@ -7569,7 +7569,7 @@ function computeLocalAlert(lat, lon, locName) {
       tier = "SEVERE / EVACUATION DIRECTIVE";
       severity = "Catastrophic";
       badgeColor = "#ef4444";
-      action = `MANDATORY EVACUATION: Eye wall gale (${resolvedWind} km/h, gust ${gustP90} km/h) active within ${Math.round(distKm)} km of eye. Immediate evacuation of vulnerable structures within 5 km. Move population to cyclone relief shelters.`;
+      action = `MANDATORY EVACUATION: Eye wall gale (${resolvedWind} km/h, gust ${gustP90} km/h) active within ${Math.round(distKm)} km of eye. Immediate evacuation of vulnerable structures within 5 km. Move residents to cyclone relief shelters.`;
     } else if (gustP90 >= 62.0 || distKm <= 140.0) {
       tier = "HIGH WARNING (LIFE THREATENING)";
       severity = "Severe";
@@ -8767,9 +8767,9 @@ function updateCellBroadcastUI(data) {
   const elSec = document.getElementById("cb-target-sec");
   const elCap = document.getElementById("cb-cap-xml-preview");
 
-  if (elTowers) elTowers.textContent = data.active_bts_towers ? data.active_bts_towers.toLocaleString() : "4,820";
-  if (elPop) elPop.textContent = `${data.population_at_risk_millions}M`;
-  if (elAck) elAck.textContent = `${data.bts_acknowledgment_pct}%`;
+  if (elTowers) elTowers.textContent = data.target_sector ? "Sector D-4" : "Sector D-4";
+  if (elPop) elPop.textContent = "5.0 km";
+  if (elAck) elAck.textContent = "3GPP CBS";
   if (elSec) elSec.textContent = data.target_sector;
   if (elCap) elCap.textContent = data.cap_xml;
 

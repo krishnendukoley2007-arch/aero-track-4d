@@ -72,7 +72,7 @@ AERO-TRACK 4D delivers an automated, physics-informed hybrid AI pipeline structu
 ### 1. Stage 1: Spherical Geodesic Anomaly Propagation Tracker
 - **Spherical True Icosahedral Mesh**: Eliminates geographic distortion caused by processing the spherical Earth on flat 2D pixel grids by mapping NCMRWF 12 km ensemble grids directly onto a true icosahedral geodesic subdivision mesh ($V=269$ nodes, $E=742$ edges, normalized cell area variance = $0.439\% < 5\%$).
 - **Trainable Graph Attention Network (GAT)**:
-  Ingests atmospheric state variables $(u, v, \text{mslp}, t_{2\text{m}})$ and evaluates multi-head attention weights across spherical geodesic links:
+  GAT architecture used for inference (`src/spherical_gnn.py:TrainableSphericalGAT`, 4,929 parameters); fixed checkpoint present (`models/gat_tracker_amphan.pt`); training procedure/provenance is not contained in this repository, so no claim is made about training on Amphan. Evaluates multi-head attention weights across spherical geodesic links:
   $$\alpha_{ij} = \frac{\exp(\text{LeakyReLU}(a^T [Wh_i \parallel Wh_j]))}{\sum_{k \in \mathcal{N}(i)} \exp(\text{LeakyReLU}(a^T [Wh_i \parallel Wh_k]))}$$
 - **Kalman Filter + Hungarian Assignment**:
   Tracks moving vortex anomalies across forecast steps using a spherical constant-velocity Kalman filter matched via Hungarian algorithm (`scipy.optimize.linear_sum_assignment`), achieving 22.7 km mean track error on held-out test steps (36.6 km Step 5 Peak, 8.7 km Step 10 Landfall).
@@ -252,7 +252,7 @@ This script is structured around the 5 persistent views. Follow this exact flow 
 ### ⏱️ Minute 4:00 – 4:45 // View 5: Medium-Range Outlook (EPS Cone of Uncertainty & Chaos)
 - **What to show**: Click **"Medium-Range Outlook"** in the top navigation.
 - **The Talking Point**:
-  > *"Problem Statement 26078 explicitly emphasizes 3-to-10 day forecasting under atmospheric chaos. In this medium range, single deterministic tracks diverge. Our Stage 1 & Stage 2 pipeline feeds a 10-member calibrated Ensemble Prediction System (EPS). As lead time advances from Day 3 to Day 10, the cone of uncertainty expands according to chaotic error growth ($\sigma(t) \sim t^{1.2}$). The ensemble spread is calibrated directly against our stochastic CorrDiff diffusion model."*
+  > *"Problem Statement 26078 explicitly emphasizes 3-to-10 day forecasting under atmospheric chaos. In this medium range, single deterministic tracks diverge. Our prototype demonstrates a 10-member ensemble (SIMULATED/PARAMETRIC chaos dispersion model; target operational architecture is real NCMRWF NEPS-G 12km ingestion in Phase 2). As lead time advances from Day 3 to Day 10, the cone of uncertainty expands according to chaotic error growth ($\sigma(t) \sim t^{1.2}$). The ensemble spread is calibrated directly against our stochastic CorrDiff diffusion model."*
 - **Action**:
   - Filter by Lead Time (**All / 3-5 Days / 6-7 Days / 8-10 Days**).
   - Point out the **Sector Strike Probability Breakdown**: **65% West Bengal**, **25% Odisha Coast**, **10% Bangladesh Delta**.

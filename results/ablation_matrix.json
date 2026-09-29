@@ -1,0 +1,39 @@
+{
+  "experiment": "Phase 6 Downscaling Ablation Study",
+  "held_out_test_storm": "amphan_2020",
+  "ablations": [
+    {
+      "configuration": "U-Net Baseline (L2 only)",
+      "lambda_mse": 1.0,
+      "lambda_l1": 0.0,
+      "lambda_tail": 0.0,
+      "lambda_div": 0.0,
+      "lambda_mfc": 0.0,
+      "peak_recovery_pct": 76.5,
+      "psd_high_k_ratio": 0.0267,
+      "mfc_alignment": 0.73
+    },
+    {
+      "configuration": "CorrDiff (No Physics / No Tail Loss)",
+      "lambda_mse": 1.0,
+      "lambda_l1": 0.0,
+      "lambda_tail": 0.0,
+      "lambda_div": 0.0,
+      "lambda_mfc": 0.0,
+      "peak_recovery_pct": 65.9,
+      "psd_high_k_ratio": 0.0218,
+      "mfc_alignment": 0.764
+    },
+    {
+      "configuration": "CorrDiff Proposed (Physics + Tail Loss)",
+      "lambda_mse": 1.0,
+      "lambda_l1": 0.3,
+      "lambda_tail": 0.25,
+      "lambda_div": 0.15,
+      "lambda_mfc": 0.2,
+      "peak_recovery_pct": 80.4,
+      "psd_high_k_ratio": 0.017,
+      "mfc_alignment": 0.692
+    }
+  ]
+}

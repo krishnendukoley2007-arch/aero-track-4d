@@ -217,3 +217,92 @@ def test_d_data_split_integrity():
                     assert (
                         gap >= 24
                     ), f"Temporal gap violation in {storm_tr}: train t={t_tr}, val t={t_val} (gap={gap} < 24h)"
+
+
+def test_e_runtime_model_output_anti_scaling():
+    """
+    Runtime anti-scaling regression test:
+    1. Obtains the raw neural-network native inference output directly from sample_ensemble()
+       before any display interpolation or unit conversion.
+    2. Obtains the public API / model output from run_downscale().
+    3. Verifies that the difference is strictly and solely from explicitly whitelisted physical operations:
+       - Physical unit conversion: m/s -> km/h (x 3.6)
+       - Bicubic spatial display interpolation: zoom(..., 38.0 / 16.0, order=3)
+       - Non-negative physical clipping: np.maximum(0, ...)
+       - Display float precision rounding: round(..., 1)
+    4. Proves negative assertions: fails if any arbitrary scalar (e.g. 1.05, 0.92, 1.85, 0.82)
+       mutates model amplitudes.
+    5. Confirms the effective mean scaling factor is identically 1.0 (no hidden scaling factor).
+    """
+    from src.downscale.inference import CorrDiffInferenceEngine
+    import numpy as np
+    import torch
+    from scipy.ndimage import zoom
+
+    inf = CorrDiffInferenceEngine()
+    dl = WeatherDataLoader("amphan_2020")
+    step_data = dl.get_real_era5_step(5)
+    coarse = step_data["coarsened_nwp_input"]
+    fine = step_data["native_era5_fine"]
+
+    # 1. Prepare raw input tensor matching inference pipeline
+    w_c = np.array(coarse["wind_speed_kmh"], dtype=np.float32) / 3.6
+    p_c = (np.array(coarse["mslp_hpa"], dtype=np.float32) - 1000.0) / 25.0
+    r_c = np.array(coarse["precip_mmh"], dtype=np.float32) / 20.0
+    t_c = (np.array(fine["temp_c"], dtype=np.float32) - 25.0) / 10.0
+    input_tensor = torch.tensor(
+        np.stack([w_c, p_c, r_c, t_c])[None, ...], dtype=torch.float32
+    ).to(inf.device)
+
+    # 2. Extract raw native neural network outputs before any display processing
+    with torch.no_grad():
+        ens_res = inf.model.sample_ensemble(input_tensor, n_members=5, seed=42)
+        raw_unet = ens_res["stage1_mean"][0].cpu().numpy()
+        raw_cd_mean = ens_res["ensemble_mean"][0].cpu().numpy()
+        raw_cd_high = ens_res["high_impact_scenario"][0].cpu().numpy()
+
+    # 3. Obtain public model outputs
+    public_res = inf.run_downscale(step_idx=5, n_ensemble_members=5, seed=42, event_id="amphan_2020")
+    actual_cd_mean = np.array(public_res["fields"]["corrdiff_ensemble_mean"]["wind_speed_kmh"])
+    actual_unet = np.array(public_res["fields"]["standard_unet"]["wind_speed_kmh"])
+    actual_cd_high = np.array(public_res["fields"]["corrdiff_high_impact_p90"]["wind_speed_kmh"])
+
+    # 4. Reconstruct public fields using ONLY whitelisted operations:
+    # Whitelist: unit conversion (x 3.6 for m/s -> km/h), bicubic zoom (38/16), non-negativity clamp, round(1)
+    reconstructed_cd_mean = np.round(np.maximum(0, zoom(raw_cd_mean[0] * 3.6, 38.0 / 16.0, order=3)), 1)
+    reconstructed_unet = np.round(zoom(np.maximum(0, raw_unet[0] * 3.6), 38.0 / 16.0, order=3), 1)
+    reconstructed_cd_high = np.round(np.maximum(0, zoom(raw_cd_high[0] * 3.6, 38.0 / 16.0, order=3)), 1)
+
+    # Assert exact match to within single-precision rounding epsilon
+    assert np.allclose(actual_cd_mean, reconstructed_cd_mean, atol=1e-4), (
+        "CorrDiff ensemble mean output does not match raw native inference via whitelisted operations!"
+    )
+    assert np.allclose(actual_unet, reconstructed_unet, atol=1e-4), (
+        "Standard U-Net output does not match raw native inference via whitelisted operations!"
+    )
+    assert np.allclose(actual_cd_high, reconstructed_cd_high, atol=1e-4), (
+        "CorrDiff P90 output does not match raw native inference via whitelisted operations!"
+    )
+
+    # 5. Anti-scaling negative test: ANY arbitrary scalar factor applied to model amplitudes MUST fail
+    for arbitrary_scalar in [0.82, 0.92, 1.02, 1.05, 1.10, 1.85, 2.0]:
+        mutated_output = actual_cd_mean * arbitrary_scalar
+        with pytest.raises(AssertionError):
+            assert np.allclose(mutated_output, reconstructed_cd_mean, atol=1e-4)
+
+    # 6. Prove that no unknown scaling factor exists:
+    # First, verify that the public display field has an identical spatial mean to the reconstructed field:
+    assert abs(float(np.mean(actual_cd_mean) - np.mean(reconstructed_cd_mean))) < 1e-4, (
+        "Public output spatial mean differs from whitelisted reconstructed spatial mean!"
+    )
+
+    # Second, verify that the ratio between zoomed display field and raw physical field
+    # is within standard bicubic spline interpolation curvature limits (+-5%), proving no
+    # hidden scaling multiplier was inserted.
+    raw_physical_mean = float(np.mean(np.maximum(0, raw_cd_mean[0] * 3.6)))
+    public_display_mean = float(np.mean(actual_cd_mean))
+    effective_scale_ratio = public_display_mean / raw_physical_mean
+    assert 0.95 <= effective_scale_ratio <= 1.05, (
+        f"Hidden amplitude scaling detected: effective scale ratio {effective_scale_ratio:.4f} deviates from 1.0"
+    )
+

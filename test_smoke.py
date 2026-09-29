@@ -54,7 +54,12 @@ ENDPOINTS = [
     ("GET", "/api/satellite/insat3dr-thermal-ir?step_index=5", ["satellite", "dvorak", "enhancement_curve", "radial_cloud_bands"]),
     ("GET", "/api/alert/cell-broadcast?lat=21.62&lon=87.51&lang=en", ["broadcast_id", "target_sector", "active_bts_towers", "script", "cap_xml"]),
     ("GET", "/api/downscale/diffusion-trajectory", ["model_architecture", "total_diffusion_timesteps", "frames"]),
+    ("GET", "/api/efi/true-ensemble?lead_hours=72&step_index=5", ["efi_type", "ensemble_members", "lead_hours", "efi_peak", "provenance"]),
+    ("GET", "/api/medium-range/forecast?lat=21.62&lon=87.51&lead_hours=72", ["lead_hours", "quantiles", "exceedance_probabilities", "uncertainty_attribution", "provenance"]),
+    ("GET", "/api/alert/model-polygon?step_index=5", ["event_type", "severity", "polygon_source", "geojson", "contour_coordinates_lonlat"]),
 ]
+
+
 
 
 def run_tests():

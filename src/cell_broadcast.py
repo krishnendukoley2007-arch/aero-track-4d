@@ -21,7 +21,6 @@ class CellBroadcastEngine:
             "name": "Bay of Bengal Coastal Sector D-4",
             "districts": ["Kendrapara", "Jagatsinghpur", "Bhadrak", "Balasore", "East Midnapore", "South 24 Parganas"],
             "bts_towers_count": 4820,
-            "population_at_risk_millions": 4.28,
             "telecom_operators": ["Jio 5G/4G (42%)", "Airtel (36%)", "BSNL (14%)", "Vi (8%)"],
             "handshake_latency_ms": 340
         },
@@ -29,7 +28,6 @@ class CellBroadcastEngine:
             "name": "Andhra Coastal Sector S-2",
             "districts": ["Visakhapatnam", "East Godavari", "West Godavari", "Krishna"],
             "bts_towers_count": 3950,
-            "population_at_risk_millions": 3.65,
             "telecom_operators": ["Jio 5G/4G (44%)", "Airtel (38%)", "BSNL (11%)", "Vi (7%)"],
             "handshake_latency_ms": 310
         }
@@ -91,7 +89,6 @@ class CellBroadcastEngine:
             "target_sector": sector["name"],
             "target_districts": sector["districts"],
             "active_bts_towers": sector["bts_towers_count"],
-            "population_at_risk_millions": sector["population_at_risk_millions"],
             "telecom_operators": sector["telecom_operators"],
             "transmission_protocol": "3GPP TS 23.041 Cell Broadcast Service (CBS)",
             "oasis_cap_version": "CAP v1.2 Compliant",
@@ -107,5 +104,15 @@ class CellBroadcastEngine:
                 "decibel_rating_at_source_db": 130
             },
             "status": "TRANSMISSION_CONFIRMED",
-            "bts_acknowledgment_pct": 98.6
+            "bts_acknowledgment_pct": 98.6,
+            "provenance": {
+                "data_source_type": "SIMULATED",
+                "data_source": "NDMA SACHET / 3GPP TS 23.041 CBS Protocol Simulation",
+                "forecast_status": "PROXY",
+                "model_status": "SIMULATED",
+                "verification_status": "SPECIFICATION_MOCK",
+                "module_type": "EXTERNAL_INTEGRATION_PLACEHOLDER",
+                "disclaimer": "Simulated telecom transmission parameters for downstream emergency broadcast demonstration",
+                "seed": 42
+            }
         }
