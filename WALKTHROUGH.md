@@ -117,7 +117,7 @@ A technically rigorous evaluation reveals **two distinct gaps**, each with a dis
 ```
 [Coarse NWP: ~53-65 km/h] ──────────┐
                                      │ GAP 1: Spectral Smoothing Gap
-[Standard U-Net: ~46-53 km/h] ──────┤ ➔ ADDRESSED BY CORRDIFF (Recovers 46.5–53.1 km/h; beats U-Net mean)
+[Standard U-Net: ~46-53 km/h] ──────┤ ➔ CorrDiff ensemble mean (53.1 km/h) ties with U-Net (53.3 km/h); P90 (55.2 km/h) captures tail
                                      │
 [Native ERA5 Target: 92-111 km/h] ──┘
                                      │
@@ -129,9 +129,9 @@ A technically rigorous evaluation reveals **two distinct gaps**, each with a dis
 [True Observed Eyewall: 138-222 km/h (IBTrACS / IMD)]
 ```
 
-#### Gap 1: The Spectral Smoothing Gap (Coarse NWP → Native ERA5) — **Addressed by CorrDiff**
+#### Gap 1: The Spectral Smoothing Gap (Coarse NWP → Native ERA5) — **Evaluated via CorrDiff**
 - **The Problem**: Standard deep learning models (CNNs and U-Nets) optimizing Mean Squared Error (MSE / L2 loss) predict the conditional mean $\mathbb{E}[Y | X]$. This mathematical averaging washes out extreme variance, causing standard U-Net peak wind to drop to **46.5–53.3 km/h** (over-smoothed below native ERA5 target).
-- **The Demonstration**: On the held-out peak super cyclone step, CorrDiff stochastically adds high-wavenumber energy (+0.1 km/h over U-Net conditional mean), achieving 53.1 km/h (48.0% of ERA5 target). True 5 km-native downscaling targeting >75% recovery requires paired IMDAA 12 km → 5 km training.
+- **The Demonstration**: CorrDiff ensemble mean (53.1 km/h) is statistically tied with / slightly below Standard U-Net (53.3 km/h); the difference is smaller than model noise. The P90 realization (55.2 km/h) captures more of the tail than the mean does, without claiming the mean "beats" anything. Model inference runs on a 16x16 (~110 km) grid; the displayed 38x38 / 5 km output is bicubic display interpolation (scipy.ndimage.zoom), not native 5 km model resolution. Native paired-resolution training is scoped as future work.
 
 #### Gap 2: The Global Reanalysis Resolution Ceiling (Native ERA5 → IBTrACS Ground Truth) — **Known Physical Ceiling**
 - **The Reality**: Why does native ERA5 only report 92–111 km/h when IBTrACS recorded 138–222 km/h? This is a widely documented, fundamental resolution limitation of global reanalysis products. At ~25–31 km native horizontal spacing, ERA5's grid box averages out the extreme pressure gradients confined within a cyclone's 15–25 km Radius of Maximum Wind (RMW). The model was trained to reconstruct ERA5, and thus inherits ERA5's physical intensity ceiling.
@@ -227,13 +227,13 @@ This script is structured around the 5 persistent views. Follow this exact flow 
 - **Action**:
   - Grab the **Interactive Draggable Swipe Divider** and slide it left and right:
     - Left side: Coarse NWP input showing the filtered 63.4 km/h wind field.
-    - Right side: CorrDiff diffusion generating the 53.1 km/h eyewall prediction (beats U-Net 53.3 km/h).
+    - Right side: CorrDiff diffusion generating the 53.1 km/h eyewall prediction (statistically tied with / slightly below Standard U-Net 53.3 km/h; difference < model noise; P90 captures tail at 55.2 km/h).
   - Toggle **Realizations**: Show **Ensemble Mean (53.1 km/h)**, **P90 High-Impact Scenario (55.2 km/h)**, and **Diffusion Spread**.
   - Point to the **Physics Conservation Diagnostic Cards**:
     - Moisture Flux Convergence (MFC): **39.0 / 100 diagnostic conformity**.
     - Wind Field Divergence: **$3.2 \times 10^{-5}\text{ s}^{-1}$**, kinematic audit.
   - Present the **Two-Gap Honesty Diagram**:
-    > *"We are completely honest about our numbers: CorrDiff addresses Gap 1 (+0.1 km/h gain over U-Net on prototype 16×16 grid). Gap 2 (between 110.5 km/h ERA5 and 222.2 km/h IBTrACS in-situ eyewall) is a known physical limitation of global 25 km reanalyses. True 5 km-native downscaling requires training on NCMRWF's 12 km regional IMDAA dataset (Phase 2 & Phase 4)."*
+    > *"We are completely honest about our numbers: CorrDiff ensemble mean (53.1 km/h) is statistically tied with / slightly below Standard U-Net (53.3 km/h), with the difference smaller than model noise, while P90 (55.2 km/h) captures more of the tail. Gap 2 (between 110.5 km/h ERA5 and 222.2 km/h IBTrACS in-situ eyewall) is a known physical limitation of global 25 km reanalyses. True 5 km-native downscaling requires training on NCMRWF's 12 km regional IMDAA dataset (Phase 2 & Phase 4)."*
 
 ### ⏱️ Minute 3:00 – 4:00 // View 4: Alert & Bulletin (Societal Impact & Real Census Demographics)
 - **What to show**: Click **"Alert & Bulletin"** in the top navigation.

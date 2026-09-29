@@ -53,12 +53,10 @@ Standard U-Net model output on Cyclone Amphan (May 18, 2020 — Peak Intensity):
   ERA5 Ground Truth:   ██████████████████████████████  110.5 km/h
   Coarse NWP Input:    ████████████████                  63.4 km/h  <- suppressed by grid
   Standard U-Net:      ████████████                      53.3 km/h  <- smoothed conditional mean
-  AERO-TRACK CorrDiff: ██████████████                    53.1 km/h  <- beats U-Net (P90: 54.6 km/h)
+  AERO-TRACK CorrDiff: ████████████                      53.1 km/h  <- tied with U-Net mean; P90 captures tail: 55.2 km/h
 ```
 
-This "spectral smoothing" problem means that when a Category 5 cyclone is bearing down on the coast, standard ML models tell forecasters it looks like a Category 2. **People die from that gap.**
-
-AERO-TRACK 4D solves it using physics-informed generative diffusion — recovering the true extreme peak amplitudes, not smoothing them away.
+This "spectral smoothing" problem means that when a Category 5 cyclone is bearing down on the coast, standard ML models predict the conditional mean. CorrDiff ensemble mean (53.1 km/h) is statistically tied with / slightly below Standard U-Net (53.3 km/h); the difference is smaller than model noise. The P90 realization (55.2 km/h) captures more of the tail than the mean does.
 
 ---
 
@@ -189,7 +187,7 @@ RAW MULTIVARIABLE 4D ENSEMBLE NWP STREAM (12 km resolution)
 
 ### Measured Performance
 
-> All metrics below are generated directly from active model checkpoints (`models/gat_tracker_amphan.pt` and `models/corrdiff_amphan.pt`) evaluated against real ECMWF ERA5 and NOAA IBTrACS ground truth data, rendered via `scripts/render_readme_tables.py` from `results/audit_metrics.json`.
+> All metrics below are generated directly from active model files (`models/gat_tracker_amphan.pt` [fixed feature-extraction weights (no training script/loss function exists in this repo; functions as a deterministic geometric feature transform, not a learned tracker)] and `models/corrdiff_amphan.pt`) evaluated against real ECMWF ERA5 and NOAA IBTrACS ground truth data, rendered via `scripts/render_readme_tables.py` from `results/audit_metrics.json`.
 >
 > **Evaluation Split & Timestep Disclosure**: Model evaluation uses hourly ECMWF ERA5 reanalysis (168 hourly timesteps from May 15–21, 2020: 142 train samples, 26 test samples in a single-storm, leakage-prone split). The 13 operational evaluation snapshots displayed in the dashboard and API correspond to 6-hourly synoptic observation intervals (00:00, 06:00, 12:00, 18:00 UTC) across the 5-day lifecycle from genesis to landfall.
 
@@ -206,6 +204,8 @@ RAW MULTIVARIABLE 4D ENSEMBLE NWP STREAM (12 km resolution)
 | *IBTrACS In-Situ Peak (Eyewall Core)* | *222.2 km/h* | *—* | *10-min sustained best track (cannot be resolved by 25 km reanalysis)* |
 
 > **Key Finding**: In this same-storm evaluation, both the CorrDiff ensemble mean (53.1 km/h) and Standard U-Net (53.3 km/h) fall below the coarse NWP identity baseline (63.4 km/h) and inverse-attenuation baseline (77.3 km/h). This limitation is systematically diagnosed in `docs/P4_T0_DIAGNOSIS.md`.
+>
+> **Model Resolution & Display Caveat**: Model inference runs on a 16x16 (~110 km) grid; the displayed 38x38 / 5 km output is bicubic display interpolation (scipy.ndimage.zoom), not native 5 km model resolution. Native paired-resolution training is scoped as future work.
 >
 > **Why does ERA5 show 110.5 km/h when IBTrACS records 222 km/h?**  
 > ERA5 is a 25 km global reanalysis grid — it physically cannot resolve the 15 km-wide cyclone eyewall where true peak winds occur. IBTrACS reports 10-minute in-situ winds measured by reconnaissance aircraft and coastal radar directly inside the eyewall. The correct scientific comparison for downscaling from coarse NWP is against the fine reanalysis target (ERA5). Closing that remaining gap requires NCMRWF IMDAA 12 km regional reanalysis and coastal Doppler radar mosaics — documented in the Roadmap.
@@ -333,7 +333,7 @@ Full endpoint list: [`src/api.py`](src/api.py)
 
 ## Test Suite & Reproducibility
 
-All 55 tests pass. Zero warnings.
+26 unit/regression tests pass; 43 live endpoint smoke tests pass (test_smoke.py). Zero warnings.
 
 ```bash
 # Scientific proof tests (~3.5 seconds)
@@ -349,7 +349,7 @@ python test_smoke.py
 | Test | Claim Proven | Result |
 |---|---|---|
 | `test_a_gat_attention.py` | GAT focuses on cyclone, not background noise | Gini 0.778 (storm) vs 0.695 (noise) |
-| `test_b_corrdiff_recovery.py` | CorrDiff beats U-Net on peak amplitude | 53.1 km/h vs 53.3 km/h; CRPS = 16.302 km/h |
+| `test_b_corrdiff_recovery.py` | CorrDiff ensemble mean ties with U-Net (P90 captures tail) | 53.1 km/h vs 53.3 km/h (P90: 55.2 km/h); CRPS = 16.302 km/h |
 | `test_c_efi_approximation.py` | Gaussian Q99/Q90 bound is tight | Max error < 0.6% across 50,000 samples |
 | `test_d_multistorm.py` | Multi-storm evaluation on unseen storms | Fani 45.7% recovery, Yaas 50.4% recovery |
 
@@ -401,7 +401,7 @@ aero-track-4d/
 |   +-- imd_bulletin_generator.py# MoES/IMD bulletin formatter
 |   +-- coastal_districts.py     # Landfall district GeoJSON and alert-corridor geometry
 +-- models/
-|   +-- gat_tracker_amphan.pt    # Trained Stage 1 GNN checkpoint (23 KB)
+|   +-- gat_tracker_amphan.pt    # Fixed feature-extraction weights (no training script/loss in repo; 23 KB)
 |   +-- corrdiff_amphan.pt       # Trained Stage 2 CorrDiff checkpoint (1.5 MB)
 +-- data/
 |   +-- climatology/             # 36-hour ERA5 pre-onset baseline distributions
@@ -435,7 +435,7 @@ aero-track-4d/
 
 ### Implemented and Measured from Real Data
 
-- **Amphan 2020 tracking pipeline** — 13 evaluation steps at 6–12 h synoptic intervals (spanning May 16–21, 2020) from ECMWF ERA5 + NOAA IBTrACS ground truth. The trained GNN checkpoint (`models/gat_tracker_amphan.pt`) runs real inference on every API call.
+- **Amphan 2020 tracking pipeline** — 13 evaluation steps at 6–12 h synoptic intervals (spanning May 16–21, 2020) from ECMWF ERA5 + NOAA IBTrACS ground truth. GNN feature extraction uses fixed feature-extraction weights (`models/gat_tracker_amphan.pt`; no training script/loss function exists in this repo; functions as a deterministic geometric feature transform, not a learned tracker) on every API call.
 - **Held-out evaluation** — Step 5 (May 18, Peak Super Cyclone) and Step 10 (May 20, Landfall) were never seen during training. Both are evaluated out-of-sample.
 - **CorrDiff downscaling** — The trained diffusion checkpoint (`models/corrdiff_amphan.pt`) runs real PyTorch inference at **16×16 grid resolution** on each API call. The 38×38 display output is the model prediction bicubically interpolated to the 5 km display grid. See Prototype Limitations below.
 - **Multi-storm generalization** — Fani 2019 and Yaas 2021 use ERA5-equivalent synthetic data generated from the same physical storm parameters. Weights were not retrained.

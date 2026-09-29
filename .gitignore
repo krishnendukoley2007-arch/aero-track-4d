@@ -17,3 +17,5 @@ data/raw/era5/
 .ecmwfapirc
 .netrc
 *.key
+ChatGPT/
+*.zip
