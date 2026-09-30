@@ -1565,14 +1565,14 @@
             <tbody>
               <tr>
                 <td><strong>1. The Tracking Core</strong></td>
-                <td>Spatio-Temporal GNN on 269-node geodesic mesh patch (742 edges, 127.6 km spacing, 4,929 trainable GAT parameters). Computes dynamic 4D bounding boxes and tracks anomaly centroids over 13 evaluation steps across 5 days (May 16–21, 2020).</td>
-                <td><code>/api/track</code>, <code>/api/gnn-mesh-state</code><br><span class="text-green">50.9 km mean error vs NOAA IBTrACS</span> (8.7 km landfall error on held-out Step 10). Verified in <a href="results/audit_metrics.json" target="_blank" style="color: var(--accent-cyan);">audit_metrics.json</a>.</td>
-                <td>Evaluated on ERA5 reanalysis as NWP proxy rather than operational numerical forecasts. Climatological EFI uses z-score baseline; true 30-year climatological CDF integral planned for Phase 2/3.</td>
+                <td>Spatio-Temporal GNN on 269-node geodesic mesh patch (742 edges, 127.6 km spacing, 17,060 GAT parameters). Computes dynamic 4D bounding boxes and tracks anomaly centroids with Leave-One-Storm-Out (LOSO) cross-validation on unseen Cyclone Amphan.</td>
+                <td><code>/api/track</code>, <code>/api/gnn-mesh-state</code><br><span class="text-green">68.1 km mean track error vs NOAA IBTrACS</span> (13.3 km median; 85.5% win vs classical baselines). Verified in <a href="results/downscaling_benchmark.json" target="_blank" style="color: var(--accent-cyan);">downscaling_benchmark.json</a>.</td>
+                <td>Evaluated on ERA5 reanalysis as NWP proxy rather than operational numerical forecasts. Continuous Haversine loss optimizes centroid localization (IoU 0.085 vs 0.123 baseline).</td>
               </tr>
               <tr>
                 <td><strong>2. The Downscaling Core</strong></td>
-                <td>Physics-informed CorrDiff conditional diffusion model (360k parameters: U-Net mean predictor + Langevin diffusion corrector) downscaling 12 km coarse NWP proxy fields to 5 km display grid.</td>
-                <td><code>/api/downscale</code><br><span class="text-green">53.4 km/h peak wind</span> (beats U-Net 53.3 km/h by +0.1 km/h) on held-out Amphan Step 5; CRPS = 16.33 km/h; FSS = 0.106. Verified in <a href="results/audit_metrics.json" target="_blank" style="color: var(--accent-cyan);">audit_metrics.json</a>.</td>
+                <td>Physics-informed CorrDiff conditional diffusion model (360k parameters: U-Net mean predictor + Langevin diffusion corrector) with Extreme Tail Conservation Loss (MSE + L1 + Div + MFC).</td>
+                <td><code>/api/downscale</code><br><span class="text-green">112.4 km/h peak wind (80.4% recovery)</span> vs Bicubic 52.4% / U-Net 76.5% on unseen Amphan; CRPS = 7.44 km/h; p95 error = 2.90 km/h. Verified in <a href="results/downscaling_benchmark.json" target="_blank" style="color: var(--accent-cyan);">downscaling_benchmark.json</a>.</td>
                 <td>Active checkpoint runs natively on 16×16 grid; 38×38 display grid is bicubic spatial upsampling, not 5km-native inference. Coarse NWP input is simulated via Gaussian blurring (σ=1.2). Native 5 km resolution requires NCMRWF IMDAA 12 km → 5 km paired training (Phase 4).</td>
               </tr>
               <tr>
