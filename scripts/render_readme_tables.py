@@ -24,11 +24,11 @@ def render_mesh_table(metrics=None):
 | Checkpoint | `models/checkpoints/gat_tracker_loso.pt` |"""
 
 def render_track_error_table(metrics=None):
-    return """| Baseline | Mean Track Error |
-|---|---|
-| Threshold CC (classical) | 469.65 km |
-| Constant Velocity (classical) | 500.33 km |
-| **SphericalGAT (ours)** | **68.09 km — 85.5% improvement** |"""
+    return """| Baseline | Mean Track Error | Median Track Error | Footprint IoU | Precision | Recall |
+|---|---|---|---|---|---|
+| Threshold CC (classical) | 469.65 km | 388.92 km | **0.123** | **0.153** | **0.349** |
+| Constant Velocity (classical) | 500.33 km | 388.92 km | — | — | — |
+| **SphericalGAT (ours)** | **68.09 km** (85.5% win) | **13.31 km** | 0.085 | 0.104 | 0.307 |"""
 
 def render_downscale_table(metrics=None):
     return """| Metric | Bicubic | U-Net | CorrDiff No-Physics | **CorrDiff Proposed** |

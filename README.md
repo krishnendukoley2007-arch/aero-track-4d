@@ -69,11 +69,13 @@ CorrDiff Proposed (ours):       ████████████████
 
 **Result on unseen Amphan 2020:**
 
-| Baseline | Mean Track Error |
-|---|---|
-| Threshold CC (classical) | 469.65 km |
-| Constant Velocity (classical) | 500.33 km |
-| **SphericalGAT (ours)** | **68.09 km — 85.5% improvement** |
+| Baseline | Mean Track Error | Median Track Error | Footprint IoU | Precision | Recall |
+|---|---|---|---|---|---|
+| Threshold CC (classical) | 469.65 km | 388.92 km | **0.123** | **0.153** | **0.349** |
+| Constant Velocity (classical) | 500.33 km | 388.92 km | — | — | — |
+| **SphericalGAT (ours)** | **68.09 km** (85.5% win) | **13.31 km** | 0.085 | 0.104 | 0.307 |
+
+> **Honest Trade-off & Mixed Result:** SphericalGAT delivers an **85.5% reduction in mean track error** (68.09 km vs 469.65 km centroid error) on held-out Amphan, but exhibits lower footprint segmentation IoU (0.085 vs 0.123 for threshold CC) because the GAT was explicitly trained with Haversine loss for continuous centroid regression rather than discrete spatial footprint segmentation.
 
 ### 2. PhysicsNeMoCorrDiff — Diffusion Downscaler
 
