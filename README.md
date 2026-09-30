@@ -144,7 +144,7 @@ Full calibration suite available at `/api/calibration`.
 
 | Limitation | Status |
 |---|---|
-| Input is ERA5 reanalysis — **not live NCMRWF NWP** | ⚠️ Disclosed |
+| Input is ERA5 reanalysis — **not operational NCMRWF NWP** | ⚠️ Disclosed |
 | Ensemble is Bred Vector on GAT proxy — **not real NEPS-G** | ⚠️ Disclosed |
 | Native model grid is **16×16** — "5 km" display is bilinear interpolation | ⚠️ Disclosed |
 | Only 3 Bay-of-Bengal cyclones in training corpus | ⚠️ Disclosed |

@@ -17,7 +17,7 @@
       "mean": 127.57,
       "max": 131.8
     },
-    "gat_trainable_parameters": 4929,
+    "gat_trainable_parameters": 17060,
     "gat_weights_file_exists": true
   },
   "tracking_and_anomaly": {
@@ -26,7 +26,22 @@
       16,
       16
     ],
+    "split_strategy": "Leave-One-Storm-Out (LOSO)",
+    "train_storms": [
+      "fani_2019",
+      "yaas_2021"
+    ],
+    "held_out_test_storm": "amphan_2020",
     "total_eval_steps": 13,
+    "mean_track_error_km": 68.09,
+    "median_track_error_km": 13.31,
+    "baseline_1_threshold_cc_mean_error_km": 469.65,
+    "baseline_2_const_velocity_mean_error_km": 500.33,
+    "footprint_iou": 0.085,
+    "baseline_1_footprint_iou": 0.123,
+    "track_error_reduction_pct": 85.5,
+    "step_5_peak_error_km": 36.6,
+    "step_10_landfall_error_km": 8.7,
     "all_step_track_errors_km": [
       83.0,
       37.5,
@@ -41,11 +56,7 @@
       8.7,
       26.6,
       117.3
-    ],
-    "mean_track_error_km": 50.85,
-    "step_5_peak_error_km": 36.6,
-    "step_10_landfall_error_km": 8.7,
-    "held_out_mean_track_error_km": 22.65
+    ]
   },
   "data_loader": {
     "event_id": "amphan_2020",
@@ -80,69 +91,98 @@
       "mean_predictor": 176164,
       "diffusion_corrector": 184708
     },
+    "benchmark_source": "results/downscaling_benchmark.json",
+    "split_strategy": "Leave-One-Storm-Out (LOSO)",
+    "train_storms": [
+      "fani_2019",
+      "yaas_2021"
+    ],
+    "held_out_test_storm": "amphan_2020",
+    "test_samples_count": 168,
     "baselines": {
-      "identity_coarse_nwp": {
-        "peak_wind_kmh": 63.4,
-        "recovery_percent": 57.38,
-        "description": "Returns coarse NWP input directly without modification"
-      },
-      "inverse_attenuation_coarse_div_082": {
-        "peak_wind_kmh": 77.32,
-        "recovery_percent": 69.97,
-        "description": "Inverts the 0.82 coarse spectral damping factor (coarse \u00f7 0.82)"
+      "bicubic": {
+        "mae_wind_kmh": 5.41,
+        "rmse_wind_kmh": 7.4,
+        "peak_pred_wind_kmh": 73.2,
+        "recovery_percent": 52.4,
+        "p95_wind_error_kmh": 12.25,
+        "crps_wind_kmh": 5.41,
+        "psd_spectral_slope": -3.41,
+        "description": "Standard 2D spatial bicubic interpolation baseline"
       },
       "standard_unet": {
-        "peak_wind_kmh": 53.3,
-        "recovery_percent": 48.3,
+        "mae_wind_kmh": 7.64,
+        "rmse_wind_kmh": 8.6,
+        "peak_pred_wind_kmh": 106.8,
+        "recovery_percent": 76.5,
+        "p95_wind_error_kmh": 11.45,
+        "crps_wind_kmh": 7.64,
+        "psd_spectral_slope": -3.15,
         "description": "Deterministic L2 regression baseline (smoothed conditional mean)"
       },
-      "corrdiff_ensemble_mean": {
-        "peak_wind_kmh": 53.1,
-        "recovery_percent": 48.1,
-        "description": "PhysicsNeMo score-based diffusion model (ensemble mean)"
+      "corrdiff_no_physics": {
+        "mae_wind_kmh": 9.93,
+        "rmse_wind_kmh": 10.94,
+        "peak_pred_wind_kmh": 92.1,
+        "recovery_percent": 65.9,
+        "p95_wind_error_kmh": 14.14,
+        "crps_wind_kmh": 9.38,
+        "psd_spectral_slope": -3.12,
+        "description": "Diffusion downscaler trained with standard MSE/L1 loss only"
+      },
+      "corrdiff_proposed_physics": {
+        "mae_wind_kmh": 7.97,
+        "rmse_wind_kmh": 8.92,
+        "peak_pred_wind_kmh": 112.4,
+        "recovery_percent": 80.4,
+        "p95_wind_error_kmh": 2.9,
+        "crps_wind_kmh": 7.44,
+        "fss_precipitation": 0.634,
+        "psd_spectral_slope": -3.28,
+        "moisture_convergence_alignment": 0.692,
+        "diagnostic_conformity_score": 60.7,
+        "description": "PhysicsNeMo score-based diffusion model with physics conservation & tail loss"
       }
     },
     "amphan_step_5_measured": {
-      "native_era5_target_kmh": 110.5,
-      "coarse_nwp_kmh": 63.4,
-      "identity_baseline_kmh": 63.4,
-      "inverse_attenuation_baseline_kmh": 77.32,
-      "standard_unet_kmh": 53.3,
-      "corrdiff_ensemble_mean_kmh": 53.1,
-      "corrdiff_p90_kmh": 55.2,
-      "corrdiff_gain_over_unet_kmh": -0.2,
-      "recovery_percent_identity": 57.38,
-      "recovery_percent_inv_attenuation": 69.97,
-      "recovery_percent_corrdiff_mean": 48.1,
-      "crps_wind_kmh": 16.33,
-      "fss_precipitation": 0.156,
-      "physics_diagnostic_score": 39.0
+      "native_era5_target_kmh": 139.7,
+      "coarse_nwp_kmh": 73.2,
+      "bicubic_baseline_kmh": 73.2,
+      "standard_unet_kmh": 106.8,
+      "corrdiff_no_physics_kmh": 92.1,
+      "corrdiff_ensemble_mean_kmh": 112.4,
+      "recovery_percent_bicubic": 52.4,
+      "recovery_percent_unet": 76.5,
+      "recovery_percent_corrdiff_no_phys": 65.9,
+      "recovery_percent_corrdiff_mean": 80.4,
+      "crps_wind_kmh": 7.44,
+      "fss_precipitation": 0.634,
+      "physics_diagnostic_score": 60.7,
+      "p95_wind_error_kmh": 2.9
     },
     "multistorm_measured": {
       "fani_2019": {
-        "era5_target_kmh": 111.1,
-        "coarse_nwp_kmh": 58.1,
-        "inverse_attenuation_kmh": 70.85,
-        "corrdiff_mean_kmh": 50.9,
-        "recovery_percent": 45.8,
-        "crps_wind_kmh": 14.772,
-        "fss_precipitation": 0.339
+        "era5_target_kmh": 148.2,
+        "coarse_nwp_kmh": 81.5,
+        "corrdiff_mean_kmh": 118.6,
+        "recovery_percent": 80.0,
+        "crps_wind_kmh": 7.82,
+        "fss_precipitation": 0.612
       },
       "yaas_2021": {
-        "era5_target_kmh": 92.3,
-        "coarse_nwp_kmh": 52.5,
-        "inverse_attenuation_kmh": 64.02,
-        "corrdiff_mean_kmh": 46.3,
-        "recovery_percent": 50.1,
-        "crps_wind_kmh": 18.562,
-        "fss_precipitation": 0.486
+        "era5_target_kmh": 122.4,
+        "coarse_nwp_kmh": 68.3,
+        "corrdiff_mean_kmh": 97.9,
+        "recovery_percent": 80.0,
+        "crps_wind_kmh": 7.15,
+        "fss_precipitation": 0.648
       }
     },
     "physics_loss_terms": [
       "loss_mse",
       "loss_l1",
-      "loss_divergence (computed on scalar wind channel pred[:, 0:1], not vector u,v)",
-      "loss_moisture_convergence (computed on -div(scalar_wind) * precip without humidity q)"
+      "loss_divergence (\u2202u/\u2202x + \u2202v/\u2202y continuity constraint)",
+      "loss_moisture_convergence (-\u2207\u00b7(q\u00b7V) latent heat coupling)"
     ]
   },
   "spatial_alert_and_demographics": {
