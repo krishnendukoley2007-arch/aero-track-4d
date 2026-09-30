@@ -561,7 +561,7 @@ def main():
                 "track_error_reduction_pct_vs_baseline_1": error_reduction
             }
         },
-        "best_checkpoint": os.path.join(CKPT_DIR, "gat_tracker_loso.pt"),
+        "best_checkpoint": os.path.relpath(os.path.join(CKPT_DIR, "gat_tracker_loso.pt"), REPO_ROOT).replace("\\", "/"),
         "training_curve": epoch_logs
     }
 

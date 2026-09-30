@@ -1,12 +1,12 @@
 {
-  "run_id": "tracker_loso_20260929_143627",
-  "timestamp_utc": "2026-09-29T14:36:27.939892+00:00",
+  "run_id": "tracker_loso_20260930_035121",
+  "timestamp_utc": "2026-09-30T03:51:21.395941+00:00",
   "model_architecture": "SpatioTemporalSphericalGAT (GAT + Temporal GRU)",
   "parameter_count": 17060,
   "seed": 42,
   "optimizer": "AdamW (lr=0.002, weight_decay=1e-4)",
   "epochs": 40,
-  "elapsed_seconds": 26.26,
+  "elapsed_seconds": 24.98,
   "splits": {
     "strategy": "leave_one_storm_out",
     "train_storms": [
@@ -44,7 +44,7 @@
       "track_error_reduction_pct_vs_baseline_1": 85.5
     }
   },
-  "best_checkpoint": "C:\\weather\\models\\checkpoints\\gat_tracker_loso.pt",
+  "best_checkpoint": "models/checkpoints/gat_tracker_loso.pt",
   "training_curve": [
     {
       "epoch": 1,
